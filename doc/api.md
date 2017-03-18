@@ -4,7 +4,7 @@ Resources
 ----
 用户、荣誉、奖学金、表单、字段的JSON object表示, 除了少数属性外, 基本上与数据库里属性一一对应。需要注意的是: 表单是一个可由API访问的资源, 字段资源由后台逻辑inline的放在表单里返回。
 
->NOTATION:
+>NOTATION: 
 > * 属性用下划线命名法, 与Javascript的标准驼峰命名法并不一样。
 > * 注释中标记了每个属性的类型, 有[required]标识的字段是必有的, 其它字段可能为空, 在此时v1 API设计为不返回该字段, 而不是返回null值。
 
@@ -12,25 +12,25 @@ Resources
 ```javascript
 {
     // Number[required]: id唯一标识用户
-    "id": 1,
+    "id": 1, 
     // String[required]: 入学年份
-    "group": "2016",
+    "group": "2016", 
     // String[required]: 类型 - "undergraduate" / "graduate"
-    "type": "undergraduate",
+    "type": "undergraduate", 
     // String[required]: 名字
-    "name": "张三",
+    "name": "张三", 
     // String[required]: 学号
-    "student_id": "2016011067",
+    "student_id": "2016011067", 
     // String: 邮箱
-    "email": "xxxxxxxx@gmail.com",
+    "email": "xxxxxxxx@gmail.com", 
     // String: 班级
-    "class": "无66",
+    "class": "无66", 
     // Number: 换算成百分制的GPA
-    "gpa": 93.3,
+    "gpa": 93.3, 
     // Number: 班级排名
-    "class_rank": 1,
+    "class_rank": 1, 
     // Number: 年级排名
-    "year_rank": 3,
+    "year_rank": 3, 
 }
 ```
 
@@ -38,18 +38,18 @@ Resources
 ```javascript
 {
     // Number[required]: id唯一标识荣誉
-    "id": 2,
+    "id": 2, 
     // String[required]: 荣誉名字
-    "name": "学业优秀奖学金",
+    "name": "学业优秀奖学金", 
     // String[required]: 该荣誉的年份
-    "year": "2017",
+    "year": "2017", 
     // Number[required]: 该荣誉开始申请的时间
-    "start_time": 1489742695,
+    "start_time": 1489742695, 
     // Number[required]: 该荣誉结束申请的时间
-    "end_time": 1489742695,
-    // Number: 总名额数量,不存在则代表直接由各个group的名额得到.
+    "end_time": 1489742695, 
+    // Number: 总名额数量, 不存在则代表直接由各个group的名额得到.
     // FIXME: 这个需要嘛?
-    "quota": 15,
+    "quota": 15, 
     // Array(Object)[required]: 每个不同的group有多少个名额, 如果此列表为空,
     //                          代表无用户组可申请此荣誉
     "group_quota": [
@@ -63,7 +63,7 @@ Resources
             "type": "undergraduate",
             "quota": 4
         }
-    ] 
+    ],
     // Number[required]: 申请该荣誉时需要填写的表单id
     "form_id": 4 
 }
@@ -75,11 +75,11 @@ Resources
     // Number[required]: id唯一标识奖学金
     "id": 3,
     // String[required]: 奖学金名字
-    "name": "学业优秀奖学金",
+    "name": "学业优秀奖学金", 
     // String[required]: 该奖学金的年份
-    "year": "2017",
+    "year": "2017", 
     // Number[required]: 该奖学金获得者需要填写的感谢表单id
-    "form_id": 6
+    "form_id": 6 
 }
 ```
 
@@ -131,29 +131,40 @@ Resources
     "user_id": "123456789",
     // Object[required]: 荣誉的简化信息和申请状态
     "honor": [
-    {
-        // Number[required]: 申请id
-        "apply_id": 10,
-        // Number[required]: 荣誉id
-        "honor_id": 2,
-        "id": "987654321", 
-        // String[required]: 荣誉名字
-        "name": "学业优秀奖学金", 
-        // String[required]: 该荣誉的年份
-        "year": "2017", 
-        // String[required]: 当前用户对该荣誉的申请状况, success/fail/required
-        "state": "applied",
-        // Number[required]: 如果用户权限包括``用户管理AND荣誉管理``则可以得到评分. 初始为-1, <0的score代表没有评分.
-        "score": 86,
-        // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
-        "apply_form_id": 111,
-    }
+        {
+            // Number[required]: 申请id
+            "apply_id": 10,
+            // Number[required]: 荣誉id
+            "honor_id": 2,
+            "id": "987654321", 
+            // String[required]: 荣誉名字
+            "name": "学业优秀奖学金", 
+            // String[required]: 该荣誉的年份
+            "year": "2017", 
+            // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied
+            "state": "applied",
+            // Number[required]: 如果用户权限包括``用户管理AND荣誉管理``则可以得到评分. 初始为-1, <0的score代表没有评分.
+            "score": 86,
+            // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
+            "fill_id": 111
+        }
+    ]
 }
 ```
 
 API
 ----
-下面按功能给出所有API接口及其作用、权限、返回值、可选query等说明。在很多权限说明中将使用``me``代表当前客户端用户的id。
+下面按功能给出所有API接口及其作用、权限、返回值、重要的filter query等说明。在很多权限说明中将使用``me``代表当前客户端用户的id。
+
+所有GET列表的API都支持pagination, 用户端可以用``page``和``per_page`` query parameter指定第几页和每页多少个item: eg. ``GET /v1/users?group=2016&page=2&per_page=60``代表每页60个, 第二页。默认``per_page=20``。并且response里会包括Link Header, 客户端可以考虑读取Link Header而不是自己拼接URL, 例如:
+
+```
+Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", <https://{HOST_NAME}/users?group=2016&page=14&per_page=20>; rel="last"
+```
+
+所有GET列表的API都支持sorting, 用户端可以用``sort`` query parameter指定按照哪个字段sort: eg. ``GET /v1/users?sort=student_id``
+
+所有GET列表的API都支持filtering, 用户端可以用query parameter指用哪个字段的哪个值做filtering, 具体例子写在每个API的介绍里。
 
 > NOTE:
 > 
@@ -165,6 +176,7 @@ API
 * ``GET /v1/users``: 得到用户列表
     * **权限**: 用户管理
     * **返回**: [User]
+    * 加入query来过滤用户, 比如``?group=2016``
 * ``POST /v1/users``: 新增用户
     * **权限**: 用户管理
     * **返回**: User
@@ -205,10 +217,10 @@ API
 * ``POST /v1/users/{id}/honors``: 申请荣誉
     * **权限**: ``me == id``
     * **返回**: User-Honor-State
-* ``PUT /v1/users/{id}/honors/{id}``: 改变一个用户申请荣誉的状态
+* ``PUT /v1/users/{id}/honors/{honor_id}``: 改变一个用户申请荣誉的状态
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
-* ``DELETE /v1/users/{id}/honors/{id}``:
+* ``DELETE /v1/users/{id}/honors/{honor_id}``:
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
 
@@ -238,7 +250,7 @@ API
     * **返回**: Form-Fill-Content
 
 ### 文件相关
-* ``GET /v1/users/{id}/files/{file``
+* ``GET /v1/users/{id}/files/{file_id}``
 
 Status Code
 ----
@@ -280,7 +292,7 @@ JWT?
 * 用户-荣誉table中将申请状态字段改成了三值的字符串, 这个需不需要用enumerator?  但是感觉字符串可能更好理解... 或者说为了存储空间小数据库用enumerator, 后台api负责转换成前台可以直接用的字符串?
 * 荣誉表年份改为required字段
 * 字段表加入了content字段
-* 给用户-荣誉申请table加入填写表单情况的ID: `apply_form_id`
+* 给用户-荣誉申请table加入填写表单情况的ID: `fill_id`
 * 需要加入用户-表单填写情况table...记录用户对某个表单填写的具体内容 **需求设计这一块需要重新讨论**只存用户ID和表单ID就行了吧(这些外键删除的时候是自动删其他的, 还是提示不能删是个问题...)
 * 加入荣誉-学生类别配额table: 一个荣誉的总配额可以不指定, 如果指定, 为所有这个table中对应该荣誉的配额之和
 * 为了对于不同年、不同类型奖学金可能复用相同申请表单, 应该对表单table加入类型type和名字name属性, 让管理员可以在创建荣誉时用表单名字(eg. 标准表单1, 学业优秀表单2)选择
