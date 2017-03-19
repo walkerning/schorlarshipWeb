@@ -19,7 +19,7 @@ Resources
     "type": "undergraduate", 
     // String[required]: 名字
     "name": "张三", 
-    // String[required]: 学号
+    // String[required]: 学号或者工作证号等
     "student_id": "2016011067", 
     // String: 邮箱
     "email": "xxxxxxxx@gmail.com", 
@@ -31,6 +31,8 @@ Resources
     "class_rank": 1, 
     // Number: 年级排名
     "year_rank": 3, 
+    // [String]: 该用户有的权限列表: login有效, user用户管理, form表单管理, honor荣誉管理, scholarship奖学金管理, export学校对接
+    "permissions": [login]
 }
 ```
 
@@ -40,7 +42,7 @@ Resources
     // Number[required]: id唯一标识荣誉
     "id": 2, 
     // String[required]: 荣誉名字
-    "name": "学业优秀奖学金", 
+    "name": "学业优秀奖", 
     // String[required]: 该荣誉的年份
     "year": "2017", 
     // Number[required]: 该荣誉开始申请的时间
@@ -75,11 +77,11 @@ Resources
     // Number[required]: id唯一标识奖学金
     "id": 3,
     // String[required]: 奖学金名字
-    "name": "学业优秀奖学金", 
+    "name": "国家奖学金",
     // String[required]: 该奖学金的年份
     "year": "2017", 
     // Number[required]: 该奖学金获得者需要填写的感谢表单id
-    "form_id": 6 
+    "form_id": 6
 }
 ```
 
@@ -124,34 +126,66 @@ Resources
 }
 ```
 
-### 用户-荣誉申请情况 User-Honor-State
+### 表单填充情况 Form-Fill-Content
 ```javascript
 {
-    // String[required]: 用户id
-    "user_id": "123456789",
-    // Object[required]: 荣誉的简化信息和申请状态
-    "honor": [
-        {
-            // Number[required]: 申请id
-            "apply_id": 10,
-            // Number[required]: 荣誉id
-            "honor_id": 2,
-            "id": "987654321", 
-            // String[required]: 荣誉名字
-            "name": "学业优秀奖学金", 
-            // String[required]: 该荣誉的年份
-            "year": "2017", 
-            // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied
-            "state": "applied",
-            // Number[required]: 如果用户权限包括``用户管理AND荣誉管理``则可以得到评分. 初始为-1, <0的score代表没有评分.
-            "score": 86,
-            // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
-            "fill_id": 111
-        }
-    ]
+    // Number[required]: id唯一标识表单填充情况
+    "id": 6666,
+    // Number[required]: 填写该表单的用户id
+    "user_id": 1,
+    // Number[required]: 该表单的id
+    "form_id": 4,
+    // Object[required]: JSON, 标记表单每个字段填写什么. key为字段id, value为内容
+    "fill_content": {
+        1234: "张三",
+        2345: "xxxx@gmail.com"
+    }
 }
 ```
 
+### 用户-荣誉申请情况 User-Honor-State
+```javascript
+{
+        // Number[required]: 用户id
+        "user_id": 123
+        // Number[required]: 申请id
+        "apply_id": 10,
+        // Number[required]: 荣誉id
+        "honor_id": 2,
+        "id": "987654321", 
+        // String[required]: 荣誉名字
+        "name": "学业优秀奖", 
+        // String[required]: 该荣誉的年份
+        "year": "2017", 
+        // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied
+        "state": "applied",
+        // Number[required]: 如果用户权限包括``用户管理AND荣誉管理``则可以得到评分. 初始为-1, <0的score代表没有评分.
+        "score": 86,
+        // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
+        "fill_id": 111
+
+}
+```
+
+### 用户-奖学金获得情况 User-Scholar-State
+```javascript
+{
+
+    // Number[required]: 用户id
+    "user_id": 1234,
+    // Number[required]: 获奖id
+    "apply_id": 10,
+    // Number[required]: 奖学金id
+    "scholar_id": 2,
+    // String[required]: 奖学金名字
+    "name": "国家奖学金", 
+    // String[required]: 该奖学金的年份
+    "year": "2017", 
+    // Number: 用户的感谢信表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
+    //         如果该字段不存在, 则该用户还没有填写感谢信
+    "fill_id": 111
+}
+```
 API
 ----
 下面按功能给出所有API接口及其作用、权限、返回值、重要的filter query等说明。在很多权限说明中将使用``me``代表当前客户端用户的id。
@@ -225,6 +259,31 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
     * **返回**: User-Honor-State
 
 ### 奖学金相关
+* ``GET /v1/scholars``: 获得奖学金列表
+    * **权限**:
+    * **返回**: [Scholarship]
+    * 可以加入query来过滤荣誉, 比如``?year=2017``
+* ``POST /v1/scholars``: 创建奖学金
+    * **权限**: 奖学金管理
+    * **返回**: Scholarship
+* ``PUT /v1/scholars/{id}``: 修改奖学金信息
+    * **权限**: 奖学金管理
+    * **返回**: Scholarship
+* ``DELETE /v1/scholars/{id}``: 删除某奖学金
+    * **权限**: 奖学金管理
+
+### 用户-奖学金相关
+* ``GET /v1/users/{id}/scholars``: 得到某个``{id}``用户获得奖学金的列表
+    * **权限**: 用户管理 OR ``me == id``
+    * **返回**: [User-Scholar-State]
+* ``POST /v1/users/{id}/scholars``: 给某个用户分配一个新的奖学金
+    * **权限**: 用户管理 AND 奖学金管理
+    * **返回**: User-Scholar-State
+* ``POST /v1/users/{id}/scholars/{scholar_id}/thankletter``: 提交感谢信表格
+    * **权限**: ``me == id``
+    * **返回**: Form-Fill-Content
+* ``DELETE /v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金
+    * **权限**: 用户管理 AND 奖学金管理
 
 ### 表单相关
 * ``GET /v1/forms``: 获得表单列表
