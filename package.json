@@ -1,0 +1,48 @@
+{
+  "name": "scholar-server",
+  "version": "1.0.0",
+  "description": "The server side of the EE scholar website.",
+  "main": "server.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "dependencies": {
+    "assert": "^1.4.1",
+    "bcryptjs": "^2.4.3",
+    "bluebird": "^3.5.0",
+    "body-parser": "~1.17.1",
+    "bookshelf": "^0.10.3",
+    "express": "^4.15.2",
+    "express-jwt": "~5.1.0",
+    "express-unless": "~0.3.0",
+    "jsonwebtoken": "^7.3.0",
+    "knex": "^0.12.8",
+    "lodash": "^4.17.4",
+    "morgan": "^1.8.1",
+    "mysql": "^2.13.0",
+    "password-validator": "^2.1.2",
+    "util": "^0.10.3",
+    "validator": "^7.0.0",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~1.0.0",
+    "grunt-execute": "~0.2.2",
+    "grunt-express-server": "~0.5.3",
+    "minimist": "^1.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/walkerning/schorlarshipWeb.git"
+  },
+  "author": "Foxfi Ning",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/walkerning/schorlarshipWeb/issues"
+  },
+  "homepage": "https://github.com/walkerning/schorlarshipWeb#readme"
+}
