@@ -222,11 +222,31 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
     * **权限**: 用户管理
     * **返回**:
 
+
+### 权限管理
+* ``GET /v1/permissions``: 得到权限列表
+    * **权限**: 权限管理
+    * **返回**: [Permission]
+* ``GET /v1/permissions/{permissionId}/users``: 得到拥有某权限的用户列表
+    * **权限**: 权限管理
+    * **返回**: [Users]
+* ``POST /v1/permissions/{permissionId}/users``: 给某个用户加入权限
+		* **参数**: `userId`=需要加入权限的user的id
+		* **权限**: 权限管理
+		* **返回**:
+* ``DELETE /v1/permissions/{permissionId}/users/:userId``: 删除某个用户的某个权限
+		* **权限**: 权限管理
+		* **返回**:
+
+
 ### 荣誉相关
 * ``GET /v1/honors``: 得到荣誉的列表
     * **权限**:
     * **返回**: [Honor]
     * 可以加入query来过滤荣誉, 比如``?year=2017``
+* ``GET /v1/honors/{id}``: 得到荣誉信息
+    * **权限**:
+    * **返回**: Honor
 * ``POST /v1/honors``: 创建荣誉
     * **权限**: 荣誉管理
     * **返回**: Honor
@@ -259,6 +279,9 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
     * **权限**:
     * **返回**: [Scholarship]
     * 可以加入query来过滤荣誉, 比如``?year=2017``
+* ``GET /v1/scholars/{id}``: 获得奖学金信息
+    * **权限**:
+    * **返回**: Scholarship
 * ``POST /v1/scholars``: 创建奖学金
     * **权限**: 奖学金管理
     * **返回**: Scholarship
@@ -275,7 +298,7 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
 * ``POST /v1/users/{id}/scholars``: 给某个用户分配一个新的奖学金
     * **权限**: 用户管理 AND 奖学金管理
     * **返回**: User-Scholar-State
-* ``POST /v1/users/{id}/scholars/{scholar_id}/thankletter``: 提交感谢信表格
+* ``POST /v1/users/{id}/scholars/{scholar_id}/thanksletter``: 提交感谢信表格
     * **权限**: ``me == id``
     * **返回**: Form-Fill-Content
 * ``DELETE /v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金

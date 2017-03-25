@@ -56,6 +56,10 @@ var User = bookshelfInst.Model.extend({
     var self = this;
     bookshelfInst.Model.prototype.onSaving.apply(this, arguments);
 
+    if (self.isNew()) {
+      this.set("active", true);
+    }
+
     if (self.isNew() || self.hasChanged("password")) {
       this.set("password", String(this.get("password")));
       if (!validatePassword(this.get("password"))) {
@@ -111,7 +115,29 @@ var User = bookshelfInst.Model.extend({
 }, {
   secretAttributes: function secretAttributes() {
     return ["password"];
+  },
+
+  queriableAttributes: function queriableAttributes() {
+    return ["id",
+      "group_id",
+      "type",
+      "name",
+      "student_id",
+      "email",
+      "class",
+      "gpa",
+      "class_rank",
+      "year_rank"
+    ];
+  },
+
+  fetchInlineRelations: function fetchInlineRelations() {
+    return [
+      "group",
+      "permissions"
+    ];
   }
+
 });
 
 var Users = bookshelfInst.Collection.extend({

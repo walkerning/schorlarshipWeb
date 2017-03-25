@@ -4,15 +4,25 @@ var schema = require("../data").schema;
 var errors = require("../errors");
 
 module.exports = {
-  list: function(req, res, next) {
-    return models.Users.forge().fetch({
-      withRelated: ["permissions", "group"]
-    })
+  list: function list(req, res, next) {
+    var queries = req.query;
+    //console.log(queries);
+    return models.Users.forge()
+      .query({
+        where: _.pick(queries, models.User.queriableAttributes())
+      })
+      .fetch()
       .then(function(collection) {
-        res.json(collection.toClientJSON());
+        var obj = collection.toClientJSON();
+        if ("group" in queries) {
+          obj = _.filter(obj, (value) => {
+            return value["group"].name == queries["group"]
+          });
+        }
+        res.status(200).json(obj);
       });
   },
-  create: function(req, res, next) {
+  create: function create(req, res, next) {
     // FIXME: this filtering is a little awkward...
     var fields = req.user.permittedUpdateAttributes(req.user);
     return models.User.forge(_.pick(req.body, fields))
@@ -22,11 +32,11 @@ module.exports = {
         }
       })
       .then(function(user) {
-        res.json(user.toClientJSON());
+        res.status(201).json(user.toClientJSON());
       });
   },
 
-  info: function(req, res, next) {
+  info: function info(req, res, next) {
     return models.User.forge({
       id: req.params.userId
     })
@@ -35,12 +45,12 @@ module.exports = {
         if (!user) {
           next(new errors.NotFoundError());
         } else {
-          res.json(user.toClientJSON());
+          res.status(200).json(user.toClientJSON());
         }
       });
   },
 
-  updateInfo: function(req, res, next) {
+  updateInfo: function updateInfo(req, res, next) {
     return models.User.forge({
       id: req.params.userId
     })
@@ -57,13 +67,15 @@ module.exports = {
               }
             })
             .then(function() {
-              res.json(user.toClientJSON());
+              res.status(200).json(user.toClientJSON());
             });
         }
       });
   },
 
-  delete: function(req, res, next) {
+  // TODO: 改成设置active标签
+  //       并且不返回错误, 保持DELETE操作的幂等性
+  delete: function _delete(req, res, next) {
     return models.User.forge({
       id: req.params.userId
     })

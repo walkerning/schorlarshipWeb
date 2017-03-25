@@ -7,8 +7,8 @@ module.exports = {
     },
     group_id: {
       type: "integer",
-      nullable: true
-    }, // FIXME: nullable?
+      nullable: false
+    }, // FIXME: nullable
     type: {
       type: "string",
       maxlength: 36,
@@ -31,7 +31,7 @@ module.exports = {
       unique: true
     },
     email: {
-      type: 'string',
+      type: "string",
       maxlength: 191,
       nullable: false,
       unique: true,
@@ -65,24 +65,29 @@ module.exports = {
         isMinimum: 1
       }
     },
+    active: {
+      type: "boolean",
+      nullable: false,
+      defaultTo: true
+    },
 
     created_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: false
     },
     created_by: {
-      type: 'integer',
+      type: "integer",
       nullable: false
     },
 
     updated_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: true
     },
     updated_by: {
-      type: 'integer',
+      type: "integer",
       nullable: true
-    }
+    },
   },
 
   groups: {
@@ -94,23 +99,29 @@ module.exports = {
     name: {
       type: "string",
       maxlength: 20,
-      nullable: false
+      nullable: false,
+      unique: true
+    },
+    description: {
+      type: "string",
+      maxlength: 54,
+      nullable: true
     },
 
     created_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: false
     },
     created_by: {
-      type: 'integer',
+      type: "integer",
       nullable: false
     },
     updated_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: true
     },
     updated_by: {
-      type: 'integer',
+      type: "integer",
       nullable: true
     }
   },
@@ -145,19 +156,19 @@ module.exports = {
     },
 
     created_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: false
     },
     created_by: {
-      type: 'integer',
+      type: "integer",
       nullable: false
     },
     updated_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: true
     },
     updated_by: {
-      type: 'integer',
+      type: "integer",
       nullable: true
     }
   },
@@ -234,24 +245,24 @@ module.exports = {
       nullable: false
     },
     form_id: {
-      type: 'integer',
+      type: "integer",
       nullable: false
     },
 
     created_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: false
     },
     created_by: {
-      type: 'integer',
+      type: "integer",
       nullable: false
     },
     updated_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: true
     },
     updated_by: {
-      type: 'integer',
+      type: "integer",
       nullable: true
     }
   },
@@ -283,7 +294,7 @@ module.exports = {
       primarty: true
     },
     name: {
-      type: 'string',
+      type: "string",
       maxlength: 150,
       nullable: false
     },
@@ -319,24 +330,31 @@ module.exports = {
       primarty: true
     },
     name: {
-      type: 'string',
+      type: "string",
+      maxlength: 36,
+      nullable: false,
+      unique: true
+    },
+    description: {
+      type: "string",
       maxlength: 150,
       nullable: false
     },
+
     created_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: false
     },
     created_by: {
-      type: 'integer',
+      type: "integer",
       nullable: false
     },
     updated_at: {
-      type: 'dateTime',
+      type: "dateTime",
       nullable: true
     },
     updated_by: {
-      type: 'integer',
+      type: "integer",
       nullable: true
     }
   },

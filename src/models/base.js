@@ -33,7 +33,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
           .then(function(existing) {
             if (existing) {
               return Promise.reject(new errors.ValidationError({
-                message: "Illegal `" + key + "`: Duplicated. " + self.get(key) + "` already exists."
+                message: "Illegal `" + key + "`: uplicated. `" + self.get(key) + "` already exists."
               }));
             }
             return Promise.resolve();
@@ -47,6 +47,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
   // `initialize` - constructor for model creation
   initialize: function initialize() {
     this.on("creating", this.onCreating);
+    this.on("fetching", this.onFetching);
 
     this.on("saving", function onSaving() {
       var self = this;
@@ -104,21 +105,49 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
     options = _.merge({
       omitPivot: true
     }, options);
+    this.constructor
     return _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
+  },
+
+  onFetching: function onFetching(models, columns, options) {
+    _.mergeWith(options, {
+      withRelated: this.constructor.fetchInlineRelations()
+    }, function(dstValue, srcValue) {
+      if (_.isArray(dstValue)) {
+        return _.union(dstValue, srcValue);
+      }
+    });
   }
 
 }, {
   secretAttributes: function secretAttributes() {
     return [];
+  },
+  fetchInlineRelations: function fetchInlineRelations() {
+    return [];
   }
 });
 
 bookshelfInst.Collection = bookshelfInst.Collection.extend({
+  initialize: function initialize() {
+    this.on("fetching", this.onFetching);
+  },
+
   toClientJSON: function toClientJSON(options) {
     options = _.merge({
       omitPivot: true
     }, options);
     return _.invokeMap(this.models, 'toClientJSON', options).filter(_.negate(_.isNull));
+  },
+
+  onFetching: function onFetching(models, columns, options) {
+    _.mergeWith(options, {
+      withRelated: this.model.fetchInlineRelations()
+    }, function(dstValue, srcValue) {
+      if (_.isArray(dstValue)) {
+        return _.union(dstValue, srcValue);
+      }
+    });
   }
 });
 
