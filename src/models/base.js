@@ -15,10 +15,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
   // `hasTimestamps` will make bookshelf handle created_at and updated_at properties automatically.
   hasTimestamps: true,
 
-  permittedAttributes: function permittedAttribute() {
-    return _.keys(schema[this.tableName]);
-  },
-
+  // Helpers for permissions, validations and permitted attributes(for filtering)
   _isUnique: function(spec) {
     return spec.hasOwnProperty("unique") && spec.unique == true;
   },
@@ -44,6 +41,33 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
     });
   },
 
+  permittedAttributes: function permittedAttribute() {
+    return _.keys(schema[this.tableName]);
+  },
+
+  autoAttributes: function autoAttributes() {
+    return [
+      "id",
+      "created_at",
+      "created_by",
+      "updated_at",
+      "updated_by"
+    ]
+  },
+
+  permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
+    // Default: return all non-auto attributes
+    return _.difference(this.permittedAttributes(), this.autoAttributes());
+  },
+
+  contextUser: function contextUser(options) {
+    if (options.context && options.context.contextUser) {
+      return options.context.contextUser.get("id");
+    } else {
+      return 0;
+    }
+  },
+
   // `initialize` - constructor for model creation
   initialize: function initialize() {
     this.on("creating", this.onCreating);
@@ -64,16 +88,9 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
 
   },
 
+  // Database interaction event handling
   onValidate: function onValidate() {
     return validation.validateSchema(this.tableName, this.toJSON(), this.autoAttributes());
-  },
-
-  contextUser: function contextUser(options) {
-    if (options.context && options.context.contextUser) {
-      return options.context.contextUser.get("id");
-    } else {
-      return 0;
-    }
   },
 
   onCreating: function onCreating(newObj, attr, options) {
@@ -91,24 +108,6 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
     this.set('updated_by', this.contextUser(options));
   },
 
-  autoAttributes: function autoAttributes() {
-    return [
-      "id",
-      "created_at",
-      "created_by",
-      "updated_at",
-      "updated_by"
-    ]
-  },
-
-  toClientJSON: function toClientJSON(options) {
-    options = _.merge({
-      omitPivot: true
-    }, options);
-    this.constructor
-    return _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
-  },
-
   onFetching: function onFetching(models, columns, options) {
     _.mergeWith(options, {
       withRelated: this.constructor.fetchInlineRelations()
@@ -117,12 +116,64 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
         return _.union(dstValue, srcValue);
       }
     });
+  },
+
+  // Operation methods used by API.
+  /** 
+   * @returns {Promise<Model>}
+   */
+  update: function update(body, contextUser) {
+    return this.save(_.pick(body, this.permittedUpdateAttributes(contextUser)), {
+      context: {
+        contextUser: contextUser
+      }
+    });
+  },
+
+  toClientJSON: function toClientJSON(options) {
+    options = _.merge({
+      omitPivot: true
+    }, options);
+    this.constructor
+    return _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
   }
 
 }, {
+  /**
+   * @returns {Promise<Model>}
+   */
+  getById: function getById(id, options) {
+    return this.forge({
+      id: id
+    })
+      .fetch()
+      .then(function(mod) {
+        if (!mod && (options === undefined || options.noreject !== true)) {
+          return Promise.reject(new errors.NotFoundError({
+            message: "This id: `" + id + "` does not exists."
+          }));
+        } else {
+          return mod;
+        }
+      });
+  },
+
+  /** 
+   * @returns {Promise<Model>}
+   */
+  create: function create(body, contextUser) {
+    var fields = contextUser.permittedUpdateAttributes(contextUser);
+    return this.forge(_.pick(body, fields)).save({}, {
+      context: {
+        contextUser: contextUser
+      }
+    });
+  },
+
   secretAttributes: function secretAttributes() {
     return [];
   },
+
   fetchInlineRelations: function fetchInlineRelations() {
     return [];
   }
@@ -133,13 +184,7 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
     this.on("fetching", this.onFetching);
   },
 
-  toClientJSON: function toClientJSON(options) {
-    options = _.merge({
-      omitPivot: true
-    }, options);
-    return _.invokeMap(this.models, 'toClientJSON', options).filter(_.negate(_.isNull));
-  },
-
+  // Database interaction event handling
   onFetching: function onFetching(models, columns, options) {
     _.mergeWith(options, {
       withRelated: this.model.fetchInlineRelations()
@@ -148,6 +193,45 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
         return _.union(dstValue, srcValue);
       }
     });
+  },
+
+  // Operation methods used by API.
+  toAttrList: function toAttrList(attrName) {
+    if (_.isString(attrName)) {
+      return _.map(this.toJSON(), function(v) {
+        return v[attrName]
+      })
+    } else if (_.isArray(attrName)) {
+      return _.map(this.toJSON(), function(v) {
+        _.map(attrName, function(name) {
+          return v[attrName]
+        });
+      });
+    }
+  },
+
+  toClientJSON: function toClientJSON(options) {
+    options = _.merge({
+      omitPivot: true
+    }, options);
+    return _.invokeMap(this.models, 'toClientJSON', options).filter(_.negate(_.isNull));
+  },
+
+}, {
+  queriableAttributes: function queriableAttributes() {
+    return ["id"];
+  },
+
+  // Operation methods used by API.
+  /** 
+   * @returns {Promise<Collection>}
+   */
+  getByQuery: function getByQuery(query) {
+    return this.forge()
+      .query({
+        where: _.pick(query, this.queriableAttributes())
+      })
+      .fetch();
   }
 });
 

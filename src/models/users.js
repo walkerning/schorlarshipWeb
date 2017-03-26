@@ -52,6 +52,21 @@ var User = bookshelfInst.Model.extend({
     return this.belongsToMany("Permission");
   },
 
+  // Attributes for filtering and validation
+  permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
+    var perms = contextUser.getPermissions().map(function(v) {
+      return v["name"]
+    });
+    if (_.includes(perms, "user")) {
+      // with user management permission
+      return _.difference(this.permittedAttributes(), this.autoAttributes());
+    } else if (contextUser.get("id") == this.get("id")) {
+      // contextUser == this
+      return ["email", "password"];
+    }
+  },
+
+  // Database interaction event handlers.
   onSaving: function(newPage, attrs, options) {
     var self = this;
     bookshelfInst.Model.prototype.onSaving.apply(this, arguments);
@@ -98,37 +113,9 @@ var User = bookshelfInst.Model.extend({
     return this.related("permissions").toJSON();
   },
 
-  // FIXME: 这个方法放到每个模型里. 根据contextUser permission判断每个model的哪些字段可以被更新!    
-  permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
-    var perms = contextUser.getPermissions().map(function(v) {
-      return v["name"]
-    });
-    if (_.includes(perms, "user")) {
-      // with user management permission
-      return _.difference(this.permittedAttributes(), this.autoAttributes());
-    } else if (contextUser.get("id") == this.get("id")) {
-      // contextUser == this
-      return ["email", "password"];
-    }
-  },
-
 }, {
   secretAttributes: function secretAttributes() {
     return ["password"];
-  },
-
-  queriableAttributes: function queriableAttributes() {
-    return ["id",
-      "group_id",
-      "type",
-      "name",
-      "student_id",
-      "email",
-      "class",
-      "gpa",
-      "class_rank",
-      "year_rank"
-    ];
   },
 
   fetchInlineRelations: function fetchInlineRelations() {
@@ -142,6 +129,21 @@ var User = bookshelfInst.Model.extend({
 
 var Users = bookshelfInst.Collection.extend({
   model: User
+
+}, {
+  queriableAttributes: function queriableAttributes() {
+    return ["id",
+      "group_id",
+      "type",
+      "name",
+      "student_id",
+      "email",
+      "class",
+      "gpa",
+      "class_rank",
+      "year_rank"
+    ];
+  }
 });
 
 var Groups = bookshelfInst.Collection.extend({
