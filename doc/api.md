@@ -206,7 +206,7 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
 * ``GET /v1/users``: 得到用户列表
     * **权限**: 用户管理
     * **返回**: [User]
-    * 加入query来过滤用户, 比如``?group=2016``
+    * 加入query来过滤用户, 比如``?group=2016``, ``?class=无23``等等
 * ``POST /v1/users``: 新增用户
     * **权限**: 用户管理
     * **返回**: User
@@ -222,6 +222,13 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
     * **权限**: 用户管理
     * **返回**:
 
+### 组管理
+* ``GET /v1/groups``: 得到组列表
+	* **权限**: 用户管理
+	* **返回**: [Group]
+* ``POST /v1/groups``: 创建新组
+	* **权限**: 用户管理
+	* **返回**: Group
 
 ### 权限管理
 * ``GET /v1/permissions``: 得到权限列表
@@ -237,7 +244,6 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
 * ``DELETE /v1/permissions/{permissionId}/users/:userId``: 删除某个用户的某个权限
 		* **权限**: 权限管理
 		* **返回**:
-
 
 ### 荣誉相关
 * ``GET /v1/honors``: 得到荣誉的列表
@@ -360,9 +366,75 @@ Errors
 
 Authentication
 ----
-Cookie vs Token.
+JWT-based authentication.
 
-JWT?
+1. ``POST /auth``拿到token, 参数: `student_id`和`password`json信息
+
+以下是一个登录成功的HTTP respponse示例
+
+```
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 183
+Content-Type: application/json; charset=utf-8
+Date: Sun, 26 Mar 2017 08:26:21 GMT
+ETag: W/"b7-JBKO74hFNC9VtkVO2PeHoB+vl3U"
+X-Powered-By: Express
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNDkwNTE2NzgxLCJleHAiOjE0OTA1MzQ3ODEsImlzcyI6InRoZVZlcnlGb3hmaU5pbmcifQ.i74QFI2_-QN9cSo5HDy5cXzaKiLPuNUrNr-LcAGm2ck"
+}
+```
+
+以下是两个登录失败的HTTP response示例
+```
+HTTP/1.1 401 Unauthorized
+Cache-Control: no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0
+Connection: keep-alive
+Content-Length: 154
+Content-Type: application/json; charset=utf-8
+Date: Sun, 26 Mar 2017 08:29:13 GMT
+ETag: W/"9a-/jj5RxQ/PksPxCxFsrjnN+X3K0I"
+X-Powered-By: Express
+
+{
+    "message": "Student ID do not exists.",
+    "name": "UnauthorizedError",
+    "trace": {
+        "message": "Student ID do not exists.",
+        "name": "UnauthorizedError",
+        "status": 401
+    }
+}
+```
+
+```
+HTTP/1.1 401 Unauthorized
+Cache-Control: no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0
+Connection: keep-alive
+Content-Length: 142
+Content-Type: application/json; charset=utf-8
+Date: Sun, 26 Mar 2017 08:29:36 GMT
+ETag: W/"8e-OMAFo76DAhbVnsu97D8s4Onvlk4"
+X-Powered-By: Express
+
+{
+    "message": "Password incorrect.",
+    "name": "UnauthorizedError",
+    "trace": {
+        "message": "Password incorrect.",
+        "name": "UnauthorizedError",
+        "status": 401
+    }
+}
+```
+
+2. 拿到token后, 用JWT token的标准方法(详细细节可见[jwt介绍](https://jwt.io/introduction/#how-do-json-web-tokens-work-)), 在之后的每个HTTP request的包头的`Authorization`字段使用Bearer schema携带该token即可.
+
+一个用`httpie`命令行工具(并用了[`httpie-jwt-auth`插件](https://github.com/teracyhq/httpie-jwt-auth))的示例如下:
+```
+http --auth-type="jwt" --auth="<token>" GET ...
+```
 
 ----
 对需求文档里数据库的改动:

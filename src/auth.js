@@ -21,7 +21,7 @@ module.exports = {
       .fetch()
       .then(function(user) {
         if (!user) {
-          return next(new errors.BadRequestError({
+          return next(new errors.UnauthorizedError({
             message: "Student ID do not exists."
           }));
         } else {
