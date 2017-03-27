@@ -12,7 +12,7 @@ module.exports = {
         var obj = collection.toClientJSON();
         if ("group" in queries) {
           obj = _.filter(obj, (value) => {
-            return value["group"].name == queries["group"];
+            return value["group"] == queries["group"];
           });
         }
         if ("admin" in queries && _.toInteger(queries["admin"])) {

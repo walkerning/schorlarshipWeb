@@ -24,9 +24,10 @@ module.exports = {
   },
 
   addUser: function addUser(req, res, next) {
-    var userId = req.body["userId"];
+    var userId = req.body["user_id"];
     if (!userId) {
       next(new errors.BadRequestError({}));
+      return Promise.resolve(null);
     }
     return models.Permission
       .getById(req.params.permissionId)

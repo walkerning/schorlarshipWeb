@@ -30,10 +30,10 @@ app.use(jwtMiddleware.unless({
 app.post("/auth", authHandler);
 
 // PLUGIN: set user: fetch the database, set `req.user` attribute to the context user
-app.use("/v1/api", readUserMiddleware);
+app.use("/api/v1", readUserMiddleware);
 
 // ROUTES: api routes
-app.use("/v1/api", apiRouter);
+app.use("/api/v1", apiRouter);
 
 // The unify error handler. 
 // @TODO: improve the error system

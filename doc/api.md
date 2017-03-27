@@ -186,155 +186,155 @@ API
 ----
 下面按功能给出所有API接口及其作用、权限、返回值、重要的filter query等说明。在很多权限说明中将使用``me``代表当前客户端用户的id。
 
-所有GET列表的API都支持pagination, 用户端可以用``page``和``per_page`` query parameter指定第几页和每页多少个item: eg. ``GET /v1/users?group=2016&page=2&per_page=60``代表每页60个, 第二页。默认``per_page=20``。并且response里会包括Link Header, 客户端可以考虑读取Link Header而不是自己拼接URL, 例如:
+所有GET列表的API都支持pagination, 用户端可以用``page``和``per_page`` query parameter指定第几页和每页多少个item: eg. ``GET /api/v1/users?group=2016&page=2&per_page=60``代表每页60个, 第二页。默认``per_page=20``。并且response里会包括Link Header, 客户端可以考虑读取Link Header而不是自己拼接URL, 例如:
 
 ```
-Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", <https://{HOST_NAME}/users?group=2016&page=14&per_page=20>; rel="last"
+Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="next", <https://{HOST_NAME}/users?group=2016&page=14&per_page=20>; rel="last"
 ```
 
-所有GET列表的API都支持sorting, 用户端可以用``sort`` query parameter指定按照哪个字段sort: eg. ``GET /v1/users?sort=student_id``
+所有GET列表的API都支持sorting, 用户端可以用``sort`` query parameter指定按照哪个字段sort: eg. ``GET /api/v1/users?sort=student_id``
 
 所有GET列表的API都支持filtering, 用户端可以用query parameter指用哪个字段的哪个值做filtering, 具体例子写在每个API的介绍里。
 
 > NOTE:
 > 
-> * 权限满足只代表不会被返回401/403, 后台在很多接口都可能由于query、payload不合法返回400: 比如修改单个用户信息的``POST /v1/users/{id}``接口后台会对不同信息字段判断合法性
+> * 权限满足只代表不会被返回401/403, 后台在很多接口都可能由于query、payload不合法返回400: 比如修改单个用户信息的``POST /api/v1/users/{id}``接口后台会对不同信息字段判断合法性
 > * 现在只写出了成功时的返回值, 需要明确指定一下失败时的返回值
 
 ### 用户管理
 用户列表:
-* ``GET /v1/users``: 得到用户列表
+* ``GET /api/v1/users``: 得到用户列表
     * **权限**: 用户管理
     * **返回**: [User]
     * 加入query来过滤用户, 比如``?group=2016``, ``?class=无23``, ``?admin=1``(得到所有有管理权限的用户)等等
-* ``POST /v1/users``: 新增用户
+* ``POST /api/v1/users``: 新增用户
     * **权限**: 用户管理
     * **返回**: User
 
 单个用户信息:
-* ``GET /v1/users/{id}``: 得到某个``{id}``的用户的信息
+* ``GET /api/v1/users/{id}``: 得到某个``{id}``的用户的信息
     * **权限**: 用户管理 OR ``id == me``
     * **返回**: User
-* ``PUT /v1/users/{id}``: 修改``{id}``的用户信息
+* ``PUT /api/v1/users/{id}``: 修改``{id}``的用户信息
     * **权限**: 用户管理 OR ``id == me`` 
     * **返回**: User
-* ``DELETE /v1/users/{id}``: 删除``{id}``的用户
+* ``DELETE /api/v1/users/{id}``: 删除``{id}``的用户
     * **权限**: 用户管理
     * **返回**:
 
 ### 组管理
-* ``GET /v1/groups``: 得到组列表
+* ``GET /api/v1/groups``: 得到组列表
 	* **权限**: 用户管理
 	* **返回**: [Group]
-* ``POST /v1/groups``: 创建新组
+* ``POST /api/v1/groups``: 创建新组
 	* **权限**: 用户管理
 	* **返回**: Group
 
 ### 权限管理
-* ``GET /v1/permissions``: 得到权限列表
+* ``GET /api/v1/permissions``: 得到权限列表
     * **权限**: 权限管理
     * **返回**: [Permission]
-* ``GET /v1/permissions/{permissionId}/users``: 得到拥有某权限的用户列表
+* ``GET /api/v1/permissions/{permissionId}/users``: 得到拥有某权限的用户列表
     * **权限**: 权限管理
     * **返回**: [Users]
-* ``POST /v1/permissions/{permissionId}/users``: 给某个用户加入权限
+* ``POST /api/v1/permissions/{permissionId}/users``: 给某个用户加入权限
 		* **参数**: `userId`=需要加入权限的user的id
 		* **权限**: 权限管理
 		* **返回**:
-* ``DELETE /v1/permissions/{permissionId}/users/:userId``: 删除某个用户的某个权限
+* ``DELETE /api/v1/permissions/{permissionId}/users/:userId``: 删除某个用户的某个权限
 		* **权限**: 权限管理
 		* **返回**:
 
 ### 荣誉相关
-* ``GET /v1/honors``: 得到荣誉的列表
+* ``GET /api/v1/honors``: 得到荣誉的列表
     * **权限**:
     * **返回**: [Honor]
     * 可以加入query来过滤荣誉, 比如``?year=2017``
-* ``GET /v1/honors/{id}``: 得到荣誉信息
+* ``GET /api/v1/honors/{id}``: 得到荣誉信息
     * **权限**:
     * **返回**: Honor
-* ``POST /v1/honors``: 创建荣誉
+* ``POST /api/v1/honors``: 创建荣誉
     * **权限**: 荣誉管理
     * **返回**: Honor
-* ``PUT /v1/honors/{id}``
+* ``PUT /api/v1/honors/{id}``
     * **权限**: 荣誉管理
     * **返回**: Honor
-* ``DELETE /v1/honors/{id}``: 删除某荣誉
+* ``DELETE /api/v1/honors/{id}``: 删除某荣誉
     * **权限**: 荣誉管理
 
 ### 用户-荣誉相关
-* ``GET /v1/users/{id}/honors``: 得到某个``{id}``用户-荣誉申请情况列表
+* ``GET /api/v1/users/{id}/honors``: 得到某个``{id}``用户-荣誉申请情况列表
     * **权限**: 用户管理 OR ``me == id``
     * **返回**: [User-Honor-State]
     * 加入query来得到这个用户的不同状态的荣誉, 比如:
         * ``?state=applied``: 只返回此用户已申请未审批的荣誉
         * ``?state=fail``: 只返回此用户曾申请但未获得的荣誉
         * ``?state=success``: 只返回此用户成功申请的荣誉
-* ``POST /v1/users/{id}/honors``: 申请荣誉
+* ``POST /api/v1/users/{id}/honors``: 申请荣誉
     * **权限**: ``me == id``
     * **返回**: User-Honor-State
-* ``PUT /v1/users/{id}/honors/{honor_id}``: 改变一个用户申请荣誉的状态
+* ``PUT /api/v1/users/{id}/honors/{honor_id}``: 改变一个用户申请荣誉的状态
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
-* ``DELETE /v1/users/{id}/honors/{honor_id}``:
+* ``DELETE /api/v1/users/{id}/honors/{honor_id}``:
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
 
 ### 奖学金相关
-* ``GET /v1/scholars``: 获得奖学金列表
+* ``GET /api/v1/scholars``: 获得奖学金列表
     * **权限**:
     * **返回**: [Scholarship]
     * 可以加入query来过滤荣誉, 比如``?year=2017``
-* ``GET /v1/scholars/{id}``: 获得奖学金信息
+* ``GET /api/v1/scholars/{id}``: 获得奖学金信息
     * **权限**:
     * **返回**: Scholarship
-* ``POST /v1/scholars``: 创建奖学金
+* ``POST /api/v1/scholars``: 创建奖学金
     * **权限**: 奖学金管理
     * **返回**: Scholarship
-* ``PUT /v1/scholars/{id}``: 修改奖学金信息
+* ``PUT /api/v1/scholars/{id}``: 修改奖学金信息
     * **权限**: 奖学金管理
     * **返回**: Scholarship
-* ``DELETE /v1/scholars/{id}``: 删除某奖学金
+* ``DELETE /api/v1/scholars/{id}``: 删除某奖学金
     * **权限**: 奖学金管理
 
 ### 用户-奖学金相关
-* ``GET /v1/users/{id}/scholars``: 得到某个``{id}``用户获得奖学金的列表
+* ``GET /api/v1/users/{id}/scholars``: 得到某个``{id}``用户获得奖学金的列表
     * **权限**: 用户管理 OR ``me == id``
     * **返回**: [User-Scholar-State]
-* ``POST /v1/users/{id}/scholars``: 给某个用户分配一个新的奖学金
+* ``POST /api/v1/users/{id}/scholars``: 给某个用户分配一个新的奖学金
     * **权限**: 用户管理 AND 奖学金管理
     * **返回**: User-Scholar-State
-* ``POST /v1/users/{id}/scholars/{scholar_id}/thanksletter``: 提交感谢信表格
+* ``POST /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 提交感谢信表格
     * **权限**: ``me == id``
     * **返回**: Form-Fill-Content
-* ``DELETE /v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金
+* ``DELETE /api/v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金
     * **权限**: 用户管理 AND 奖学金管理
 
 ### 表单相关
-* ``GET /v1/forms``: 获得表单列表
+* ``GET /api/v1/forms``: 获得表单列表
     * **返回**: Form
     * 可以加入query来过滤荣誉, 比如``?type=apply``或者``?type=thanks``
-* ``GET /v1/forms/{id}``: 获得表单
+* ``GET /api/v1/forms/{id}``: 获得表单
     * **返回**: Form
-* ``POST /v1/forms/{id}``: 增加表单
+* ``POST /api/v1/forms/{id}``: 增加表单
     * **权限**: 表单管理
     * **返回**: Form
-* ``PUT /v1/forms/{id}``: 改变表单内容
+* ``PUT /api/v1/forms/{id}``: 改变表单内容
     * **权限**: 表单管理
     * **返回**: Form
-* ``DELETE /v1/forms/{id}``: 删除表单
+* ``DELETE /api/v1/forms/{id}``: 删除表单
     * **权限**: 表单管理
 
 ### 用户-表单相关
-* ``GET /v1/users/{id}/forms/{fill_id}``: 得到表单填写内容
+* ``GET /api/v1/users/{id}/forms/{fill_id}``: 得到表单填写内容
     * **权限**: 表单管理 OR ``me == id``
     * **返回**: Form-Fill-Content
-* ``POST /v1/users/{id}/forms``: 上传新填写的表单
+* ``POST /api/v1/users/{id}/forms``: 上传新填写的表单
     * **权限**: ``me == id``
     * **返回**: Form-Fill-Content
 
 ### 文件相关
-* ``GET /v1/users/{id}/files/{file_id}``
+* ``GET /api/v1/users/{id}/files/{file_id}``
 
 Status Code
 ----
