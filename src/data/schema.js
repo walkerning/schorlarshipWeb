@@ -8,7 +8,7 @@ module.exports = {
     group_id: {
       type: "integer",
       nullable: false
-    }, // FIXME: nullable
+    },
     type: {
       type: "string",
       maxlength: 36,
@@ -37,6 +37,15 @@ module.exports = {
       unique: true,
       validations: {
         isEmail: true
+      }
+    },
+    phone: {
+      type: "string",
+      maxlength: 20,
+      nullable: true,
+      unique: true,
+      validations: {
+        isPhone: true
       }
     },
     class: {

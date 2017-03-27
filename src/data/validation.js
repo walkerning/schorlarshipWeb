@@ -29,6 +29,12 @@ validator.extend("isMinimum", function isBetween(strVal, mini) {
   return val >= mini;
 });
 
+validator.extend("isPhone", function isPhone(strVal) {
+  // FIXME: Do we need different locale for phone? I think it's unneccesary
+  var locale = "zh-CN";
+  return validator.isMobilePhone(strVal, locale);
+});
+
 function validateSchema(tableName, model, autoAttrs) {
   var columns = _.keys(schema[tableName]);
   var validationErrors = [];
