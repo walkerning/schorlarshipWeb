@@ -206,7 +206,7 @@ Link: <https://{HOST_NAME}/v1/users?group=2016&page=3&per_page=20>; rel="next", 
 * ``GET /v1/users``: 得到用户列表
     * **权限**: 用户管理
     * **返回**: [User]
-    * 加入query来过滤用户, 比如``?group=2016``, ``?class=无23``等等
+    * 加入query来过滤用户, 比如``?group=2016``, ``?class=无23``, ``?admin=1``(得到所有有管理权限的用户)等等
 * ``POST /v1/users``: 新增用户
     * **权限**: 用户管理
     * **返回**: User

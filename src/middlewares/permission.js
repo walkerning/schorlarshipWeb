@@ -3,9 +3,7 @@ var errors = require("../errors");
 
 module.exports = function permit(...rules) {
   return function(req, res, next) {
-    var permNames = req.user.getPermissions().map(function(v) {
-      return v["name"]
-    });
+    var permNames = req.user.getPermissionNames();
     if (req.user.get("id") == req.params["userId"]) {
       permNames.push("me");
     }

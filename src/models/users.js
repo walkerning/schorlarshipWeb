@@ -54,9 +54,7 @@ var User = bookshelfInst.Model.extend({
 
   // Attributes for filtering and validation
   permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
-    var perms = contextUser.getPermissions().map(function(v) {
-      return v["name"]
-    });
+    var perms = contextUser.getPermissionNames();
     if (_.includes(perms, "user")) {
       // with user management permission
       return _.difference(this.permittedAttributes(), this.autoAttributes());
@@ -113,6 +111,9 @@ var User = bookshelfInst.Model.extend({
     return this.related("permissions").toJSON();
   },
 
+  getPermissionNames: function getPermissionNames() {
+    return this.related("permissions").toAttrList("name");
+  }
 }, {
   secretAttributes: function secretAttributes() {
     return ["password"];

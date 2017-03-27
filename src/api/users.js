@@ -12,7 +12,12 @@ module.exports = {
         var obj = collection.toClientJSON();
         if ("group" in queries) {
           obj = _.filter(obj, (value) => {
-            return value["group"].name == queries["group"]
+            return value["group"].name == queries["group"];
+          });
+        }
+        if ("admin" in queries && _.toInteger(queries["admin"])) {
+          obj = _.filter(obj, (value) => {
+            return value["permissions"].length != 0;
           });
         }
         res.status(200).json(obj);

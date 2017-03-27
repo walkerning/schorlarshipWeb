@@ -11,6 +11,18 @@ var bookshelfInst;
 bookshelfInst = bookshelf(db);
 bookshelfInst.plugin("registry");
 
+// Helpers
+_getJSONAttrList:
+function _getJSONAttrList(json, attrName) {
+  if (_.isString(attrName)) {
+    return json[attrName];
+  } else if (_.isArray(attrName)) {
+    return _.map(attrName, function(name) {
+      return json[attrName];
+    });
+  }
+}
+
 bookshelfInst.Model = bookshelfInst.Model.extend({
   // `hasTimestamps` will make bookshelf handle created_at and updated_at properties automatically.
   hasTimestamps: true,
@@ -130,12 +142,27 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
     });
   },
 
+  // By default, the relations objects will be flatten using `name` fields,
+  // to get full relations objects, pass in `{flattenRelation: false}` option
   toClientJSON: function toClientJSON(options) {
     options = _.merge({
-      omitPivot: true
+      omitPivot: true,
+      flattenRelation: true
     }, options);
-    this.constructor
-    return _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
+
+    var json = _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
+    if (options.flattenRelation) {
+      _.forEach(_.keys(this.relations), function(key) {
+        if (json[key]) {
+          if (_.isArray(json[key])) {
+            json[key] = _.map(json[key], (v) => v.name || v.id);
+          } else {
+            json[key] = json[key].name || json[key].id;
+          }
+        }
+      });
+    }
+    return json;
   }
 
 }, {
@@ -197,22 +224,12 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
 
   // Operation methods used by API.
   toAttrList: function toAttrList(attrName) {
-    if (_.isString(attrName)) {
-      return _.map(this.toJSON(), function(v) {
-        return v[attrName]
-      })
-    } else if (_.isArray(attrName)) {
-      return _.map(this.toJSON(), function(v) {
-        _.map(attrName, function(name) {
-          return v[attrName]
-        });
-      });
-    }
+    return _.map(this.toJSON(), (json) => _getJSONAttrList(json, attrName));
   },
 
   toClientJSON: function toClientJSON(options) {
     options = _.merge({
-      omitPivot: true
+      omitPivot: true,
     }, options);
     return _.invokeMap(this.models, 'toClientJSON', options).filter(_.negate(_.isNull));
   },
