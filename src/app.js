@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-var morgan = require('morgan');
+var morgan = require("morgan");
+var cors = require("cors");
 
 var logging = require("./logging");
 var models = require("./models");
@@ -12,6 +13,10 @@ var readUserMiddleware = require("./middlewares/readUser");
 models.init();
 
 var app = express();
+
+// PLUGIN: enable CORS requests. **TODO**: only for development, all
+// cross-domain requests are enabled
+app.use(cors())
 
 // PLUGIN: log requests
 app.use(morgan("dev", {

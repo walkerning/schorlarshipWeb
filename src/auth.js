@@ -29,6 +29,7 @@ module.exports = {
             .then(function then() {
               // send the JWT token to the client
               return res.json({
+                id: user.id,
                 token: createToken(user)
               });
             }, function then(err) {
