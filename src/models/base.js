@@ -135,7 +135,12 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
    * @returns {Promise<Model>}
    */
   update: function update(body, contextUser) {
-    return this.save(_.pick(body, this.permittedUpdateAttributes(contextUser)), {
+    var newBody = _.pick(body, this.permittedUpdateAttributes(contextUser));
+    if (_.isEmpty(newBody)) {
+      // Avoid unneccessary update to `updated_at` field.
+      return Promise.resolve(null);
+    }
+    return this.save(newBody, {
       context: {
         contextUser: contextUser
       }
@@ -189,8 +194,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
    * @returns {Promise<Model>}
    */
   create: function create(body, contextUser) {
-    var fields = contextUser.permittedUpdateAttributes(contextUser);
-    return this.forge(_.pick(body, fields)).save({}, {
+    return this.forge(body).save({}, {
       context: {
         contextUser: contextUser
       }

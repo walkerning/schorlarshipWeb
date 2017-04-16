@@ -15,3 +15,14 @@ DEVELOP
 * ``npm install -g grunt-cli``
 * ``grunt database``: 初始化数据库, 建立表格, 插入实验数据
 * ``grunt dev``: 运行development server
+
+API
+-----------
+
+见[API文档](doc/api.md)
+
+Some issues
+-----------
+
+* There is a little bug in grunt plugin grunt-express-server, see [issue](https://github.com/ericclemmons/grunt-express-server/issues/105), still don't know what cause the stop method being called. But seems it's [this statement](https://github.com/ericclemmons/grunt-express-server/blob/eced2b73817fc4bf9cf73fce65998c7200794730/tasks/lib/server.js#L135) cause the error: `Fatal error: Cannot read property 'hardStop' of null` 
+

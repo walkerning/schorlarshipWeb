@@ -54,7 +54,7 @@ module.exports = {
       nullable: true
     },
     gpa: {
-      type: "integer",
+      type: "float",
       nullable: true,
       validations: {
         isBetween: [0, 100]

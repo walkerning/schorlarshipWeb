@@ -60,7 +60,7 @@ var User = bookshelfInst.Model.extend({
       return _.difference(this.permittedAttributes(), this.autoAttributes());
     } else if (contextUser.get("id") == this.get("id")) {
       // contextUser == this
-      return ["email", "password"];
+      return ["email", "password", "phone"];
     }
   },
 
@@ -124,6 +124,12 @@ var User = bookshelfInst.Model.extend({
       "group",
       "permissions"
     ];
+  },
+
+  create: function create(body, contextUser) {
+    var fields = contextUser.permittedUpdateAttributes(contextUser);
+    return bookshelfInst.Model.create.call(this, _.pick(body, fields),
+      contextUser);
   }
 
 });

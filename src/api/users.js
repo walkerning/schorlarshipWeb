@@ -25,7 +25,12 @@ module.exports = {
   },
 
   create: function create(req, res, next) {
-    return models.User.create(req.body, req.user)
+    var body = req.body;
+    if (body["password"] === undefined) {
+      // Application logic: default password is the student_id
+      body["password"] = body["student_id"];
+    }
+    return models.User.create(body, req.user)
       .then(function(user) {
         res.status(201).json(user.toClientJSON());
       });
@@ -43,7 +48,10 @@ module.exports = {
       .then(function(user) {
         return user.update(req.body, req.user)
           .then(function() {
-            res.status(200).json(user.toClientJSON());
+            return models.User.getById(req.params.userId)
+              .then(function(user) {
+                res.status(200).json(user.toClientJSON());
+              });
           });
       });
   },
