@@ -4,6 +4,7 @@ var permit = require("../middlewares/permission");
 // api methods
 var users = require("./users");
 var permissions = require("./permissions");
+var groups = require("./groups");
 var honors = require("./honors");
 var scholars = require("./scholars");
 
@@ -65,6 +66,15 @@ apiRouter.get("/permissions/:permissionId/users", permit(["permission"]), catchE
 apiRouter.post("/permissions/:permissionId/users", permit(["permission"]), catchError(permissions.addUser));
 // Delete a user from a permission group
 apiRouter.delete("/permissions/:permissionId/users/:userId", permit(["permission"]), catchError(permissions.deleteUser));
+
+
+//// Routing endpoints `/groups`
+// List groups
+apiRouter.get("/groups", permit(["user"]), catchError(groups.list));
+// Create group
+apiRouter.post("/groups", permit(["user"]), catchError(groups.create));
+// Update group info
+apiRouter.put("/groups/:groupId", permit(["user"]), catchError(groups.updateInfo));
 
 
 //// Routing endpoints `/honors`

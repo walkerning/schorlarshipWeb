@@ -229,6 +229,9 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``POST /api/v1/groups``: 创建新组
 	* **权限**: 用户管理
 	* **返回**: Group
+* ``PUT /api/v1/groups/{id}``: 修改``{id}``的组信息
+	* **权限**: 用户管理
+	* **返回**: Group
 
 ### 权限管理
 * ``GET /api/v1/permissions``: 得到权限列表
