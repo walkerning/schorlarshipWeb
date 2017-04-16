@@ -313,6 +313,34 @@ module.exports = {
       validations: {
         isIn: [["apply", "thanks"]]
       }
+    },
+    // maxlength: 65,535 (2**16 − 1)
+    fields: {
+      type: "text",
+      nullable: false
+    },
+    template: {
+      type: "text",
+      nullable: true
+    },
+
+    // timestamps
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
     }
   },
 
@@ -329,6 +357,24 @@ module.exports = {
     content: {
       type: "text",
       nullable: false
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
     }
   },
 

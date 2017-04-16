@@ -9,11 +9,21 @@ var Form = bookshelfInst.Model.extend({
 
   honors: function() {
     return this.hasMany("Honor", "form_id");
+  },
+
+  toClientJSON: function toClientJSON(options) {
+    var json = bookshelfInst.Model.prototype.toClientJSON.call(this, options);
+    json.fields = JSON.parse(json.fields);
+    return json;
   }
 });
 
 var Forms = bookshelfInst.Collection.extend({
   model: Form
+}, {
+  queriableAttributes: function queriableAttributes() {
+    return ["id", "name", "type"];
+  }
 });
 
 module.exports = {

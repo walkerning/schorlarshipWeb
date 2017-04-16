@@ -122,6 +122,18 @@ Resources
 }
 ```
 
+一个创建表单测试样例:
+
+```
+http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name="测试表单1" type="apply" fields:='[{
+"type": 1,
+"max_len": -1,
+"min_len": -1,
+"required": false,
+"description": "说明文字",
+"content": null}]'
+```
+
 ### 表单填充情况 Form-Fill-Content
 ```javascript
 {
@@ -317,10 +329,10 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``GET /api/v1/forms``: 获得表单列表
     * **返回**: Form
     * 可以加入query来过滤荣誉, 比如``?type=apply``或者``?type=thanks``
-* ``GET /api/v1/forms/{id}``: 获得表单
-    * **返回**: Form
-* ``POST /api/v1/forms/{id}``: 增加表单
+* ``POST /api/v1/forms/``: 增加表单
     * **权限**: 表单管理
+    * **返回**: Form
+* ``GET /api/v1/forms/{id}``: 获得表单
     * **返回**: Form
 * ``PUT /api/v1/forms/{id}``: 改变表单内容
     * **权限**: 表单管理

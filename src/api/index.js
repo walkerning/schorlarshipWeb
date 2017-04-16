@@ -5,6 +5,7 @@ var permit = require("../middlewares/permission");
 var users = require("./users");
 var permissions = require("./permissions");
 var groups = require("./groups");
+var forms = require("./forms");
 var honors = require("./honors");
 var scholars = require("./scholars");
 
@@ -77,6 +78,19 @@ apiRouter.post("/groups", permit(["user"]), catchError(groups.create));
 apiRouter.put("/groups/:groupId", permit(["user"]), catchError(groups.updateInfo));
 
 
+//// Routing endpoints `/forms`
+// List forms
+apiRouter.get("/forms", permit(["form"]), catchError(forms.list));
+// Create forms
+apiRouter.post("/forms", permit(["form"]), catchError(forms.create));
+// Get form info
+apiRouter.get("/forms/:formId", catchError(forms.info));
+// Update form
+apiRouter.put("/forms/:formId", permit(["form"]), catchError(forms.updateInfo));
+// Delete form
+apiRouter.delete("/forms/:formId", permit(["form"]), catchError(forms.delete));
+
+
 //// Routing endpoints `/honors`
 // List honors
 apiRouter.get("/honors", catchError(honors.list));
@@ -87,7 +101,7 @@ apiRouter.get("/honors/:honorId", catchError(honors.info));
 // Update honor info
 apiRouter.put("/honors/:honorId", permit(["honor"]), catchError(honors.updateInfo));
 // Delete honor
-apiRouter.delete("/users/:userId", permit(["honor"]), catchError(honors.delete));
+apiRouter.delete("/honors/:honorId", permit(["honor"]), catchError(honors.delete));
 
 //// Routing endpoints `/scholars`
 // List scholars
@@ -99,7 +113,7 @@ apiRouter.get("/scholars/:scholarId", catchError(scholars.info));
 // Update scholar info
 apiRouter.put("/scholars/:scholarId", permit(["scholar"]), catchError(scholars.updateInfo));
 // Delete scholar
-apiRouter.delete("/users/:userId", permit(["scholar"]), catchError(users.delete));
+apiRouter.delete("/scholars/:scholarId", permit(["scholar"]), catchError(scholars.delete));
 
 
 module.exports = apiRouter;
