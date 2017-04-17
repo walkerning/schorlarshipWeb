@@ -24,7 +24,7 @@ module.exports = {
       .then(function(grp) {
         grp.update(req.body, req.user)
           .then(function() {
-            return models.Group.getById(req.params.groupId)
+            return grp.fetch()
               .then(function(grp) {
                 res.status(200).json(grp.toClientJSON());
               });

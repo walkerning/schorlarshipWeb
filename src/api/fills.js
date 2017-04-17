@@ -67,7 +67,7 @@ module.exports = {
         }
         return fill.update(body, req.user)
           .then(function() {
-            return models.Fill.getById(req.params.fillId)
+            return fill.fetch()
               .then(function(fill) {
                 res.status(200).json(fill.toJSON());
               });

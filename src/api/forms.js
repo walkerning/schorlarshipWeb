@@ -35,7 +35,7 @@ module.exports = {
       .then(function(form) {
         return form.update(req.body, req.user)
           .then(function() {
-            return models.Form.getById(req.params.formId)
+            return form.fetch()
               .then(function(form) {
                 res.status(200).json(form.toClientJSON());
               });

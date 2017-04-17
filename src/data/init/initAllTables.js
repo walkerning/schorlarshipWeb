@@ -39,6 +39,10 @@ var initData = {
       description: "Login permission."
     },
     {
+      name: "apply",
+      description: "Apply for honor/scholarship permission."
+    },
+    {
       name: "user",
       description: "User management permission."
     },

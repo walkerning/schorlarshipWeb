@@ -37,7 +37,20 @@ module.exports = {
     }
     return models.User.create(body, req.user)
       .then(function(user) {
-        res.status(201).json(user.toClientJSON());
+        // Default permissions.
+        // FIXME: maybe move to outer api logic?
+        return Promise.map([1, 2], function(permId) {
+          return models.Permission.getById(permId)
+            .then(function(perm) {
+              return perm.addUser(user.get("id"));
+            });
+        })
+          .then(function() {
+            return user.fetch()
+              .then(function(user) {
+                res.status(201).json(user.toClientJSON());
+              });
+          });
       });
   },
 
@@ -65,7 +78,7 @@ module.exports = {
         }
         return user.update(req.body, req.user)
           .then(function() {
-            return models.User.getById(req.params.userId)
+            return user.fetch()
               .then(function(user) {
                 res.status(200).json(user.toClientJSON());
               });
