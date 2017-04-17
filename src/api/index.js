@@ -33,10 +33,14 @@ function catchError(apiFunc) {
 apiRouter.get("/users", permit(["user"]), catchError(users.list));
 // Create user
 apiRouter.post("/users", permit(["user"]), catchError(users.create));
+// Get user info of current context user
+apiRouter.get("/users/me", catchError(users.infoMe));
 // Get user info
 apiRouter.get("/users/:userId", permit(["me"], ["user"]), catchError(users.info));
 // Update user info
 apiRouter.put("/users/:userId", permit(["me"], ["user"]), catchError(users.updateInfo));
+// Reset user password. This is a pseudo resource "newPassword"
+apiRouter.put("/users/:userId/newPassword", permit(["user"]), catchError(users.newPassword));
 // Delete user
 apiRouter.delete("/users/:userId", permit(["user"]), catchError(users.delete));
 

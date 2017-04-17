@@ -21,7 +21,7 @@ module.exports = {
     if (body.content !== undefined) {
       body.content = JSON.stringify(body.content);
     }
-    body.user_id = req.user.id;
+    body.user_id = req.user.get("id");
     return models.Fill.create(body, req.user)
       .then(function(fill) {
         res.status(201).json(fill.toClientJSON());
@@ -52,7 +52,7 @@ module.exports = {
     }
     // logic: no one cannot update `user_id` explicitly.
     // `fill.user_id` is determined by the context user only.
-    body.user_id = req.user.id;
+    body.user_id = req.user.get("id");
     return models.User.getById(req.params.userId, {
       fetchOptions: {
         withRelated: ["fills"]

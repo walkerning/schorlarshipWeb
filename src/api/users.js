@@ -47,9 +47,21 @@ module.exports = {
       });
   },
 
+  infoMe: function info(req, res, next) {
+    return models.User.getById(req.user.get("id"))
+      .then(function(user) {
+        res.status(200).json(user.toClientJSON());
+      });
+  },
+
   updateInfo: function updateInfo(req, res, next) {
     return models.User.getById(req.params.userId)
       .then(function(user) {
+        // Application logic: the user admin cannot update password. 
+        // can only reset password through the `newPassword` API.
+        if (req.body.password !== undefined && req.user.get("id") != user.get("id")) {
+          delete req.body.password;
+        }
         return user.update(req.body, req.user)
           .then(function() {
             return models.User.getById(req.params.userId)
@@ -74,6 +86,19 @@ module.exports = {
         return start.then(function() {
           res.status(204).json({}).end();
         });
+      });
+  },
+
+  newPassword: function newPassword(req, res, next) {
+    return models.User.getById(req.params.userId)
+      .then(function(user) {
+        // TODO: the reset password should be random and sent to the user's email
+        return user.update({
+          password: user.get("student_id")
+        }, req.user)
+          .then(function() {
+            res.status(201).json({}).end();
+          });
       });
   }
 };
