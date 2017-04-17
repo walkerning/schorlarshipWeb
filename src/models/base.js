@@ -1,6 +1,7 @@
 var Promise = require("bluebird");
 var _ = require("lodash");
 var bookshelf = require("bookshelf");
+var util = require("util");
 var db = require("../data").db;
 var schema = require("../data").schema;
 var validation = require("../data").validation;
@@ -42,7 +43,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
           .then(function(existing) {
             if (existing) {
               return Promise.reject(new errors.ValidationError({
-                message: "Illegal `" + key + "`: uplicated. `" + self.get(key) + "` already exists."
+                message: "Illegal `" + key + "`: Duplicated. `" + self.get(key) + "` already exists."
               }));
             }
             return Promise.resolve();
@@ -175,14 +176,17 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
    * @returns {Promise<Model>}
    */
   getById: function getById(id, options) {
+    if (options !== undefined) {
+      var fetchOpt = options.fetchOptions;
+    }
     return this.forge({
       id: id
     })
-      .fetch()
+      .fetch(fetchOpt)
       .then(function(mod) {
         if (!mod && (options === undefined || options.noreject !== true)) {
           return Promise.reject(new errors.NotFoundError({
-            message: "This id: `" + id + "` does not exists."
+            message: util.format("`id`(%s) not exists.", id)
           }));
         } else {
           return mod;

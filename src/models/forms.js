@@ -26,7 +26,27 @@ var Forms = bookshelfInst.Collection.extend({
   }
 });
 
+var Fill = bookshelfInst.Model.extend({
+  tableName: "fills",
+
+  form: function() {
+    return this.belongsTo("Form", "form_id");
+  },
+
+  user: function() {
+    return this.belongsTo("User", "user_id");
+  }
+
+});
+
+var Fills = bookshelfInst.Collection.extend({
+  model: Fill
+});
+
 module.exports = {
   Form: bookshelfInst.model("Form", Form),
-  Forms: bookshelfInst.collection("Forms", Forms)
+  Forms: bookshelfInst.collection("Forms", Forms),
+
+  Fill: bookshelfInst.model("Fill", Fill),
+  Fills: bookshelfInst.collection("Fills", Fills)
 };

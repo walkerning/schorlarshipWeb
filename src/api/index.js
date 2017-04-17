@@ -6,6 +6,7 @@ var users = require("./users");
 var permissions = require("./permissions");
 var groups = require("./groups");
 var forms = require("./forms");
+var fills = require("./fills");
 var honors = require("./honors");
 var scholars = require("./scholars");
 
@@ -89,6 +90,18 @@ apiRouter.get("/forms/:formId", catchError(forms.info));
 apiRouter.put("/forms/:formId", permit(["form"]), catchError(forms.updateInfo));
 // Delete form
 apiRouter.delete("/forms/:formId", permit(["form"]), catchError(forms.delete));
+
+
+//// Routing endpoints `/users/:userId/forms/`. Form-fills
+// List fills
+apiRouter.get("/users/:userId/forms", permit(["me"], ["form", "user"]), catchError(fills.list));
+// Create new fill
+apiRouter.post("/users/:userId/forms", permit(["me"]), catchError(fills.create));
+// Get fill info
+apiRouter.get("/users/:userId/forms/:fillId", permit(["me"], ["form", "user"]), catchError(fills.info));
+// Update fill info
+apiRouter.put("/users/:userId/forms/:fillId", permit(["me"]), catchError(fills.updateInfo));
+// Delete fill?
 
 
 //// Routing endpoints `/honors`

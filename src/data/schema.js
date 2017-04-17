@@ -357,6 +357,10 @@ module.exports = {
       type: "integer",
       nullable: false
     },
+    user_id: {
+      type: "integer",
+      nullable: false
+    },
     content: {
       type: "text",
       nullable: false

@@ -341,10 +341,16 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **权限**: 表单管理
 
 ### 用户-表单相关
-* ``GET /api/v1/users/{id}/forms/{fill_id}``: 得到表单填写内容
-    * **权限**: 表单管理 OR ``me == id``
-    * **返回**: Form-Fill-Content
+* ``GET /api/v1/users/{id}/forms/``: 列出``{id}``用户填写过的表单
+	  * **权限**: (用户管理 AND 表单管理) OR ``me == id``
+		* **返回**: [Form-Fill-Content]
 * ``POST /api/v1/users/{id}/forms``: 上传新填写的表单
+    * **权限**: ``me == id``
+    * **返回**: Form-Fill-Content
+* ``GET /api/v1/users/{id}/forms/{fill_id}``: 得到表单填写内容
+    * **权限**: (用户管理 AND 表单管理) OR ``me == id``
+    * **返回**: Form-Fill-Content
+* ``PUT /api/v1/users/{id}/forms/{fill_id}``: 修改表单内容
     * **权限**: ``me == id``
     * **返回**: Form-Fill-Content
 

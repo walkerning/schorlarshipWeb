@@ -52,6 +52,10 @@ var User = bookshelfInst.Model.extend({
     return this.belongsToMany("Permission");
   },
 
+  fills: function() {
+    return this.hasMany("Fill");
+  },
+
   // Attributes for filtering and validation
   permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
     var perms = contextUser.getPermissionNames();
