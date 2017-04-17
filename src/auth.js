@@ -17,7 +17,7 @@ module.exports = {
   auth: function(req, res, next) {
     if (req.body.student_id === undefined) {
       return next(new errors.BadRequestError({
-        message: "`student_id` field is needed"
+        message: "`student_id` field is required."
       }));
     }
     models.User.forge({

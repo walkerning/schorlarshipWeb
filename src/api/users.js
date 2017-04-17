@@ -25,6 +25,11 @@ module.exports = {
 
   create: function create(req, res, next) {
     var body = req.body;
+    if (body["student_id"] === undefined) {
+      return Promise.reject(new errors.BadRequestError({
+        message: "`student_id` field is required."
+      }));
+    }
     if (body["password"] === undefined) {
       // Application logic: default password is the student_id
       body["password"] = body["student_id"];

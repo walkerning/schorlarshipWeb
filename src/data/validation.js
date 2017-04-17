@@ -46,7 +46,7 @@ function validateSchema(tableName, model, autoAttrs) {
       && schema[tableName][columnKey].nullable !== true
       && !_.includes(autoAttrs, columnKey)) {
       if (validator.isEmpty(strVal)) {
-        log = util.format("%s.%s  cannot be blank.", tableName, columnKey);
+        log = util.format("%s.%s cannot be blank.", tableName, columnKey);
         validationErrors.push(new errors.ValidationError({
           log: log,
           context: tableName + "." + columnKey
@@ -78,7 +78,7 @@ function validateSchema(tableName, model, autoAttrs) {
 
       // check validations objects
       if (schema[tableName][columnKey].hasOwnProperty("validations")) {
-        validationErrors = validationErrors.concat(validate(strVal, columnKey, schema[tableName][columnKey].validations));
+        validationErrors = validationErrors.concat(validate(strVal, columnKey, tableName));
 
       }
 
@@ -103,7 +103,8 @@ function validateSchema(tableName, model, autoAttrs) {
   return Promise.resolve();
 }
 
-function validate(value, key, validations) {
+function validate(value, key, tableName) {
+  var validations = schema[tableName][key].validations;
   var validationErrors = [];
   value = _.toString(value);
 
@@ -124,7 +125,9 @@ function validate(value, key, validations) {
     // equivalent of validator.isSomething(option1, option2)
     if (validator[validationName].apply(validator, validationOptions) !== goodResult) {
       validationErrors.push(new errors.ValidationError({
-        log: util.format("%s %s validation failed.", validationName, key)
+        context: tableName + "." + key,
+        log: util.format("%s.%s(%s) %s %j validation failed.", tableName, key, value,
+          validationName, _.slice(validationOptions, 1))
       }));
     }
     validationOptions.shift();

@@ -12,7 +12,10 @@ module.exports = {
     type: {
       type: "string",
       maxlength: 36,
-      nullable: false
+      nullable: false,
+      validations: {
+        isIn: [["undergraduate", "graduate", "faculty"]]
+      }
     },
     name: {
       type: "string",
@@ -42,7 +45,7 @@ module.exports = {
     phone: {
       type: "string",
       maxlength: 20,
-      nullable: true,
+      nullable: false,
       unique: true,
       validations: {
         isPhone: true
@@ -51,7 +54,7 @@ module.exports = {
     class: {
       type: "string",
       maxlength: 36,
-      nullable: true
+      nullable: false
     },
     gpa: {
       type: "float",

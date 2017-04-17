@@ -28,6 +28,8 @@ var initData = {
       type: "undergraduate",
       email: "foxmail@gmail.com",
       password: "ning12345678",
+      phone: "18311111111",
+      class: "无23",
       active: true
     }
   ],
