@@ -3,7 +3,8 @@ module.exports = {
   database: require("./database"),
   log: require("./log"),
   jwt: require("./jwt"),
-  validation: require("./validation")
+  validation: require("./validation"),
+  sendemail: require("./sendemail")
 };
 
 

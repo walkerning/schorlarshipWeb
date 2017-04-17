@@ -1,5 +1,6 @@
 var _ = require("lodash");
 var Promise = require("bluebird");
+var util = require("util");
 var models = require("../models");
 var errors = require("../errors");
 
@@ -93,9 +94,14 @@ module.exports = {
     return models.User.getById(req.params.userId)
       .then(function(user) {
         // TODO: the reset password should be random and sent to the user's email
+        // var newPass = user.get("student_id");
+        var newPass = passwordGenerator.generate();
         return user.update({
-          password: user.get("student_id")
+          password: newPass
         }, req.user)
+          .then(function() {
+            return user.sendEmail("Password reset: Your new password at EEScholarshipWeb", util.format("Your new password is: %s\n", newPass));
+          })
           .then(function() {
             res.status(201).json({}).end();
           });

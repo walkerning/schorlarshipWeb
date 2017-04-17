@@ -1,8 +1,9 @@
 var _ = require("lodash");
 var bookshelfInst = require("./base");
-var errors = require("../errors");
 var Promise = require("bluebird");
 var bcrypt = require("bcryptjs");
+var sendemail = require("../config").sendemail;
+var errors = require("../errors");
 var validationCfg = require("../config").validation;
 var bcryptGenSalt = Promise.promisify(bcrypt.genSalt);
 var bcryptHash = Promise.promisify(bcrypt.hash);
@@ -117,6 +118,11 @@ var User = bookshelfInst.Model.extend({
 
   getPermissionNames: function getPermissionNames() {
     return this.related("permissions").toAttrList("name");
+  },
+
+  // send email utils
+  sendEmail: function sendEmail(subject, content) {
+    return sendemail.sendEmail(this.get("email"), subject, content)
   }
 }, {
   secretAttributes: function secretAttributes() {
