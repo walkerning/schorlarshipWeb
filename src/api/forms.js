@@ -31,9 +31,13 @@ module.exports = {
   },
 
   updateInfo: function updateInfo(req, res, next) {
+    var body = req.body;
+    if (body.fields !== undefined) {
+      body.fields = JSON.stringify(body.fields);
+    }
     return models.Form.getById(req.params.formId)
       .then(function(form) {
-        return form.update(req.body, req.user)
+        return form.update(body, req.user)
           .then(function() {
             return form.fetch()
               .then(function(form) {

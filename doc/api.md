@@ -31,7 +31,7 @@ Resources
     "class_rank": 1, 
     // Number: 年级排名
     "year_rank": 3, 
-    // [String]: 该用户有的权限列表: login有效, user用户管理, form表单管理, honor荣誉管理, scholarship奖学金管理, export学校对接
+    // [String]: 该用户有的权限列表: login有效, apply可申请荣誉/奖学金, user用户管理, form表单管理, honor荣誉管理, scholarship奖学金管理, export学校对接
     "permissions": ["login"]
 }
 ```
@@ -224,12 +224,18 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **返回**: User
 
 单个用户信息:
+* ``GET /api/v1/users/me``: 得到当前登录用户的信息
+    * **权限**:
+    * **返回**: User
 * ``GET /api/v1/users/{id}``: 得到某个``{id}``的用户的信息
     * **权限**: 用户管理 OR ``id == me``
     * **返回**: User
 * ``PUT /api/v1/users/{id}``: 修改``{id}``的用户信息
     * **权限**: 用户管理 OR ``id == me`` 
     * **返回**: User
+* ``PUT /api/v1/users/{id}/newPassword``: 随机重置``{id}``的用户密码, 新密码将发至该用户邮箱
+    * **权限**: 用户管理
+    * **返回**:
 * ``DELETE /api/v1/users/{id}``: 删除``{id}``的用户
     * **权限**: 用户管理
     * **返回**:
@@ -253,9 +259,9 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **权限**: 权限管理
     * **返回**: [Users]
 * ``POST /api/v1/permissions/{permissionId}/users``: 给某个用户加入权限
-		* **参数**: `userId`=需要加入权限的user的id
-		* **权限**: 权限管理
-		* **返回**:
+    * **参数**: `userId`=需要加入权限的user的id
+    * **权限**: 权限管理
+    * **返回**:
 * ``DELETE /api/v1/permissions/{permissionId}/users/:userId``: 删除某个用户的某个权限
 		* **权限**: 权限管理
 		* **返回**:
