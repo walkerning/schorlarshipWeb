@@ -45,10 +45,10 @@ Resources
     "name": "学业优秀奖", 
     // String[required]: 该荣誉的年份
     "year": "2017", 
-    // Number[required]: 该荣誉开始申请的时间
-    "start_time": 1489742695, 
-    // Number[required]: 该荣誉结束申请的时间
-    "end_time": 1489742695, 
+    // String[required]: 该荣誉开始申请的时间(ISO format)
+    "start_time": "2017-09-01T10:54:24.738793",  
+    // String[required]: 该荣誉结束申请的时间(ISO format)
+    "end_time": "2017-09-28T10:54:24.738793",
     // Number: 总名额数量, 不存在则代表直接由各个group的名额得到.
     // FIXME: 这个需要嘛?
     "quota": 15, 
@@ -81,7 +81,13 @@ Resources
     // String[required]: 该奖学金的年份
     "year": "2017", 
     // Number[required]: 该奖学金获得者需要填写的感谢表单id
-    "form_id": 6
+    "form_id": 6,
+    // String[required]: 分配方式: "quota", "money"
+    "alloc": "quota",
+    // Number[required]: 金额, 如果分配方式为"quota", 代表为每人可以分多少钱; 如果分配方式为"money"代表总金额
+    "money": 1000,
+    // Number[required]: 如果分配方式为"quota", 代表能获得该奖学金的人数; 分配方式为"money", 字段无效
+    "quota": 10
 }
 ```
 
@@ -145,8 +151,8 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
     "form_id": 4,
     // Object[required]: JSON, 标记表单每个字段填写什么. key为字段id, value为内容
     "fill_content": {
-        1234: "张三",
-        2345: "xxxx@gmail.com"
+        "1234": "张三",
+        "2345": "xxxx@gmail.com"
     }
 }
 ```
@@ -154,10 +160,10 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
 ### 用户-荣誉申请情况 User-Honor-State
 ```javascript
 {
-        // Number[required]: 用户id
-        "user_id": 123
         // Number[required]: 申请id
         "apply_id": 10,
+        // Number[required]: 用户id
+        "user_id": 123,
         // Number[required]: 荣誉id
         "honor_id": 2,
         "id": "987654321", 
@@ -167,8 +173,19 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
         "year": "2017", 
         // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied
         "state": "applied",
-        // Number[required]: 如果用户权限包括``用户管理AND荣誉管理``则可以得到评分. 初始为-1, <0的score代表没有评分.
-        "score": 86,
+        //  Array(Score)[required]: 评分情况列表
+        "scores": [
+		{
+			// Number[required]: 评分辅导员/老师id
+			"scorer_id": 1,
+			// Number[required, 0-100]: 该辅导员/老师给此申请的评分
+			"score": 90,
+			// String[required]: 创建该打分的可读timestamp (ISO format)
+			"created_at": 2017-05-28T10:48:51.416731,
+			// String[required]: 最后更新该打分的可读timestamp (ISO format)
+			"updated_at": 2017-05-28T10:48:51.416731
+		}
+	],
         // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
         "fill_id": 111
 
@@ -178,7 +195,6 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
 ### 用户-奖学金获得情况 User-Scholar-State
 ```javascript
 {
-
     // Number[required]: 用户id
     "user_id": 1234,
     // Number[required]: 获奖id
@@ -191,7 +207,9 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
     "year": "2017", 
     // Number: 用户的感谢信表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
     //         如果该字段不存在, 则该用户还没有填写感谢信
-    "fill_id": 111
+    "fill_id": 111,
+    // Number[required]: 获得的金额数目
+    "money": 5000
 }
 ```
 API
