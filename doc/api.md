@@ -181,9 +181,9 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
 			// Number[required, 0-100]: 该辅导员/老师给此申请的评分
 			"score": 90,
 			// String[required]: 创建该打分的可读timestamp (ISO format)
-			"created_at": 2017-05-28T10:48:51.416731,
+			"created_at": "2017-05-28T10:48:51.416731",
 			// String[required]: 最后更新该打分的可读timestamp (ISO format)
-			"updated_at": 2017-05-28T10:48:51.416731
+			"updated_at": "2017-05-28T10:48:51.416731"
 		}
 	],
         // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
@@ -301,11 +301,19 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``DELETE /api/v1/honors/{id}``: 删除某荣誉
     * **权限**: 荣誉管理
 
+### 组-荣誉相关
+* ``GET /api/v1/groups/{id}/honors``: 得到某个``{id}``组里的所有用户的荣誉申请情况列表
+    * **权限**: 用户管理 AND 荣誉管理
+    * **返回**: {`user_id`: User-Honor-State}, dict中每个value为一个list, 代表`user_id`用户的各个荣誉情况, 如果组里某用户没有申请这些荣誉, 省略其key-value对
+    * 加入query来限制honor id:
+        * ``?honor_ids=12,34,13``: 荣誉id用单个逗号分隔, 不要空格
+
 ### 用户-荣誉相关
 * ``GET /api/v1/users/{id}/honors``: 得到某个``{id}``用户-荣誉申请情况列表
     * **权限**: 用户管理 OR ``me == id``
     * **返回**: [User-Honor-State]
-    * 加入query来得到这个用户的不同状态的荣誉, 比如:
+    * 加入query来得到这个用户的不同状态的荣誉, 或者限制荣誉id列表, 比如:
+        * ``?honor_ids=12,34,13``: 荣誉id用单个逗号分隔, 不要空格
         * ``?state=applied``: 只返回此用户已申请未审批的荣誉
         * ``?state=fail``: 只返回此用户曾申请但未获得的荣誉
         * ``?state=success``: 只返回此用户成功申请的荣誉
@@ -380,6 +388,15 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 
 ### 文件相关
 * ``GET /api/v1/users/{id}/files/{file_id}``
+
+Batch requests
+--------------
+批量请求太多时, 过多的HTTP requests使用不同的connection，增加了服务器负担, 多次网络round trip增加了用户进行批量操作时的延时, 所以需要对一些经常会批量操作的接口提供batch requests接口。
+
+### 请求格式
+* ``POST /api/v1/batch``
+* **Body**:
+* **Return**:
 
 Status Code
 ----
