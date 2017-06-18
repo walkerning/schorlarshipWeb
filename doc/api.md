@@ -83,11 +83,23 @@ Resources
     // Number[required]: 该奖学金获得者需要填写的感谢表单id
     "form_id": 6,
     // String[required]: 分配方式: "quota", "money"
-    "alloc": "quota",
-    // Number[required]: 金额, 如果分配方式为"quota", 代表为每人可以分多少钱; 如果分配方式为"money"代表总金额
-    "money": 1000,
-    // Number[required]: 如果分配方式为"quota", 代表能获得该奖学金的人数; 分配方式为"money", 字段无效
-    "quota": 10
+    "alloc": "quota",
+    // Array(Object)[required]: 如果分配方式为"quota", 代表每个不同的group有多少个名额; 如果分配方式为"money",
+    //                          代表每个不同的group有多少钱
+    "group_quota": [
+        {
+            "group": "2015",
+            "type": "undergraduate",
+            "quota": 10
+        },
+        {
+            "group": "2016",
+            "type": "undergraduate",
+            "quota": 4
+        }
+    ],
+    // Number[required]: 如果分配方式为"quota", 代表为每人可以分多少钱; 如果分配方式为"money", 字段无效
+    "money": 1000
 }
 ```
 
