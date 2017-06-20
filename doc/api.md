@@ -97,6 +97,20 @@ Resources
             "type": "undergraduate",
             "quota": 4
         }
+    ],
+    // Array(Object)[required]: 如果分配方式为"quota", 代表每个不同的group已经分配了多少个名额; 如果分配方式为"money",
+    //                          代表每个不同的group已经分配了多少钱
+    "group_alloc_quota": [
+        {
+            "group": "2015",
+            "type": "undergraduate",
+            "quota": 5
+        },
+        {
+            "group": "2016",
+            "type": "undergraduate",
+            "quota": 2
+        }
     ],
     // Number[required]: 如果分配方式为"quota", 代表为每人可以分多少钱; 如果分配方式为"money", 字段无效
     "money": 1000
