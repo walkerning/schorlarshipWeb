@@ -13,7 +13,9 @@ Resources
 {
     // Number[required]: id唯一标识用户
     "id": 1, 
-    // String[required]: 入学年份
+    // Number[required]: 用户组id
+    "group_id": 2,
+    // String[required]: 入学年份
     "group": "2016", 
     // String[required]: 类型 - "undergraduate" / "graduate"
     "type": "undergraduate", 
@@ -31,7 +33,8 @@ Resources
     "class_rank": 1, 
     // Number: 年级排名
     "year_rank": 3, 
-    // [String]: 该用户有的权限列表: login有效, apply可申请荣誉/奖学金, user用户管理, form表单管理, honor荣誉管理, scholarship奖学金管理, export学校对接
+    // [String]: 该用户有的权限列表: login有效, apply可申请荣誉/奖学金, user用户管理, form表单管理,
+    //           honor荣誉管理, scholarship奖学金管理, export学校对接
     "permissions": ["login"]
 }
 ```
@@ -56,11 +59,13 @@ Resources
     //                          代表无用户组可申请此荣誉
     "group_quota": [
         {
+	    "group_id": 2,
             "group": "2015",
             "type": "undergraduate",
             "quota": 10
         },
         {
+	    "group_id": 3,
             "group": "2016",
             "type": "undergraduate",
             "quota": 4
@@ -88,11 +93,13 @@ Resources
     //                          代表每个不同的group有多少钱
     "group_quota": [
         {
+	    "group_id": 2,
             "group": "2015",
             "type": "undergraduate",
             "quota": 10
         },
         {
+	    "group_id": 3,
             "group": "2016",
             "type": "undergraduate",
             "quota": 4
@@ -102,11 +109,13 @@ Resources
     //                          代表每个不同的group已经分配了多少钱
     "group_alloc_quota": [
         {
+	    "group_id": 2,
             "group": "2015",
             "type": "undergraduate",
             "quota": 5
         },
         {
+	    "group_id": 3,
             "group": "2016",
             "type": "undergraduate",
             "quota": 2
@@ -197,8 +206,11 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
         "name": "学业优秀奖", 
         // String[required]: 该荣誉的年份
         "year": "2017", 
-        // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied
-        "state": "applied",
+	// String[required]: 申请时间
+	"apply_time":  "2017-09-28T10:54:24.738793",
+        // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied/temp 分别代表
+	//                   申请成功/申请失败/已申请/暂存
+        "state": "applied",
         //  Array(Score)[required]: 评分情况列表
         "scores": [
 		{
@@ -212,9 +224,10 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
 			"updated_at": "2017-05-28T10:48:51.416731"
 		}
 	],
-        // Number[required]: 用户的申请表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
-        "fill_id": 111
-
+        // Number[required]: 用户的申请表填写情况ID. // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 不可以...
+        "fill_id": 111,
+	// Form-Fill-Content[required]: 内联的申请表填写情况
+	"fill": Form-Fill-Content{...}
 }
 ```
 
@@ -230,10 +243,14 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
     // String[required]: 奖学金名字
     "name": "国家奖学金", 
     // String[required]: 该奖学金的年份
-    "year": "2017", 
-    // Number: 用户的感谢信表填写情况ID, 用这个ID可以拿到具体这个用户这个申请表填写的内容
-    //         如果该字段不存在, 则该用户还没有填写感谢信
+    "year": "2017",
+    // String[required]: 奖学金感谢信状态, commit/temp分别代表 已提交/暂存
+    "state": "commit",
+    // Number: 用户的感谢信表填写情况ID // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 现在不可以
+    //         如果该字段不存在, 则该用户还没有填写感谢信
     "fill_id": 111,
+    // Form-Fill-Content[required]: 内联的申请表填写情况. 如果该字段不存在, 则该用户还没填写感谢信
+    "fill": Form-Fill-Content{...}
     // Number[required]: 获得的金额数目
     "money": 5000
 }
@@ -343,12 +360,12 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
         * ``?state=applied``: 只返回此用户已申请未审批的荣誉
         * ``?state=fail``: 只返回此用户曾申请但未获得的荣誉
         * ``?state=success``: 只返回此用户成功申请的荣誉
-* ``POST /api/v1/users/{id}/honors``: 申请荣誉
-    * **权限**: ``me == id``
+* ``POST /api/v1/users/{id}/honors``: 申请荣誉, 申请表格fill内容内联上传
+    * **权限**: ``me == id``
     * **返回**: User-Honor-State
-* ``PUT /api/v1/users/{id}/honors/{honor_id}``: 改变一个用户申请荣誉的状态
-    * **权限**: 用户管理 AND 荣誉管理
-    * **返回**: User-Honor-State
+* ``PUT /api/v1/users/{id}/honors/{honor_id}``: 改变一个用户申请荣誉的状态; 如果是``me == id``, 只能在此荣誉状态为暂存的时候, 通过这个接口修改申请表格.
+    * **权限**: 用户管理 AND 荣誉管理 OR ``me == id``
+    * **返回**: User-Honor-State
 * ``DELETE /api/v1/users/{id}/honors/{honor_id}``:
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
@@ -370,6 +387,14 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``DELETE /api/v1/scholars/{id}``: 删除某奖学金
     * **权限**: 奖学金管理
 
+### 组-奖学金相关
+* ``GET /api/v1/groups/{id}/scholars``: 得到某个``{id}``组里的所有用户的奖学金分配情况列表
+    * **权限**: 用户管理 AND 奖学金管理
+    * **返回**: {`user_id`: User-Scholar-State}, dict中每个value为一个list, 代表`user_id`用户的奖学金情况, 如果组里某用户没有获得奖学金, 省略其key-value对
+    * 加入query来限制scholar:
+        * ``?scholar_ids=12,34,13``: 奖学金id用单个逗号分隔, 不要空格
+	* ``?year=2017``: 奖学金的年份
+
 ### 用户-奖学金相关
 * ``GET /api/v1/users/{id}/scholars``: 得到某个``{id}``用户获得奖学金的列表
     * **权限**: 用户管理 OR ``me == id``
@@ -379,7 +404,10 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **返回**: User-Scholar-State
 * ``POST /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 提交感谢信表格
     * **权限**: ``me == id``
-    * **返回**: Form-Fill-Content
+    * **返回**: User-Scholar-State
+* ``PUT /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 修改感谢信表格或者提交状态; 如果是``me == id``, 只能在暂存状态下修改成功, 否则返回错误。
+    * **权限**: ``me == id`` OR 奖学金管理
+    * **返回**: User-Scholar-State
 * ``DELETE /api/v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金
     * **权限**: 用户管理 AND 奖学金管理
 
@@ -398,26 +426,12 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``DELETE /api/v1/forms/{id}``: 删除表单
     * **权限**: 表单管理
 
-### 用户-表单相关
-* ``GET /api/v1/users/{id}/forms/``: 列出``{id}``用户填写过的表单
-	  * **权限**: (用户管理 AND 表单管理) OR ``me == id``
-		* **返回**: [Form-Fill-Content]
-* ``POST /api/v1/users/{id}/forms``: 上传新填写的表单
-    * **权限**: ``me == id``
-    * **返回**: Form-Fill-Content
-* ``GET /api/v1/users/{id}/forms/{fill_id}``: 得到表单填写内容
-    * **权限**: (用户管理 AND 表单管理) OR ``me == id``
-    * **返回**: Form-Fill-Content
-* ``PUT /api/v1/users/{id}/forms/{fill_id}``: 修改表单内容
-    * **权限**: ``me == id``
-    * **返回**: Form-Fill-Content
-
 ### 文件相关
 * ``GET /api/v1/users/{id}/files/{file_id}``
 
 Batch requests
 --------------
-批量请求太多时, 过多的HTTP requests使用不同的connection，增加了服务器负担, 多次网络round trip增加了用户进行批量操作时的延时, 所以需要对一些经常会批量操作的接口提供batch requests接口。
+批量请求太多时, 过多的HTTP requests使用不同的connection, 增加了服务器负担, 多次网络round trip增加了用户进行批量操作时的延时, 所以需要对一些经常会批量操作的接口提供batch requests接口。
 
 ### 请求格式
 * ``POST /api/v1/batch``
