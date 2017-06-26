@@ -13,7 +13,6 @@ bookshelfInst = bookshelf(db);
 bookshelfInst.plugin("registry");
 
 // Helpers
-_getJSONAttrList:
 function _getJSONAttrList(json, attrName) {
   if (_.isString(attrName)) {
     return json[attrName];

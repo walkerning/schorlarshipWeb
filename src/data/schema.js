@@ -3,19 +3,11 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     group_id: {
       type: "integer",
       nullable: false
-    },
-    type: {
-      type: "string",
-      maxlength: 36,
-      nullable: false,
-      validations: {
-        isIn: [["undergraduate", "graduate", "faculty"]]
-      }
     },
     name: {
       type: "string",
@@ -106,13 +98,21 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     name: {
       type: "string",
       maxlength: 20,
       nullable: false,
       unique: true
+    },
+    type: {
+      type: "string",
+      maxlength: 36,
+      nullable: false,
+      validations: {
+        isIn: [["undergraduate", "graduate", "faculty"]]
+      }
     },
     description: {
       type: "string",
@@ -142,7 +142,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     name: {
       type: "string",
@@ -189,7 +189,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     group_id: {
       type: "integer",
@@ -208,11 +208,34 @@ module.exports = {
     }
   },
 
+  honor_user_scores: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true,
+    },
+    score: {
+      type: "float",
+      nullable: false,
+      validations: {
+        isBetween: [0, 100]
+      }
+    },
+    honor_user_id: {
+      type: "integer",
+      nullable: false
+    },
+    scorer_id: {
+      type: "integer",
+      nullable: false
+    }
+  },
+
   honors_users: {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     user_id: {
       type: "integer",
@@ -226,14 +249,18 @@ module.exports = {
       type: "string",
       nullable: false,
       validations: {
-        isIn: [["applied", "success", "fail"]]
+        isIn: [["temp", "applied", "success", "fail"]]
       }
     },
-    score: {
-      type: "integer",
-      nullable: false,
-      defaultTo: -1
+    apply_time: {
+      type: "datetime",
+      nullable: true,
     },
+    // score: {
+    //   type: "integer",
+    //   nullable: false,
+    //   defaultTo: -1
+    // },
     fill_id: {
       type: "integer",
       nullable: false
@@ -244,7 +271,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     name: {
       type: "string",
@@ -255,6 +282,21 @@ module.exports = {
       type: "string",
       maxlength: 20,
       nullable: false
+    },
+    alloc: {
+      type: "string",
+      nullable: false,
+      defaultTo: "quota",
+      validations: {
+        isIn: [["quota", "money"]]
+      }
+    },
+    money: {
+      type: "integer",
+      nullable: true,
+      validations: {
+        isMinimum: 0
+      }
     },
     form_id: {
       type: "integer",
@@ -279,11 +321,34 @@ module.exports = {
     }
   },
 
+  groups_scholars: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
+    group_id: {
+      type: "integer",
+      nullable: false
+    },
+    scholar_id: {
+      type: "integer",
+      nullable: false
+    },
+    quota: {
+      type: "integer",
+      nullable: false,
+      validations: {
+        isMinimum: 0
+      }
+    }
+  },
+
   scholars_users: {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     user_id: {
       type: "integer",
@@ -293,7 +358,18 @@ module.exports = {
       type: "integer",
       nullable: false
     },
+    state: {
+      type: "string",
+      nullable: false,
+      validations: {
+        isIn: [["none", "temp", "commit"]]
+      }
+    },
     fill_id: {
+      type: "integer",
+      nullable: false
+    },
+    money: {
       type: "integer",
       nullable: false
     }
@@ -303,7 +379,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     name: {
       type: "string",
@@ -351,7 +427,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     form_id: {
       type: "integer",
@@ -389,7 +465,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     name: {
       type: "string",
@@ -425,7 +501,7 @@ module.exports = {
     id: {
       type: "increments",
       nullable: false,
-      primarty: true
+      primary: true
     },
     user_id: {
       type: "integer",

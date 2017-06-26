@@ -30,6 +30,9 @@ function createTable(tableName) {
       if (schema[tableName][key].hasOwnProperty("unique") && schema[tableName][key].unique) {
         column.unique();
       }
+      if (schema[tableName][key].hasOwnProperty("index") && schema[tableName][key].index) {
+        column.index();
+      }
       if (schema[tableName][key].hasOwnProperty("unsigned") && schema[tableName][key].unsigned) {
         column.unsigned();
       }

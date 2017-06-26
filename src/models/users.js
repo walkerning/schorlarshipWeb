@@ -151,7 +151,6 @@ var Users = bookshelfInst.Collection.extend({
   queriableAttributes: function queriableAttributes() {
     return ["id",
       "group_id",
-      "type",
       "name",
       "student_id",
       "email",

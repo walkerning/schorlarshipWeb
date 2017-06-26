@@ -41,9 +41,9 @@ var Honor = bookshelfInst.Model.extend({
 
   renamePivotAttributes: function renamePivotAttributes(){
     return {
-      _pivot_quota:"quota",
-      description:"type",
-      name:"group"
+      _pivot_quota: "quota",
+      description: "type",
+      name: "group"
     };
   },
 
@@ -55,26 +55,41 @@ var Honor = bookshelfInst.Model.extend({
   },
 
   toClientJSON: function toClientJSON(options){
-    var quota=0;
+    var quota = 0;
 
-    var json=this.toJSON();
-    json["group_quota"]=json["groups"];
+    var json = this.toJSON();
+    json["group_quota"] = json["groups"];
 
-    var renamePivotAttributes=this.renamePivotAttributes();
-    var pickPivotAttributes=this.pickPivotAttributes();
-    json["group_quota"]=_.map(json["group_quota"],function(model){
-      _.forEach(renamePivotAttributes,function(value,key){
-        model[value]=model[key];
+    var renamePivotAttributes = this.renamePivotAttributes();
+    var pickPivotAttributes = this.pickPivotAttributes();
+    json["group_quota"] = _.map(json["group_quota"], function(model){
+      _.forEach(renamePivotAttributes, function(value, key){
+        model[value] = model[key];
       });
-      model=_.pick(model,pickPivotAttributes);
-      quota+=model["quota"];
+      model = _.pick(model, pickPivotAttributes);
+      quota += model["quota"];
       return model;
     });
-    json["quota"]=quota;
-    return _.omit(json,this.omitAttributes());
+    json["quota"] = quota;
+    return _.omit(json, this.omitAttributes());
   }
 });
 
+var Score = bookshelfInst.Model.extend({
+  tableName: "honor_user_scores",
+
+  scorer: function scorer() {
+    return this.belongsTo("User", "scorer_id");
+  }
+});
+
+var HonorUserState = bookshelfInst.Model.extend({
+  tableName: "honors_users",
+
+  scores: function() {
+    return this.hasMany("Score", "honor_user_id");
+  }
+});
 
 var Honors = bookshelfInst.Collection.extend({
   model: Honor
@@ -88,13 +103,14 @@ var Honors = bookshelfInst.Collection.extend({
       "form_id"
     ];
   },
-  getByQuery: function(query,related)
+
+  getByQuery: function(query, related)
   {
     return this.forge()
       .query({
         where: _.pick(query, this.queriableAttributes())
       })
-      .fetch({withRelated:related});
+      .fetch({withRelated: related});
   }
 
 });

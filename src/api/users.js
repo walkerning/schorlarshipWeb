@@ -15,9 +15,11 @@ module.exports = {
             return value["group"] == queries["group"];
           });
         }
+        // Query `?admin=1` return all the users with permissions other than "login"
         if ("admin" in queries && _.toInteger(queries["admin"])) {
           obj = _.filter(obj, (value) => {
-            return value["permissions"].length != 0;
+            // FIXME: add `is admin permission` field into the permission table?
+            return _.difference(value["permissions"], ["user", "apply"]).length > 0
           });
         }
         res.status(200).json(obj);

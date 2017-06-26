@@ -48,8 +48,8 @@ apiRouter.delete("/users/:userId", permit(["user"]), catchError(users.delete));
 apiRouter.get("/users/:userId/honors", permit(["me"], ["user"]), catchError(users.listHonors));
 // Apply for honor
 apiRouter.post("/users/:userId/honors", permit(["me"]), catchError(users.applyHonor));
-// Change honor apply status for this user
-apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users.updateHonor));
+// Change honor apply status for this user; `me` can change the apply form using this api.
+apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me"]), catchError(users.updateHonor));
 // Delete a honor apply for this user
 apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users.deleteHonor));
 
@@ -59,8 +59,10 @@ apiRouter.get("/users/:userId/scholars", permit(["me"], ["user"]), catchError(us
 apiRouter.post("/users/:userId/scholars", permit(["user", "scholar"]), catchError(users.giveScholar));
 // Upload the thanks-letter form
 apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"]), catchError(users.uploadThanksLetter));
+// Change the thanks-letter form
+apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], ["scholar"]), catchError(users.changeThanksLetter));
 // Delete a scholar for this user
-apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "honor"]), catchError(users.deleteScholar));
+apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "scholar"]), catchError(users.deleteScholar));
 
 
 //// Routing endpoins `/permissions`
@@ -96,16 +98,16 @@ apiRouter.put("/forms/:formId", permit(["form"]), catchError(forms.updateInfo));
 apiRouter.delete("/forms/:formId", permit(["form"]), catchError(forms.delete));
 
 
-//// Routing endpoints `/users/:userId/forms/`. Form-fills
-// List fills
-apiRouter.get("/users/:userId/forms", permit(["me"], ["form", "user"]), catchError(fills.list));
-// Create new fill
-apiRouter.post("/users/:userId/forms", permit(["me"]), catchError(fills.create));
-// Get fill info
-apiRouter.get("/users/:userId/forms/:fillId", permit(["me"], ["form", "user"]), catchError(fills.info));
-// Update fill info
-apiRouter.put("/users/:userId/forms/:fillId", permit(["me"]), catchError(fills.updateInfo));
-// Delete fill?
+// //// Routing endpoints `/users/:userId/forms/`. Form-fills
+// // List fills
+// apiRouter.get("/users/:userId/forms", permit(["me"], ["form", "user"]), catchError(fills.list));
+// // Create new fill
+// apiRouter.post("/users/:userId/forms", permit(["me"]), catchError(fills.create));
+// // Get fill info
+// apiRouter.get("/users/:userId/forms/:fillId", permit(["me"], ["form", "user"]), catchError(fills.info));
+// // Update fill info
+// apiRouter.put("/users/:userId/forms/:fillId", permit(["me"]), catchError(fills.updateInfo));
+// // Delete fill?
 
 
 //// Routing endpoints `/honors`

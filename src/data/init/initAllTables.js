@@ -9,15 +9,18 @@ var initData = {
   Group: [
     {
       name: "2012",
-      description: "2012级本科生"
+      description: "2012级本科生",
+      type: "undergraduate"
     },
     {
       name: "2013",
-      description: "2013级本科生"
+      description: "2013级本科生",
+      type: "undergraduate"
     },
     {
       name: "2014",
-      description: "2014级本科生"
+      description: "2014级本科生",
+      type: "undergraduate"
     }
   ],
   User: [
@@ -25,7 +28,6 @@ var initData = {
       name: "admin_test",
       student_id: "2012011067",
       group_id: 1,
-      type: "undergraduate",
       email: "foxmail@gmail.com",
       password: "ning12345678",
       phone: "18311111111",
