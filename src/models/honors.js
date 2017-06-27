@@ -24,7 +24,10 @@ var Honor = bookshelfInst.Model.extend({
   },
 
   users: function() {
-    return this.belongsToMany("User").through("UserHonorState");
+    return this.belongsToMany("User").withPivot([
+      "state", "apply_time", "fill_id"
+    ]);
+    //.through("UserHonorState");
   },
 
   form: function() {
@@ -62,12 +65,10 @@ var Honor = bookshelfInst.Model.extend({
   update: function update(body, contextUser) {
     var start = Promise.resolve(null);
     if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
-      console.log(body["group_quota"]);
       gids_spec = _.reduce(body["group_quota"], function (obj, s) {
         obj[s["group_id"]] = s;
         return obj;
       }, {});
-      console.log(gids_spec);
       gids = _.keys(gids_spec)
       now_gids = _.map(this.relations["groups"].toJSON(), (s) => {return s["id"]})
       // The gids that should be removed
@@ -96,6 +97,22 @@ var Honor = bookshelfInst.Model.extend({
     return start.then(function () {
       return bookshelfInst.Model.prototype.update.call(self, body, contextUser);
     });
+  },
+
+  getGroupQuota: function getGroupQuota() {
+    var json = this.toJSON();
+    group_quota = json["groups"];
+
+    var renamePivotAttributes = this.renamePivotAttributes();
+    var pickPivotAttributes = this.pickPivotAttributes();
+    group_quota = _.map(group_quota, function(model){
+      _.forEach(renamePivotAttributes, function(value, key){
+        model[value] = model[key];
+      });
+      model = _.pick(model, pickPivotAttributes);
+      return model;
+    });
+    return group_quota;
   },
 
   toClientJSON: function toClientJSON(options) {

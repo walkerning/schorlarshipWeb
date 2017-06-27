@@ -51,8 +51,10 @@ apiRouter.delete("/users/:userId", permit(["user"]), catchError(users.delete));
 apiRouter.get("/users/:userId/honors", permit(["me"], ["user"]), catchError(users_honors.listHonors));
 // Apply for honor
 apiRouter.post("/users/:userId/honors", permit(["me"]), catchError(users_honors.applyHonor));
-// Change honor apply status for this user; `me` can change the apply form using this api.
-apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me"]), catchError(users_honors.updateHonor));
+// Change honor apply status for this user
+apiRouter.put("/users/:userId/honors/:honorId/admin", permit(["user", "honor"]), catchError(users_honors.updateHonor));
+// Change honor apply fill content when the state is "temp"
+apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me"]), catchError(users_honors.updateHonorFill));
 // Delete a honor apply for this user
 apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users_honors.deleteHonor));
 

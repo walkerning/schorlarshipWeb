@@ -11,7 +11,11 @@ var Score = bookshelfInst.Model.extend({
   }
 });
 
-var HonorUserState = bookshelfInst.Model.extend({
+var Scores = bookshelfInst.Collection.extend({
+  model: Score
+});
+
+var UserHonorState = bookshelfInst.Model.extend({
   tableName: "honors_users",
 
   scores: function scores() {
@@ -23,3 +27,14 @@ var HonorUserState = bookshelfInst.Model.extend({
   }
 });
 
+var UserHonorStates = bookshelfInst.Collection.extend({
+  model: UserHonorState
+});
+
+module.exports = {
+  UserHonorState: bookshelfInst.model("UserHonorState", UserHonorState),
+  UserHonorStates: bookshelfInst.collection("UserHonorStates", UserHonorStates),
+
+  Score: bookshelfInst.model("Score", Score),
+  Scores: bookshelfInst.collection("Score", Scores),
+};

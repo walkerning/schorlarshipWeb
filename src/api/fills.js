@@ -38,7 +38,7 @@ module.exports = {
         var fill = user.related("fills").get(req.params.fillId);
         if (fill === undefined) {
           return Promise.reject(new errors.NotFoundError({
-            message: util.format("`id`(%s) not exists", req.params.fillId)
+            message: util.format("Fill: `id`(%s) not exists", req.params.fillId)
           }));
         }
         res.status(200).json(fill.toJSON());

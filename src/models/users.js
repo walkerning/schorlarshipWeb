@@ -30,7 +30,7 @@ var Group = bookshelfInst.Model.extend({
   },
 
   honors: function() {
-    return this.belongsToMany("Honor").through("UserHonorState");
+    return this.belongsToMany("Honor");
   }
 });
 
@@ -42,7 +42,14 @@ var User = bookshelfInst.Model.extend({
   },
 
   honors: function() {
-    return this.belongToMany("Honor");
+    //return this.hasMany("UserHonorState", "user_id");
+    // FIXME: whether to treat UserHonorState as a Model or just a relation table?
+    //        as Model: treat as a resource, easy to update. but must have a id field...
+    //        as relation table: can use composite primary key to constraint
+    return this.belongsToMany("Honor").withPivot([
+      "state", "apply_time", "fill_id"
+    ]);
+    //.through("UserHonorState");
   },
 
   scholars: function() {
@@ -123,6 +130,22 @@ var User = bookshelfInst.Model.extend({
   // send email utils
   sendEmail: function sendEmail(subject, content) {
     return sendemail.sendEmail(this.get("email"), subject, content)
+  },
+  
+  // get applied honors
+  getHonorStates: function getHonorStates() {
+    return _.map(this.related("honors").toJSON(), function(h) {
+      return _.reduce(_.keys(h), function(obj, k) {
+        if (k.startsWith("_pivot_")) {
+          obj[k.slice(7)] = h[k];
+        }
+        return obj;
+      }, {});
+    });
+  },
+
+  getHonorState: function getHonorState(honor_id) {
+    return _.find(this.getHonorStates(), (o) => {return o["honor_id"] == honor_id});
   }
 }, {
   secretAttributes: function secretAttributes() {
@@ -137,7 +160,11 @@ var User = bookshelfInst.Model.extend({
   },
 
   create: function create(body, contextUser) {
-    var fields = contextUser.permittedUpdateAttributes(contextUser);
+    var fields =  bookshelfInst.Model.prototype.permittedUpdateAttributes.call(User.forge(),
+                                                                               contextUser);
+    if (contextUser) {
+      fields = contextUser.permittedUpdateAttributes(contextUser);
+    }
     return bookshelfInst.Model.create.call(this, _.pick(body, fields),
       contextUser);
   }

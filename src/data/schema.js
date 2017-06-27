@@ -231,22 +231,20 @@ module.exports = {
   },
 
   honors_users: {
-    id: {
-      type: "increments",
-      nullable: false,
-      primary: true
-    },
     user_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true
     },
     honor_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true
     },
     state: {
       type: "string",
       nullable: false,
+      defaultTo: "temp",
       validations: {
         isIn: [["temp", "applied", "success", "fail"]]
       }
@@ -258,6 +256,24 @@ module.exports = {
     fill_id: {
       type: "integer",
       nullable: false
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
     }
   },
 

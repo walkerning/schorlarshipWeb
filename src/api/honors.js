@@ -2,7 +2,6 @@ var _ = require("lodash")
 var Promise = require("bluebird")
 var util = require("util")
 var models = require("../models")
-var errors = require("../errors")
 var logging = require("../logging")
 
 module.exports={

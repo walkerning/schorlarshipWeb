@@ -75,7 +75,17 @@ var initData = {
       year: "2016",
       start_time: "2017-06-27T06:31:09.000Z",
       end_time: "2017-06-29T06:31:09.000Z",
-      form_id: 2
+      form_id: 2,
+      group_quota: [
+        {
+          group_id: 1,
+          quota: 5
+        },
+        {
+          group_id: 2,
+          quota: 10
+        }
+      ]
     }
   ]
 };
@@ -83,20 +93,21 @@ var initData = {
 function initTables() {
   return Promise.mapSeries(_.keys(initData), function initDatum(dataName) {
     return Promise.mapSeries(initData[dataName], function initInfo(info) {
-      return models[dataName].forge(_.omit(info, models[dataName].secretAttributes()))
-        .fetch()
+      //return models[dataName].forge(_.omit(info, models[dataName].secretAttributes()))
+      //.fetch()
+      //  .then(function(item) {
+      //if (!item) {
+      // return models[dataName].forge(info)
+      //   .save(null, {method: "insert"})
+      return models[dataName].create(info, null)
         .then(function(item) {
-          if (!item) {
-            return models[dataName].forge(info)
-              .save(null, {method: "insert"})
-              .then(function(item) {
-                logging.info("Created " + dataName.toLowerCase() + ": "
-                  + item.get("id") + " - " + item.get("name"));
-              });
-          } else {
-            return Promise.resolve(null);
-          }
+          logging.info("Created " + dataName.toLowerCase() + ": "
+                       + item.get("id") + " - " + item.get("name"));
         });
+      //} else {
+      //return Promise.resolve(null);
+      //}
+      //});
     })
       .then(function() {
         logging.info("Table " + dataName + " initialized!");
