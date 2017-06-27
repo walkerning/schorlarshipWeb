@@ -186,18 +186,20 @@ module.exports = {
   },
 
   groups_honors: {
-    id: {
-      type: "increments",
-      nullable: false,
-      primary: true
-    },
+    // id: {
+    //   type: "increments",
+    //   nullable: false,
+    //   primary: true
+    // },
     group_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true,
     },
     honor_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true
     },
     quota: {
       type: "integer",
@@ -209,11 +211,6 @@ module.exports = {
   },
 
   honor_user_scores: {
-    id: {
-      type: "increments",
-      nullable: false,
-      primary: true,
-    },
     score: {
       type: "float",
       nullable: false,
@@ -223,11 +220,13 @@ module.exports = {
     },
     honor_user_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true
     },
     scorer_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true
     }
   },
 
@@ -256,11 +255,6 @@ module.exports = {
       type: "datetime",
       nullable: true,
     },
-    // score: {
-    //   type: "integer",
-    //   nullable: false,
-    //   defaultTo: -1
-    // },
     fill_id: {
       type: "integer",
       nullable: false

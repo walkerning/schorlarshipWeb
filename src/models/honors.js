@@ -1,5 +1,8 @@
-var bookshelfInst = require("./base");
 var _ = require("lodash")
+var Promise = require("bluebird");
+var bookshelfInst = require("./base");
+var errors = require("../errors");
+
 var Quota = bookshelfInst.Model.extend({
   tableName: "groups_honors",
 
@@ -21,7 +24,7 @@ var Honor = bookshelfInst.Model.extend({
   },
 
   users: function() {
-    return this.belongsToMany("User");
+    return this.belongsToMany("User").through("UserHonorState");
   },
 
   form: function() {
@@ -42,19 +45,60 @@ var Honor = bookshelfInst.Model.extend({
   renamePivotAttributes: function renamePivotAttributes(){
     return {
       _pivot_quota: "quota",
-      description: "type",
-      name: "group"
+      type: "type",
+      name: "group",
+      id: "group_id"
     };
   },
 
   pickPivotAttributes: function pickPivotAttributes(){
     return ["group",
-      "quota",
-      "type"
-    ];
+            "quota",
+            "type",
+            "group_id"
+           ];
   },
 
-  toClientJSON: function toClientJSON(options){
+  update: function update(body, contextUser) {
+    var start = Promise.resolve(null);
+    if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
+      console.log(body["group_quota"]);
+      gids_spec = _.reduce(body["group_quota"], function (obj, s) {
+        obj[s["group_id"]] = s;
+        return obj;
+      }, {});
+      console.log(gids_spec);
+      gids = _.keys(gids_spec)
+      now_gids = _.map(this.relations["groups"].toJSON(), (s) => {return s["id"]})
+      // The gids that should be removed
+      gids_remove = _.difference(now_gids, gids);
+      self = this;
+      start = self.groups().detach(gids_remove).then(function () {
+        return self.fetch().then(function() {
+          return Promise.mapSeries(gids, function(gid) {
+            return self.relations["groups"].query({where: {group_id: gid}})
+              .fetch()
+              .then(function(c) {
+                if (c.length) {
+                  // Already exists. call `updatePivot`
+                  return c.updatePivot(_.pick(gids_spec[gid], ["quota", "group_id"]));
+                } else {
+                  // Not exists. call `attach`
+                  return self.groups().attach(_.pick(gids_spec[gid], ["quota", "group_id"]));
+                }
+              });
+          });
+        });
+      })
+    }
+    // Update attributes other than the `group_quota`.
+    self = this;
+    return start.then(function () {
+      return bookshelfInst.Model.prototype.update.call(self, body, contextUser);
+    });
+  },
+
+  toClientJSON: function toClientJSON(options) {
     var quota = 0;
 
     var json = this.toJSON();
@@ -73,21 +117,33 @@ var Honor = bookshelfInst.Model.extend({
     json["quota"] = quota;
     return _.omit(json, this.omitAttributes());
   }
-});
+}, {
+  fetchInlineRelations: function fetchInlineRelations() {
+    return [
+      "groups"
+    ];
+  },
 
-var Score = bookshelfInst.Model.extend({
-  tableName: "honor_user_scores",
-
-  scorer: function scorer() {
-    return this.belongsTo("User", "scorer_id");
-  }
-});
-
-var HonorUserState = bookshelfInst.Model.extend({
-  tableName: "honors_users",
-
-  scores: function() {
-    return this.hasMany("Score", "honor_user_id");
+  // FIXME: unify the `create` and `update` interface
+  //        `create` promise the refreshed model instance
+  //        `update` promise nothing
+  create: function create(body, contextUser) {
+    if (!body.hasOwnProperty("group_quota") || !_.isArray(body["group_quota"]) || body["group_quota"].length == 0) {
+      return Promise.reject(new errors.ValidationError({
+        message: "Non-empty `group_quota` field is required."
+      }));
+    }
+    return bookshelfInst.Model.create.call(this, body, contextUser)
+      .then(function (m) {
+        return m.groups()
+          .attach(_.map(body["group_quota"],
+                        function (g) {
+                          return _.pick(g, ["group_id", "quota"]);
+                        }))
+          .then(function () {
+            return m.fetch();
+          });
+      });
   }
 });
 
@@ -104,14 +160,14 @@ var Honors = bookshelfInst.Collection.extend({
     ];
   },
 
-  getByQuery: function(query, related)
-  {
-    return this.forge()
-      .query({
-        where: _.pick(query, this.queriableAttributes())
-      })
-      .fetch({withRelated: related});
-  }
+  // getByQuery: function(query, related)
+  // {
+  //   return this.forge()
+  //     .query({
+  //       where: _.pick(query, this.queriableAttributes())
+  //     })
+  //     .fetch({withRelated: related});
+  // }
 
 });
 

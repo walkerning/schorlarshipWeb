@@ -69,6 +69,15 @@ var initData = {
       description: "Permission management permission."
     },
   ],
+  Honor: [
+    {
+      name: "学业优秀奖",
+      year: "2016",
+      start_time: "2017-06-27T06:31:09.000Z",
+      end_time: "2017-06-29T06:31:09.000Z",
+      form_id: 2
+    }
+  ]
 };
 
 function initTables() {
@@ -79,7 +88,7 @@ function initTables() {
         .then(function(item) {
           if (!item) {
             return models[dataName].forge(info)
-              .save()
+              .save(null, {method: "insert"})
               .then(function(item) {
                 logging.info("Created " + dataName.toLowerCase() + ": "
                   + item.get("id") + " - " + item.get("name"));

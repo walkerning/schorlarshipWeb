@@ -198,6 +198,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
    */
   create: function create(body, contextUser) {
     return this.forge(body).save({}, {
+      method: "insert",
       context: {
         contextUser: contextUser
       }

@@ -10,6 +10,7 @@ function createTable(tableName) {
   return knexInst.schema.createTable(tableName, function(table) {
     var column;
     var columnKeys = _.keys(schema[tableName]);
+    var composite_primarys = []
 
     _.each(columnKeys, function(key) {
       if (schema[tableName][key].type === "text" && schema[tableName][key].hasOwnProperty("fieldtype")) {
@@ -27,6 +28,9 @@ function createTable(tableName) {
       if (schema[tableName][key].hasOwnProperty("primary") && schema[tableName][key].primary === true) {
         column.primary();
       }
+      if (schema[tableName][key].hasOwnProperty("composite_primary") && schema[tableName][key].composite_primary === true) {
+        composite_primarys.push(key);
+      }
       if (schema[tableName][key].hasOwnProperty("unique") && schema[tableName][key].unique) {
         column.unique();
       }
@@ -43,6 +47,9 @@ function createTable(tableName) {
         column.defaultTo(schema[tableName][key].defaultTo);
       }
     });
+    if (composite_primarys.length > 0) {
+      table.primary(composite_primarys);
+    }
   });
 }
 

@@ -30,7 +30,7 @@ var Group = bookshelfInst.Model.extend({
   },
 
   honors: function() {
-    return this.belongsToMany("Honor");
+    return this.belongsToMany("Honor").through("UserHonorState");
   }
 });
 

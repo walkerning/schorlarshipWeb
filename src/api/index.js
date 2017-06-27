@@ -8,7 +8,9 @@ var groups = require("./groups");
 var forms = require("./forms");
 var fills = require("./fills");
 var honors = require("./honors");
+var users_honors = require("./users_honors");
 var scholars = require("./scholars");
+var users_scholars = require("./users_honors");
 
 var apiRouter = express.Router();
 
@@ -34,6 +36,7 @@ apiRouter.get("/users", permit(["user"]), catchError(users.list));
 // Create user
 apiRouter.post("/users", permit(["user"]), catchError(users.create));
 // Get user info of current context user
+// FIXME: do i need to enable visit all the endpoints under `/users` by the special identifier "me"
 apiRouter.get("/users/me", catchError(users.infoMe));
 // Get user info
 apiRouter.get("/users/:userId", permit(["me"], ["user"]), catchError(users.info));
@@ -45,24 +48,24 @@ apiRouter.put("/users/:userId/newPassword", permit(["user"]), catchError(users.n
 apiRouter.delete("/users/:userId", permit(["user"]), catchError(users.delete));
 
 // List the honors this user has applied or got
-apiRouter.get("/users/:userId/honors", permit(["me"], ["user"]), catchError(users.listHonors));
+apiRouter.get("/users/:userId/honors", permit(["me"], ["user"]), catchError(users_honors.listHonors));
 // Apply for honor
-apiRouter.post("/users/:userId/honors", permit(["me"]), catchError(users.applyHonor));
+apiRouter.post("/users/:userId/honors", permit(["me"]), catchError(users_honors.applyHonor));
 // Change honor apply status for this user; `me` can change the apply form using this api.
-apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me"]), catchError(users.updateHonor));
+apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me"]), catchError(users_honors.updateHonor));
 // Delete a honor apply for this user
-apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users.deleteHonor));
+apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users_honors.deleteHonor));
 
 // List the scholars this user has got
-apiRouter.get("/users/:userId/scholars", permit(["me"], ["user"]), catchError(users.listScholars));
+apiRouter.get("/users/:userId/scholars", permit(["me"], ["user"]), catchError(users_scholars.listScholars));
 // Give a scholar to user
-apiRouter.post("/users/:userId/scholars", permit(["user", "scholar"]), catchError(users.giveScholar));
+apiRouter.post("/users/:userId/scholars", permit(["user", "scholar"]), catchError(users_scholars.giveScholar));
 // Upload the thanks-letter form
-apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"]), catchError(users.uploadThanksLetter));
+apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"]), catchError(users_scholars.uploadThanksLetter));
 // Change the thanks-letter form
-apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], ["scholar"]), catchError(users.changeThanksLetter));
+apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], ["scholar"]), catchError(users_scholars.changeThanksLetter));
 // Delete a scholar for this user
-apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "scholar"]), catchError(users.deleteScholar));
+apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "scholar"]), catchError(users_scholars.deleteScholar));
 
 
 //// Routing endpoins `/permissions`
