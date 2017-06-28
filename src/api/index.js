@@ -55,6 +55,10 @@ apiRouter.post("/users/:userId/honors", permit(["me", "apply"]), catchError(user
 apiRouter.put("/users/:userId/honors/:honorId/admin", permit(["user", "honor"]), catchError(users_honors.updateHonor));
 // Change honor apply fill content when the state is "temp"
 apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me", "apply"]), catchError(users_honors.updateHonorFill));
+// Add score for a user honor state
+apiRouter.post("/users/:userId/honors/:honorId/scores", permit(["user", "honor"]), catchError(users_honors.addHonorScore));
+// Update score for a user honor state
+apiRouter.put("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "honor", "me_scorer"]), catchError(users_honors.updateHonorScore));
 // Delete a honor apply for this user
 apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users_honors.deleteHonor));
 

@@ -1,7 +1,9 @@
 var _ = require("lodash")
 var Promise = require("bluebird");
+var util = require("util");
 var bookshelfInst = require("./base");
 var errors = require("../errors");
+
 
 var Score = bookshelfInst.Model.extend({
   tableName: "honor_user_scores",
@@ -32,6 +34,50 @@ var UserHonorState = bookshelfInst.Model.extend({
 
   honor: function() {
     return this.belongsTo("Honor", "honor_id");
+  },
+
+  addScore: function addScore(context_user, score) {
+    scorer_id = context_user.get("id");
+    // Check whether this scorer already submit a score
+    if (_.includes(_.map(this.related("scores").toJSON(), (s) => {return s["scorer_id"];}), scorer_id)) {
+      return Promise.reject(new errors.ValidationError({
+        message: util.format("This scorer with id(%d) has already submitted a score, to modify the score, use the PUT API instead.",
+                            scorer_id)
+      }));
+    }
+    return Score.create({
+      scorer_id: scorer_id,
+      score: score,
+      honor_user_id: this.get("id")
+    }, context_user);
+  },
+
+  updateScore: function updateScore(context_user, score) {
+    scorer_id = context_user.get("id");
+    return Score.forge({
+      scorer_id: scorer_id,
+      honor_user_id: this.get("id")
+    }).fetch()
+      .then(function(sc) {
+        // Check whether this scorer already submit a score
+        if (!sc) {
+          return Promise.reject(new errors.ValidationError({
+            message: util.format("This scorer with id(%d) has not submitted a score, to submit a new score, use the POST API instead.",
+                                 scorer_id)
+          }));
+        }
+        return sc.update({score: score});
+      });
+  }
+}, {
+  getUserHonorState: function getState(user_id, honor_id) {
+    return this.forge()
+      .where({user_id: user_id, honor_id: honor_id})
+      .fetch();
+  },
+
+  fetchInlineRelations: function fetchInlineRelations() {
+    return ["scores"];
   }
 });
 

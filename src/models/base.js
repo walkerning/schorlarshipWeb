@@ -150,14 +150,19 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
   // By default, the relations objects will be flatten using `name` fields,
   // to get full relations objects, pass in `{flattenRelation: false}` option
   toClientJSON: function toClientJSON(options) {
-    options = _.merge({
+    options = _.mergeWith({
       omitPivot: true,
-      flattenRelation: true
-    }, options);
+      flattenRelation: this.constructor.fetchInlineRelations(),
+    }, options, function(dstValue, srcValue) {
+      if (_.isArray(dstValue)) {
+        return _.union(dstValue, srcValue);
+      }
+    });
 
     var json = _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
-    if (options.flattenRelation) {
-      _.forEach(_.keys(this.relations), function(key) {
+    if (options.flattenRelation.length) {
+      // _.forEach(_.keys(this.relations), function(key) {
+      _.forEach(options.flattenRelation, function(key) {
         if (json[key]) {
           if (_.isArray(json[key])) {
             json[key] = _.map(json[key], (v) => v.name || v.id);

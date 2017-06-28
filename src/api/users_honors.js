@@ -1,5 +1,6 @@
 var _ = require("lodash");
 var Promise = require("bluebird");
+var util = require("util");
 var models = require("../models");
 var errors = require("../errors");
 
@@ -209,6 +210,55 @@ module.exports = {
                   .then(function(hstate) {
                     res.status(201).json(expandFill(hstate, user));
                   });
+              });
+          });
+      });
+  },
+
+  addHonorScore: function addHonorScore(req, res, next) {
+    if (!req.body.hasOwnProperty("score")) {
+      return Promise.reject(new errors.BadRequestError({
+        message: "`score` field is required."
+      }));
+    }
+    return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
+      .then(function (st) {
+        if (!st) {
+          // FIXME: BadRequestError or NotFoundError???
+          return Promise.reject(new errors.BadRequestError({
+            message: util.format("This user %s has not applied for this honor %s.", req.params.userId, req.params.honorId)
+          }));
+        }        
+        return st.addScore(req.user, req.body.score)
+          .then(function() {
+            st.fetch()
+              .then(function(st) {
+                // FIXME: TODO: also inlining fill here?
+                res.status(201).json(st.toJSON());
+              });
+          });
+      });
+  },
+
+  updateHonorScore: function updateHonorScore(req, res, next) {
+    if (!req.body.hasOwnProperty("score")) {
+      return Promise.reject(new errors.BadRequestError({
+        message: "`score` field is required."
+      }));
+    }
+    return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
+      .then(function (st) {
+        if (!st) {
+          // FIXME: BadRequestError or NotFoundError???
+          return Promise.reject(new errors.BadRequestError({
+            message: util.format("This user %s has not applied for this honor %s.", req.params.userId, req.params.honorId)
+          }));
+        }
+        return st.updateScore(req.user, req.body.score)
+          .then(function() {
+            st.fetch()
+              .then(function(st) {
+                res.status(201).json(st.toJSON());
               });
           });
       });

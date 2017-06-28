@@ -211,6 +211,11 @@ module.exports = {
   },
 
   honor_user_scores: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
     score: {
       type: "float",
       nullable: false,
@@ -221,13 +226,31 @@ module.exports = {
     honor_user_id: {
       type: "integer",
       nullable: false,
-      composite_primary: true
+      composite_unique: 1
     },
     scorer_id: {
       type: "integer",
       nullable: false,
-      composite_primary: true
-    }
+      composite_unique: 1
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
+    },
   },
 
   honors_users: {

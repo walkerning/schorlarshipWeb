@@ -7,7 +7,10 @@ module.exports = function permit(...rules) {
     if (req.user.get("id") == req.params["userId"]) {
       permNames.push("me");
     }
-
+    // FIXME: not very flexible...
+    if (req.user.get("id") == req.params["scorerId"]) {
+      permNames.push("me_scorer");
+    }
     // judge if current `req.user` statsify all items in some rule of the rules
     if (_.some(rules, function(rule, ind) {
         var diffs = _.difference(rule, permNames);
