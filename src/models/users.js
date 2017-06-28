@@ -3,6 +3,7 @@ var bookshelfInst = require("./base");
 var Promise = require("bluebird");
 var bcrypt = require("bcryptjs");
 var sendemail = require("../config").sendemail;
+var models = require(".");
 var errors = require("../errors");
 var validationCfg = require("../config").validation;
 var bcryptGenSalt = Promise.promisify(bcrypt.genSalt);
@@ -40,16 +41,9 @@ var User = bookshelfInst.Model.extend({
   group: function() {
     return this.belongsTo("Group", "group_id");
   },
-
-  honors: function() {
-    //return this.hasMany("UserHonorState", "user_id");
-    // FIXME: whether to treat UserHonorState as a Model or just a relation table?
-    //        as Model: treat as a resource, easy to update. but must have a id field...
-    //        as relation table: can use composite primary key to constraint
-    return this.belongsToMany("Honor").withPivot([
-      "state", "apply_time", "fill_id"
-    ]);
-    //.through("UserHonorState");
+  
+  applyHonors: function() {
+    return this.hasMany("UserHonorState", "user_id");
   },
 
   scholars: function() {
@@ -63,6 +57,7 @@ var User = bookshelfInst.Model.extend({
   fills: function() {
     return this.hasMany("Fill");
   },
+
 
   // Attributes for filtering and validation
   permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
@@ -134,18 +129,33 @@ var User = bookshelfInst.Model.extend({
   
   // get applied honors
   getHonorStates: function getHonorStates() {
-    return _.map(this.related("honors").toJSON(), function(h) {
-      return _.reduce(_.keys(h), function(obj, k) {
-        if (k.startsWith("_pivot_")) {
-          obj[k.slice(7)] = h[k];
-        }
-        return obj;
-      }, {});
-    });
+    return this.related("applyHonors").toJSON();
+  },
+
+  getHonorStatesCol: function getHonorStatesCol(queries) {
+    return this.related("applyHonors")
+      .query({where: queries})
+      .fetch()
+      .then(function(c) {
+        return c.toJSON();
+      });
   },
 
   getHonorState: function getHonorState(honor_id) {
-    return _.find(this.getHonorStates(), (o) => {return o["honor_id"] == honor_id});
+    return this.getHonorStateModel(honor_id)
+      .then(function (state) {
+        if (state !== null) {
+          return state.toJSON();
+        }
+        return null;
+      });
+  },
+
+  getHonorStateModel: function getHonorStateModel(honor_id) {
+    return models.UserHonorState
+      .forge()
+      .where({user_id: this.get("id"), honor_id: honor_id})
+      .fetch();
   }
 }, {
   secretAttributes: function secretAttributes() {

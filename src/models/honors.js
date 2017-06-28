@@ -23,17 +23,13 @@ var Honor = bookshelfInst.Model.extend({
     return this.belongsToMany("Group").withPivot(["quota"]);
   },
 
-  users: function() {
-    return this.belongsToMany("User").withPivot([
-      "state", "apply_time", "fill_id"
-    ]);
-    //.through("UserHonorState");
+  applyUsers: function() {
+    return this.hasMany("UserHonorState");
   },
 
   form: function() {
     return this.belongsTo("Form", "form_id");
   },
-
 
 
   omitAttributes: function omitAttributes(){

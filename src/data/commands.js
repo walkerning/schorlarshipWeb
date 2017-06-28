@@ -11,6 +11,7 @@ function createTable(tableName) {
     var column;
     var columnKeys = _.keys(schema[tableName]);
     var composite_primarys = []
+    var composite_uniques = {}
 
     _.each(columnKeys, function(key) {
       if (schema[tableName][key].type === "text" && schema[tableName][key].hasOwnProperty("fieldtype")) {
@@ -31,6 +32,14 @@ function createTable(tableName) {
       if (schema[tableName][key].hasOwnProperty("composite_primary") && schema[tableName][key].composite_primary === true) {
         composite_primarys.push(key);
       }
+      if (schema[tableName][key].hasOwnProperty("composite_unique")) {
+        uni_grp = schema[tableName][key].composite_unique;
+        if (composite_uniques.hasOwnProperty(uni_grp)) {
+          composite_uniques[uni_grp].push(key);
+        } else {
+          composite_uniques[uni_grp] = [key];
+        }
+      }
       if (schema[tableName][key].hasOwnProperty("unique") && schema[tableName][key].unique) {
         column.unique();
       }
@@ -50,6 +59,9 @@ function createTable(tableName) {
     if (composite_primarys.length > 0) {
       table.primary(composite_primarys);
     }
+    _.each(_.keys(composite_uniques), function (k) {
+      table.unique(composite_uniques[k]);
+    });
   });
 }
 

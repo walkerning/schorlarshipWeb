@@ -24,6 +24,14 @@ var UserHonorState = bookshelfInst.Model.extend({
   
   fill: function fill() {
     return this.belongsTo("Fill");
+  },
+
+  user: function() {
+    return this.belongsTo("User", "user_id");
+  },
+
+  honor: function() {
+    return this.belongsTo("Honor", "honor_id");
   }
 });
 

@@ -231,15 +231,20 @@ module.exports = {
   },
 
   honors_users: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
     user_id: {
       type: "integer",
       nullable: false,
-      composite_primary: true
+      composite_unique: 1
     },
     honor_id: {
       type: "integer",
       nullable: false,
-      composite_primary: true
+      composite_unique: 1
     },
     state: {
       type: "string",

@@ -185,7 +185,7 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
       .then(function(mod) {
         if (!mod && (options === undefined || options.noreject !== true)) {
           return Promise.reject(new errors.NotFoundError({
-            message: util.format("`id`(%s) not exists.", id)
+            message: util.format("%s: `id`(%s) not exists.", this.constructor.prototype.tableName, id)
           }));
         } else {
           return mod;
