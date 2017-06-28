@@ -13,9 +13,9 @@ Resources
 {
     // Number[required]: id唯一标识用户
     "id": 1, 
-    // Number[required]: 用户组id
+    // Number[required]: 用户组id
     "group_id": 2,
-    // String[required]: 入学年份
+    // String[required]: 入学年份
     "group": "2016", 
     // String[required]: 类型 - "undergraduate" / "graduate"
     "type": "undergraduate", 
@@ -59,13 +59,13 @@ Resources
     //                          代表无用户组可申请此荣誉
     "group_quota": [
         {
-	    "group_id": 2,
+            "group_id": 2,
             "group": "2015",
             "type": "undergraduate",
             "quota": 10
         },
         {
-	    "group_id": 3,
+	          "group_id": 3,
             "group": "2016",
             "type": "undergraduate",
             "quota": 4
@@ -88,40 +88,40 @@ Resources
     // Number[required]: 该奖学金获得者需要填写的感谢表单id
     "form_id": 6,
     // String[required]: 分配方式: "quota", "money"
-    "alloc": "quota",
-    // Array(Object)[required]: 如果分配方式为"quota", 代表每个不同的group有多少个名额; 如果分配方式为"money",
-    //                          代表每个不同的group有多少钱
-    "group_quota": [
+    "alloc": "quota",
+    // Array(Object)[required]: 如果分配方式为"quota", 代表每个不同的group有多少个名额; 如果分配方式为"money",
+    //                          代表每个不同的group有多少钱
+    "group_quota": [
         {
-	    "group_id": 2,
+            "group_id": 2,
             "group": "2015",
             "type": "undergraduate",
             "quota": 10
         },
         {
-	    "group_id": 3,
+            "group_id": 3,
             "group": "2016",
             "type": "undergraduate",
             "quota": 4
         }
-    ],
-    // Array(Object)[required]: 如果分配方式为"quota", 代表每个不同的group已经分配了多少个名额; 如果分配方式为"money",
-    //                          代表每个不同的group已经分配了多少钱
-    "group_alloc_quota": [
+    ],
+    // Array(Object)[required]: 如果分配方式为"quota", 代表每个不同的group已经分配了多少个名额; 如果分配方式为"money",
+    //                          代表每个不同的group已经分配了多少钱
+    "group_alloc_quota": [
         {
-	    "group_id": 2,
+            "group_id": 2,
             "group": "2015",
             "type": "undergraduate",
             "quota": 5
         },
         {
-	    "group_id": 3,
+            "group_id": 3,
             "group": "2016",
             "type": "undergraduate",
             "quota": 2
         }
     ],
-    // Number[required]: 如果分配方式为"quota", 代表为每人可以分多少钱; 如果分配方式为"money", 字段无效
+    // Number[required]: 如果分配方式为"quota", 代表为每人可以分多少钱; 如果分配方式为"money", 字段无效
     "money": 1000
 }
 ```
@@ -142,18 +142,18 @@ Resources
             //                   多行字符串（6）、多选框（7）、单选框（8）、附件(管理员上传的说明文件)（9）、
             //                   上传文件(用户需要上传的材料)（10）。
             "type": 2, 
-            // Number[required]: 限制字段填写的最长/最短长度。当字段类型为邮箱、手机、单行字符串、多行字符串时，
-            //                   含义为字符串长度，值<0表示没有限制;当字段类型为数字时，含义为最小值与最大值，
-            //                   最大值小于最小值表示没有限制；当字段类型为上传文件时,含义为文件大小限制(byte)，
-            //                   值<0表示没有限制;当为其他字段类型时，无用。
+            // Number[required]: 限制字段填写的最长/最短长度。当字段类型为邮箱、手机、单行字符串、多行字符串时,
+            //                   含义为字符串长度,值<0表示没有限制;当字段类型为数字时,含义为最小值与最大值,
+            //                   最大值小于最小值表示没有限制；当字段类型为上传文件时,含义为文件大小限制(byte),
+            //                   值<0表示没有限制;当为其他字段类型时,无用。
             "max_len": 1000, 
             "min_len": 1000,
             // Boolean[required]: 这个字段是否必填
             "required": true, 
             // String: 该字段的说明文字
             "description": "请填写您的科创经历, 此项最好不要为空", 
-            // Object: 当字段类型为附件时，含义为附件id; 当字段类型为多选框或单选框时，含义为选项的列表Array[String]；
-            //         当为其他字段类型时，无用。
+            // Object: 当字段类型为附件时,含义为附件id; 当字段类型为多选框或单选框时,含义为选项的列表Array[String]；
+            //         当为其他字段类型时,无用。
             "content": null
         }
     ], 
@@ -206,28 +206,28 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
         "name": "学业优秀奖", 
         // String[required]: 该荣誉的年份
         "year": "2017", 
-	// String[required]: 申请时间
-	"apply_time":  "2017-09-28T10:54:24.738793",
-        // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied/temp 分别代表
-	//                   申请成功/申请失败/已申请/暂存
-        "state": "applied",
-        //  Array(Score)[required]: 评分情况列表
-        "scores": [
-		{
-			// Number[required]: 评分辅导员/老师id
-			"scorer_id": 1,
-			// Number[required, 0-100]: 该辅导员/老师给此申请的评分
-			"score": 90,
-			// String[required]: 创建该打分的可读timestamp (ISO format)
-			"created_at": "2017-05-28T10:48:51.416731",
-			// String[required]: 最后更新该打分的可读timestamp (ISO format)
-			"updated_at": "2017-05-28T10:48:51.416731"
-		}
-	],
-        // Number[required]: 用户的申请表填写情况ID. // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 不可以...
-        "fill_id": 111,
-	// Form-Fill-Content[required]: 内联的申请表填写情况
-	"fill": Form-Fill-Content{...}
+        // String[required]: 申请时间
+	      "apply_time":  "2017-09-28T10:54:24.738793",
+        // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied/temp 分别代表
+      	//                   申请成功/申请失败/已申请/暂存
+        "state": "applied",
+        //  Array(Score)[required]: 评分情况列表
+        "scores": [
+         		{
+         			// Number[required]: 评分辅导员/老师id
+         			"scorer_id": 1,
+         			// Number[required, 0-100]: 该辅导员/老师给此申请的评分
+         			"score": 90,
+         			// String[required]: 创建该打分的可读timestamp (ISO format)
+         			"created_at": "2017-05-28T10:48:51.416731",
+         			// String[required]: 最后更新该打分的可读timestamp (ISO format)
+         			"updated_at": "2017-05-28T10:48:51.416731"
+         		}
+       	],
+        // Number[required]: 用户的申请表填写情况ID. // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 不可以...
+        "fill_id": 111,
+      	// Form-Fill-Content[required]: 内联的申请表填写情况
+	      "fill": Form-Fill-Content{...}
 }
 ```
 
@@ -244,15 +244,15 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
     "name": "国家奖学金", 
     // String[required]: 该奖学金的年份
     "year": "2017",
-    // String[required]: 奖学金感谢信状态, commit/temp分别代表 已提交/暂存
-    "state": "commit",
-    // Number: 用户的感谢信表填写情况ID // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 现在不可以
-    //         如果该字段不存在, 则该用户还没有填写感谢信
+    // String[required]: 奖学金感谢信状态, commit/temp分别代表 已提交/暂存
+    "state": "commit",
+    // Number: 用户的感谢信表填写情况ID // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 现在不可以
+    //         如果该字段不存在, 则该用户还没有填写感谢信
     "fill_id": 111,
-    // Form-Fill-Content[required]: 内联的申请表填写情况. 如果该字段不存在, 则该用户还没填写感谢信
-    "fill": Form-Fill-Content{...}
-    // Number[required]: 获得的金额数目
-    "money": 5000
+    // Form-Fill-Content[required]: 内联的申请表填写情况. 如果该字段不存在, 则该用户还没填写感谢信
+    "fill": Form-Fill-Content{...}
+    // Number[required]: 获得的金额数目
+    "money": 5000
 }
 ```
 API
@@ -355,17 +355,26 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``GET /api/v1/users/{id}/honors``: 得到某个``{id}``用户-荣誉申请情况列表
     * **权限**: 用户管理 OR ``me == id``
     * **返回**: [User-Honor-State]
-    * 加入query来得到这个用户的不同状态的荣誉, 或者限制荣誉id列表, 比如:
+    * 加入query来得到这个用户的不同状态的荣誉, 或者限制荣誉id列表, 比如:
         * ``?honor_ids=12,34,13``: 荣誉id用单个逗号分隔, 不要空格
         * ``?state=applied``: 只返回此用户已申请未审批的荣誉
         * ``?state=fail``: 只返回此用户曾申请但未获得的荣誉
         * ``?state=success``: 只返回此用户成功申请的荣誉
 * ``POST /api/v1/users/{id}/honors``: 申请荣誉, 申请表格fill内容内联上传
-    * **权限**: ``me == id``
+    * **权限**: ``me == id``
     * **返回**: User-Honor-State
-* ``PUT /api/v1/users/{id}/honors/{honor_id}``: 改变一个用户申请荣誉的状态; 如果是``me == id``, 只能在此荣誉状态为暂存的时候, 通过这个接口修改申请表格.
-    * **权限**: 用户管理 AND 荣誉管理 OR ``me == id``
-    * **返回**: User-Honor-State
+* ``PUT /api/v1/users/{id}/honors/{honor_id}/admin``: 改变一个用户申请荣誉状态的所有信息, 包括表格等
+    * **权限**: 用户管理 AND 荣誉管理
+    * **返回**: User-Honor-State
+* ``PUT /api/v1/users/{id}/honors/{honor_id}``: 提交已暂存的申请表, 或者在荣誉状态为暂存的时候修改申请表
+    * **权限**: 用户管理 AND 荣誉管理 OR ``me == id``
+    * **返回**: User-Honor-State
+* ``POST /api/v1/users/{id}/honors/{honor_id}/scores/``: 提交对某个荣誉申请的评分
+    * **权限**: 用户管理 AND 荣誉管理
+    * **返回**: User-Honor-State
+* ``PUT /api/v1/users/{id}/honors/{honor_id}/scores/{scorer_id}``: 修改自己对某个荣誉申请的评分
+    * **权限**: 用户管理 AND 荣誉管理 AND ``me == scorer_id``
+    * **返回**: User-Honor-State
 * ``DELETE /api/v1/users/{id}/honors/{honor_id}``:
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
@@ -389,10 +398,10 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 
 ### 组-奖学金相关
 * ``GET /api/v1/groups/{id}/scholars``: 得到某个``{id}``组里的所有用户的奖学金分配情况列表
-    * **权限**: 用户管理 AND 奖学金管理
-    * **返回**: {`user_id`: User-Scholar-State}, dict中每个value为一个list, 代表`user_id`用户的奖学金情况, 如果组里某用户没有获得奖学金, 省略其key-value对
+    * **权限**: 用户管理 AND 奖学金管理
+    * **返回**: {`user_id`: User-Scholar-State}, dict中每个value为一个list, 代表`user_id`用户的奖学金情况, 如果组里某用户没有获得奖学金, 省略其key-value对
     * 加入query来限制scholar:
-        * ``?scholar_ids=12,34,13``: 奖学金id用单个逗号分隔, 不要空格
+        * ``?scholar_ids=12,34,13``: 奖学金id用单个逗号分隔, 不要空格
 	* ``?year=2017``: 奖学金的年份
 
 ### 用户-奖学金相关
@@ -404,10 +413,10 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **返回**: User-Scholar-State
 * ``POST /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 提交感谢信表格
     * **权限**: ``me == id``
-    * **返回**: User-Scholar-State
+    * **返回**: User-Scholar-State
 * ``PUT /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 修改感谢信表格或者提交状态; 如果是``me == id``, 只能在暂存状态下修改成功, 否则返回错误。
-    * **权限**: ``me == id`` OR 奖学金管理
-    * **返回**: User-Scholar-State
+    * **权限**: ``me == id`` OR 奖学金管理
+    * **返回**: User-Scholar-State
 * ``DELETE /api/v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金
     * **权限**: 用户管理 AND 奖学金管理
 
@@ -537,19 +546,3 @@ X-Powered-By: Express
 ```
 http --auth-type="jwt" --auth="<token>" GET ...
 ```
-
-----
-对需求文档里数据库的改动:
-* 用户table中改了不少字段的约束
-* 用户-荣誉table中将申请状态字段改成了三值的字符串, 这个需不需要用enumerator?  但是感觉字符串可能更好理解... 或者说为了存储空间小数据库用enumerator, 后台api负责转换成前台可以直接用的字符串?
-* 荣誉表年份改为required字段
-* 字段表加入了content字段
-* 给用户-荣誉申请table加入填写表单情况的ID: `fill_id`
-* 需要加入用户-表单填写情况table...记录用户对某个表单填写的具体内容 **需求设计这一块需要重新讨论**只存用户ID和表单ID就行了吧(这些外键删除的时候是自动删其他的, 还是提示不能删是个问题...)
-* 加入荣誉-学生类别配额table: 一个荣誉的总配额可以不指定, 如果指定, 为所有这个table中对应该荣誉的配额之和
-* 为了对于不同年、不同类型奖学金可能复用相同申请表单, 应该对表单table加入类型type和名字name属性, 让管理员可以在创建荣誉时用表单名字(eg. 标准表单1, 学业优秀表单2)选择
-* 加入文件索引table
-* 奖学金申请table->奖学金获得状态table: 奖学金不是申请的. 并且需要加入一个用户填写的表单Form-Fill-Content的id。
-* 表单表中打印内容->template_id, 存template模版
-* ...还改了很多小地方... 但是有些还需要讨论确认一下是不是这么设计的
-* 感谢信下载那里还需要再确认一下接口: 点击打印, 拿到感谢信的Form-Fill-Content和对应表格的template_id调用一些渲染器(不知道是前台还是后台)生成一个临时文件给用户下载。
