@@ -73,8 +73,8 @@ var initData = {
     {
       name: "学业优秀奖",
       year: "2016",
-      start_time: "2017-06-27T06:31:09.000Z",
-      end_time: "2017-06-29T06:31:09.000Z",
+      start_time: "2017-06-27T06:31:09.0000",
+      end_time: "2017-06-29T06:31:09.0000",
       form_id: 2,
       group_quota: [
         {
