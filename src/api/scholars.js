@@ -21,7 +21,10 @@ module.exports={
   },
     
   create:function (req, res, next) {
-        
+    return models.Scholar.create(req.body,req.user)
+      .then(function (scholar) {
+        res.status(201).json(scholar.toClientJSON())
+      })
   },
     
   updateInfo:function (req, res, next) {

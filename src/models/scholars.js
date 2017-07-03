@@ -1,4 +1,7 @@
 var bookshelfInst = require("./base");
+var _ = require("lodash")
+var Promise = require("bluebird");
+var errors = require("../errors");
 
 var Scholar = bookshelfInst.Model.extend({
   tableName: "scholars",
@@ -32,6 +35,15 @@ var Scholar = bookshelfInst.Model.extend({
     ];
   },
 
+  omitAttributes: function omitAttributes(){
+    return ["created_at",
+      "created_by",
+      "updated_at",
+      "updated_by",
+      "groups"
+    ];
+  },
+
   toClientJSON: function (options) {
     var quota = 0;
 
@@ -56,6 +68,36 @@ var Scholar = bookshelfInst.Model.extend({
     return([
       "groups"
     ])
+  },
+  
+  create:function (body, user) {
+    if (body.hasOwnProperty("alloc") && body["alloc"] == "quota")
+    {
+      if (!body.hasOwnProperty(["money"]))
+      {
+        return Promise.reject(new errors.ValidationError({
+          message:"`money` field is required for quota allocation method"
+        }))
+      }
+    }
+
+    if (!body.hasOwnProperty("group_quota") || !_.isArray(body["group_quota"]) || body["group_quota"].length==0)
+    {
+      return Promise.reject(new errors.ValidationError({
+        message:"Non-empty `group_quota` field is required."
+      }))
+    }
+
+    return bookshelfInst.Model.create.call(this, body, user)
+      .then(function (scholar){
+        return scholar.groups()
+          .attach(_.map(body["group_quota"],function (quota) {
+            return _.pick(quota,["group_id","quota"])
+          }))
+          .then(function () {
+            return Scholar.forge({"id":scholar.get("id")}).fetch()
+          })
+      })
   }
 });
 

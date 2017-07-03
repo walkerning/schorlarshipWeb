@@ -87,7 +87,26 @@ var initData = {
         }
       ]
     }
-  ]
+  ],
+  Scholar: [
+    {
+      name: "校设奖学金",
+      year: "2016",
+      form_id: 5,
+      alloc: "quota",
+      money: 1000,
+      group_quota: [
+        {
+          group_id: 1,
+          quota: 5
+        },
+        {
+          group_id: 2,
+          quota: 10
+        }
+      ]
+    }
+  ],
 };
 
 function initTables() {
