@@ -38,6 +38,12 @@ module.exports={
   },
     
   delete:function (req, res, next) {
-        
+    return models.Scholar.getById(req.params.scholarId)
+      .then(function (scholar) {
+        return scholar.delete()
+          .then(function (g) {
+            res.status(200)
+          })
+      })
   }
 };

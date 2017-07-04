@@ -98,6 +98,18 @@ var Scholar = bookshelfInst.Model.extend({
           return Scholar.getById(self.get("id"))
         })
     })
+  },
+
+  delete: function () {
+    var start = Promise.resolve(null)
+    gids = _.map(this.relations["groups"].toJSON(),function (g) {
+      return g["id"]
+    })
+    self = this
+    var start = self.groups().detach(gids).then(function () {
+      return self.destroy()
+    })
+    return start
   }
 }, {
   fetchInlineRelations: function () {
