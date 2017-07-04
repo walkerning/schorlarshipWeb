@@ -41,8 +41,8 @@ module.exports={
     return models.Scholar.getById(req.params.scholarId)
       .then(function (scholar) {
         return scholar.delete()
-          .then(function (g) {
-            res.status(200)
+          .then(function () {
+            res.status(200).send("Successful Deleted")
           })
       })
   }
