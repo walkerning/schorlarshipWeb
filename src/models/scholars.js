@@ -62,6 +62,42 @@ var Scholar = bookshelfInst.Model.extend({
     });
     json["quota"] = quota;
     return _.omit(json, this.omitAttributes());
+  },
+
+  update: function (body, user) {
+    var start = Promise.resolve(null)
+    if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
+      gids_spec = _.reduce(body["group_quota"], function (obj, s) {
+        obj[s["group_id"]] = s
+        return obj
+      }, {})
+      gids = _.map(_.keys(gids_spec),(s) => {return parseInt(s)})
+      now_gids = _.map(this.relations["groups"].toJSON(), function (g) {
+        return g["id"]
+      })
+      remove_gids = _.difference(now_gids, gids)
+      self = this
+      start = self.groups().detach(remove_gids).then(function () {
+        return Promise.mapSeries(gids, function (gid) {
+          return self.relations["groups"].query({where: {group_id: gid}})
+            .fetch()
+            .then(function (group) {
+              if (group.length) {
+                return group.updatePivot(_.pick(gids_spec[gid], ["group_id", "quota"]),{query:{where:{"group_id":gid}}})
+              } else {
+                return self.groups().attach(_.pick(gids_spec[gid], ["group_id", "quota"]))
+              }
+            })
+        })
+      })
+    }
+    self = this
+    return start.then(function () {
+      return bookshelfInst.Model.prototype.update.call(self,body,user)
+        .then(function (g) {
+          return Scholar.getById(self.get("id"))
+        })
+    })
   }
 }, {
   fetchInlineRelations: function () {

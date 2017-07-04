@@ -28,7 +28,13 @@ module.exports={
   },
     
   updateInfo:function (req, res, next) {
-        
+    return models.Scholar.getById(req.params.scholarId)
+      .then(function(scholar){
+        return scholar.update(req.body, req.user)
+          .then(function (scholar) {
+            res.status(200).json(scholar)
+          })
+      })
   },
     
   delete:function (req, res, next) {
