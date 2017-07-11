@@ -156,6 +156,35 @@ var User = bookshelfInst.Model.extend({
       .forge()
       .where({user_id: this.get("id"), honor_id: honor_id})
       .fetch();
+  },
+
+  toClientJSON: function toClientJSON(options) {
+    options = _.mergeWith({
+      omitPivot: true,
+      flattenRelation: this.constructor.fetchInlineRelations(),
+    }, options, function(dstValue, srcValue) {
+      if (_.isArray(dstValue)) {
+        return _.union(dstValue, srcValue);
+      }
+    });
+
+    var json = _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
+    if (options.flattenRelation.length) {
+      // _.forEach(_.keys(this.relations), function(key) {
+      _.forEach(options.flattenRelation, function(key) {
+        if (json[key]) {
+          if (_.isArray(json[key])) {
+            json[key] = _.map(json[key], (v) => v.name || v.id);
+          } else {
+            if (key === "group") {
+              json["type"] = json[key].type;
+            }
+            json[key] = json[key].name || json[key].id;
+          }
+        }
+      });
+    }
+    return json;
   }
 }, {
   secretAttributes: function secretAttributes() {
