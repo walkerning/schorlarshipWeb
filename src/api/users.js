@@ -48,7 +48,7 @@ module.exports = {
             });
         })
           .then(function() {
-            return user.fetch()
+            return models.User.forge({"id": user.get("id")}).fetch()
               .then(function(user) {
                 res.status(201).json(user.toClientJSON());
               });
