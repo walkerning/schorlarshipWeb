@@ -154,7 +154,7 @@ var Honor = bookshelfInst.Model.extend({
                           return _.pick(g, ["group_id", "quota"]);
                         }))
           .then(function () {
-            return m.fetch();
+            return Honor.forge({"id": m.get("id")}).fetch();
           });
       });
   }
