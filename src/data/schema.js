@@ -104,7 +104,7 @@ module.exports = {
       type: "string",
       maxlength: 20,
       nullable: false,
-      unique: true
+      composite_unique: 1
     },
     type: {
       type: "string",
@@ -112,7 +112,8 @@ module.exports = {
       nullable: false,
       validations: {
         isIn: [["undergraduate", "graduate", "faculty"]]
-      }
+      },
+      composite_unique: 1
     },
     description: {
       type: "string",
