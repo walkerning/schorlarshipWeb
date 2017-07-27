@@ -316,16 +316,16 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``GET /api/v1/permissions``: 得到权限列表
     * **权限**: 权限管理
     * **返回**: [Permission]
-* ``GET /api/v1/permissions/{permissionId}/users``: 得到拥有某权限的用户列表
+* ``GET /api/v1/permissions/{permissionName}/users``: 得到拥有某权限的用户列表
     * **权限**: 权限管理
     * **返回**: [Users]
-* ``POST /api/v1/permissions/{permissionId}/users``: 给某个用户加入权限
+* ``POST /api/v1/permissions/{permissionName}/users``: 给某个用户加入权限
     * **参数**: `userId`=需要加入权限的user的id
     * **权限**: 权限管理
     * **返回**:
-* ``DELETE /api/v1/permissions/{permissionId}/users/:userId``: 删除某个用户的某个权限
-		* **权限**: 权限管理
-		* **返回**:
+* ``DELETE /api/v1/permissions/{permissionName}/users/{userId}``: 删除某个用户的某个权限
+    * **权限**: 权限管理
+    * **返回**:
 
 ### 荣誉相关
 * ``GET /api/v1/honors``: 得到荣誉的列表
