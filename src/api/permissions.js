@@ -14,7 +14,7 @@ module.exports = {
 
   listUsers: function listUsers(req, res, next) {
     return models.Permission
-      .getById(req.params.permissionId)
+      .getByName(req.params.permissionName)
       .then(function(perm) {
         return perm.listUsers()
           .then(function(users) {
@@ -30,7 +30,7 @@ module.exports = {
       return Promise.resolve(null);
     }
     return models.Permission
-      .getById(req.params.permissionId)
+      .getByName(req.params.permissionName)
       .then(function(perm) {
         return perm.addUser(userId)
           .then(function() {
@@ -42,7 +42,7 @@ module.exports = {
   deleteUser: function deleteUser(req, res, next) {
     var userId = req.params.userId;
     return models.Permission
-      .getById(req.params.permissionId, {
+      .getByName(req.params.permissionName, {
         noreject: true
       })
       .then(function(perm) {

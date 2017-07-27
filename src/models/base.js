@@ -198,6 +198,28 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
       });
   },
 
+  /**
+   * @returns {Promise<Model>}
+   */
+  getByName: function getByName(name, options) {
+    if (options !== undefined) {
+      var fetchOpt = options.fetchOptions;
+    }
+    return this.forge({
+      name: name
+    })
+      .fetch(fetchOpt)
+      .then(function(mod) {
+        if (!mod && (options === undefined || options.noreject !== true)) {
+          return Promise.reject(new errors.NotFoundError({
+            message: util.format("%s: `name`(%s) not exists.", this.constructor.prototype.tableName, name)
+          }));
+        } else {
+          return mod;
+        }
+      });
+  },
+
   /** 
    * @returns {Promise<Model>}
    */

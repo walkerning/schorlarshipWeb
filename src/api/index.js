@@ -78,11 +78,11 @@ apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "scholar"
 // List permissions
 apiRouter.get("/permissions", permit(["permission"]), catchError(permissions.list));
 // List users of a permission group
-apiRouter.get("/permissions/:permissionId/users", permit(["permission"]), catchError(permissions.listUsers));
+apiRouter.get("/permissions/:permissionName/users", permit(["permission"]), catchError(permissions.listUsers));
 // Add user to a permission group
-apiRouter.post("/permissions/:permissionId/users", permit(["permission"]), catchError(permissions.addUser));
+apiRouter.post("/permissions/:permissionName/users", permit(["permission"]), catchError(permissions.addUser));
 // Delete a user from a permission group
-apiRouter.delete("/permissions/:permissionId/users/:userId", permit(["permission"]), catchError(permissions.deleteUser));
+apiRouter.delete("/permissions/:permissionName/users/:userId", permit(["permission"]), catchError(permissions.deleteUser));
 
 
 //// Routing endpoints `/groups`
