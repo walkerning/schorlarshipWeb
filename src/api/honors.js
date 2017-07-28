@@ -9,7 +9,28 @@ module.exports={
     var queries = req.query;
     return models.Honors.getByQuery(queries)
       .then(function(collection) {
-        res.status(200).json(collection.toClientJSON());
+        var obj = collection.toClientJSON();
+        // Query "?group_id=" return all honors that have quota in this group
+        if ("group_id" in queries) {
+          obj = _.filter(obj, (value) => {
+            for (var i in value["group_quota"]) {
+              if (value["group_quota"][i]["group_id"] == queries["group_id"]) {
+                return true;
+              }
+            }
+            return false;
+          });
+        }
+        // Query "?available=1" return all honors that the current time is between its start_time and end_time
+        if ("available" in queries && _.toInteger(queries["available"])) {
+          var now = new Date();
+          obj = _.filter(obj, (value) => {
+            var start = new Date(value["start_time"]);
+            var end = new Date(value["end_time"]);
+            return start <= now && now <= end;
+          });
+        }
+        res.status(200).json(obj);
       })
   },
 
@@ -34,7 +55,7 @@ module.exports={
       .then(function(hon) {
         return hon.update(req.body, req.user)
           .then(function() {
-            return hon.fetch()
+            return models.Honor.forge({"id": hon.get("id")}).fetch()
               .then(function(hon) {
                 res.status(200).json(hon.toClientJSON());
               });
