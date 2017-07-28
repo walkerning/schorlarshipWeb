@@ -148,12 +148,14 @@ module.exports = {
     name: {
       type: "string",
       maxlength: 50,
-      nullable: false
+      nullable: false,
+      composite_unique: 1
     },
     year: {
       type: "string",
       maxlength: 20,
-      nullable: false
+      nullable: false,
+      composite_unique: 1
     },
     start_time: {
       type: "datetime",
@@ -315,12 +317,14 @@ module.exports = {
     name: {
       type: "string",
       maxlength: 50,
-      nullable: false
+      nullable: false,
+      composite_unique: 1
     },
     year: {
       type: "string",
       maxlength: 20,
-      nullable: false
+      nullable: false,
+      composite_unique: 1
     },
     alloc: {
       type: "string",
