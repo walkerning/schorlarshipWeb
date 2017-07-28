@@ -330,8 +330,8 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 ### 荣誉相关
 * ``GET /api/v1/honors``: 得到荣誉的列表
     * **权限**:
-    * **返回**: [Honor]
-    * 可以加入query来过滤荣誉, 比如``?year=2017``。特别的，query``?group_id=``可以搜索group_quota中包含该group的荣誉，query``?available=1``可以搜索当前时间在荣誉可申请时间段内的荣誉
+    * **返回**: Honor
+    * 可以加入query来过滤荣誉, 比如``?year=2017``。特别的，query``?group_id=``可以搜索group_quota中包含该group的荣誉，query``?available=1``可以搜索当前时间在荣誉可申请时间段内的荣誉
 * ``GET /api/v1/honors/{id}``: 得到荣誉信息
     * **权限**:
     * **返回**: Honor
