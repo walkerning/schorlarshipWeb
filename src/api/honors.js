@@ -41,4 +41,19 @@ module.exports={
           });
       });
   },
+
+  delete: function _delete(req, res, next) {
+    return models.Honor.getById(req.params.honorId, {
+      noreject: true
+    })
+      .then(function(honor) {
+        var start = Promise.resolve(null);
+        if (honor) {
+          start = honor.destroy();
+        }
+        return start.then(function() {
+          res.status(204).json({}).end();
+        });
+      });
+  }
 }
