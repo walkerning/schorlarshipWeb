@@ -13,12 +13,8 @@ module.exports={
         // Query "?group_id=" return all honors that have quota in this group
         if ("group_id" in queries) {
           obj = _.filter(obj, (value) => {
-            for (var i in value["group_quota"]) {
-              if (value["group_quota"][i]["group_id"] == queries["group_id"]) {
-                return true;
-              }
-            }
-            return false;
+            var group_ids = _.map(value["group_quota"], (s) => s["group_id"]);
+            return ~_.includes(group_ids, queries["group_id"]);
           });
         }
         // Query "?available=1" return all honors that the current time is between its start_time and end_time

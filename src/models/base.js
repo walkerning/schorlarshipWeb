@@ -292,8 +292,7 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
    extendQuery: function extendQuery(query) {
     return this.query({
         where: _.pick(query, this.queriableAttributes())
-      })
-      .fetch();
+      });
    }  
 });
 

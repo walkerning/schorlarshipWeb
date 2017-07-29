@@ -63,6 +63,15 @@ module.exports = {
                 message: "You can not apply for this honor. No quota is assigned to your group."
               }));
             }
+            // Get current time
+            start_time = new Date(hon.get("start_time"));
+            end_time = new Date(hon.get("end_time"));
+            apply_time = new Date();
+            if (!(start_time <= apply_time && apply_time <= end_time)) {
+              return Promise.reject(new errors.BadRequestError({
+                message: "You can not apply for this honor. The honor is not open now."
+              }));
+            }
             // Create the fill object
             return models.Fill.create({
               "form_id": hon.get("form_id"),
@@ -70,8 +79,6 @@ module.exports = {
               "content": JSON.stringify(req.body["fill"])
             }, req.user)
               .then(function(fill) {
-                // Get current time
-                apply_time = new Date();
                 // Create new honor apply state
                 return models.UserHonorState.create({
                   user_id: req.params.userId,
@@ -155,10 +162,10 @@ module.exports = {
   updateHonorFill: function updateHonorFill(req, res, next) {
     // Update the honor applying status, or the table content
     body = _.pick(req.body, ["state", "fill"]);
-    if (_.keys(body).length == 0) {
+    if (_.keys(body).length != 2) {
       res.status(304).json();
     }
-    if (body["state"] && !_.includes(["applied", "temp"], body["state"])) {
+    if (!_.includes(["applied", "temp"], body["state"])) {
       return Promise.reject(new errors.BadRequestError({
         message: "You can just pass `state`==\"applied\"/\"temp\" to this API."
       }));
@@ -171,36 +178,37 @@ module.exports = {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
           .then(function(state) {
-            start = Promise.resolve(null);
             if (!state) {
               return Promise.reject(new errors.NotFoundError({
                 message: "This user do not apply for this honor."
               }));
             }
             hstate = state.toJSON();
-            if (body.hasOwnProperty("fill")) {
-              if (hstate["state"] != "temp") {
+            if (hstate["state"] != "temp") {
+              return Promise.reject(new errors.BadRequestError({
+                message: "You cannot modify the apply form after it is applied."
+              }));
+            }
+            return models.Honor.getById(req.params.honorId).then(function(hon) {
+              // Get current time
+              start_time = new Date(hon.get("start_time"));
+              end_time = new Date(hon.get("end_time"));
+              apply_time = new Date();
+              if (!(start_time <= apply_time && apply_time <= end_time)) {
                 return Promise.reject(new errors.BadRequestError({
-                  message: "You cannot modify the apply form after it is applied."
+                  message: "You can not apply for this honor. The honor is not open now."
                 }));
               }
               fill_id = hstate["fill_id"];
-              start = user.related("fills").get(fill_id).update({
+              return user.related("fills").get(fill_id).update({
                 "content": JSON.stringify(body["fill"])
+              }).then(function() {
+                // Handle state change
+                return state.update({
+                  "state": body["state"],
+                  "apply_time": apply_time
+                });
               });
-            }
-            return start.then(function() {
-              // Handle state change
-              if (body["state"]) {
-                return state.update({
-                  "state": body["state"],
-                  "apply_time": new Date()
-                });
-              } else {
-                return state.update({
-                  "state": body["state"],
-                });
-              }
             });
           })
           .then(function() {
