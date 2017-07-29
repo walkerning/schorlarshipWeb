@@ -356,7 +356,7 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **权限**: 用户管理 OR ``me == id``
     * **返回**: [User-Honor-State]
     * 加入query来得到这个用户的不同状态的荣誉, 或者限制荣誉id列表, 比如:
-        * ``?honor_ids=12,34,13``: 荣誉id用单个逗号分隔, 不要空格
+        * ``?honor_id=12``: 荣誉id
         * ``?state=applied``: 只返回此用户已申请未审批的荣誉
         * ``?state=fail``: 只返回此用户曾申请但未获得的荣誉
         * ``?state=success``: 只返回此用户成功申请的荣誉
