@@ -83,6 +83,13 @@ var UserHonorState = bookshelfInst.Model.extend({
 
 var UserHonorStates = bookshelfInst.Collection.extend({
   model: UserHonorState
+}, {
+  queriableAttributes: function queriableAttributes() {
+    return ["id",
+      "state",
+      "honor_id"
+    ];
+  }
 });
 
 module.exports = {

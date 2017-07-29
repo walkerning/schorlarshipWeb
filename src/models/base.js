@@ -284,7 +284,17 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
         where: _.pick(query, this.queriableAttributes())
       })
       .fetch();
-  }
+  },
+  // Operation methods used by API.
+  /** 
+   * @returns {Promise<Collection>}
+   */
+   extendQuery: function extendQuery(query) {
+    return this.query({
+        where: _.pick(query, this.queriableAttributes())
+      })
+      .fetch();
+   }  
 });
 
 module.exports = bookshelfInst;

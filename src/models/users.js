@@ -134,7 +134,7 @@ var User = bookshelfInst.Model.extend({
 
   getHonorStatesCol: function getHonorStatesCol(queries) {
     return this.related("applyHonors")
-      .query({where: queries})
+      .extendQuery(queries)
       .fetch()
       .then(function(c) {
         return c.toJSON();
