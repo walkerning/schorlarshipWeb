@@ -32,7 +32,13 @@ var Group = bookshelfInst.Model.extend({
 
   honors: function() {
     return this.belongsToMany("Honor");
+  },
+
+  // Get users in this group
+  getUsers: function() {
+    return this.related("users").toClientJSON();
   }
+
 });
 
 var User = bookshelfInst.Model.extend({
