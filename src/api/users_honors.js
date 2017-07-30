@@ -272,6 +272,25 @@ module.exports = {
       });
   },
 
+  deleteHonorScore: function deleteHonorScore(req, res, next) {
+    return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
+      .then(function (st) {
+        if (!st) {
+          // FIXME: BadRequestError or NotFoundError???
+          return Promise.reject(new errors.BadRequestError({
+            message: util.format("This user %s has not applied for this honor %s.", req.params.userId, req.params.honorId)
+          }));
+        }
+        return st.deleteScore(req.user)
+          .then(function() {
+            st.fetch()
+              .then(function(st) {
+                res.status(204).json({});
+              });
+          });
+      });
+  },
+
   deleteHonor: function deleteHonor(req, res, next) {
   },
 };

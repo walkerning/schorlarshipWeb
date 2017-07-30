@@ -220,11 +220,8 @@ module.exports = {
       primary: true
     },
     score: {
-      type: "float",
-      nullable: false,
-      validations: {
-        isBetween: [0, 100]
-      }
+      type: "text",
+      nullable: true
     },
     honor_user_id: {
       type: "integer",

@@ -68,6 +68,24 @@ var UserHonorState = bookshelfInst.Model.extend({
         }
         return sc.update({score: score});
       });
+  },
+
+  deleteScore: function deleteScore(context_user) {
+    scorer_id = context_user.get("id");
+    return Score.forge({
+      scorer_id: scorer_id,
+      honor_user_id: this.get("id")
+    }).fetch()
+      .then(function(sc) {
+        // Check whether this scorer already submit a score
+        if (!sc) {
+          return Promise.reject(new errors.ValidationError({
+            message: util.format("This scorer with id(%d) has not submitted a score.",
+                                 scorer_id)
+          }));
+        }
+        return sc.destroy();
+      });
   }
 }, {
   getUserHonorState: function getState(user_id, honor_id) {
