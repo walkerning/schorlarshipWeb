@@ -91,7 +91,7 @@ var UserHonorState = bookshelfInst.Model.extend({
   getUserHonorState: function getState(user_id, honor_id) {
     return this.forge()
       .where({user_id: user_id, honor_id: honor_id})
-      .fetch();
+      .fetch({withRelated: ["fill"]});
   },
 
   fetchInlineRelations: function fetchInlineRelations() {

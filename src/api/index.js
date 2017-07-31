@@ -60,8 +60,8 @@ apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me",
 apiRouter.post("/users/:userId/honors/:honorId/scores", permit(["user", "honor"]), catchError(users_honors.addHonorScore));
 // Update score for a user honor state
 apiRouter.put("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "honor", "me_scorer"]), catchError(users_honors.updateHonorScore));
-// Delete score for a usre honor state
-apiRouter.delete("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "honor", "me_scorer"], catchError(users_honors.deleteHonorScore));
+// Delete score for a user honor state
+apiRouter.delete("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "honor", "me_scorer"]), catchError(users_honors.deleteHonorScore));
 // Delete a honor apply for this user
 apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), catchError(users_honors.deleteHonor));
 

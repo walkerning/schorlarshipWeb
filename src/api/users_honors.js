@@ -237,7 +237,7 @@ module.exports = {
             message: util.format("This user %s has not applied for this honor %s.", req.params.userId, req.params.honorId)
           }));
         }        
-        return st.addScore(req.user, req.body.score)
+        return st.addScore(req.user, JSON.stringify(req.body.score))
           .then(function() {
             st.fetch()
               .then(function(st) {
@@ -262,7 +262,7 @@ module.exports = {
             message: util.format("This user %s has not applied for this honor %s.", req.params.userId, req.params.honorId)
           }));
         }
-        return st.updateScore(req.user, req.body.score)
+        return st.updateScore(req.user, JSON.stringify(req.body.score))
           .then(function() {
             st.fetch()
               .then(function(st) {

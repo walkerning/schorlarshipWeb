@@ -24,6 +24,13 @@ module.exports={
           }
         }
         return Promise.all(tasks).then(results => {
+          results = _.map(results, (h) => { 
+          	if (h != null) {
+          		h = h.toJSON();
+          		h["fill"] = h["fill"]["content"];
+          	}
+          	return h;
+          });
           var rates = {};
           for (var i in users) {
           	t = results.slice(i * honor_ids.length, (i + 1) * honor_ids.length);
