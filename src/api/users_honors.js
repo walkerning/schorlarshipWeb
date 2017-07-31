@@ -133,17 +133,10 @@ module.exports = {
             return start.then(function() {
               // Handle state change
               if (body["state"]) {
-                if (hstate["state"] == "temp" && body["state"] == "applied") {
-                  // FIXME: should `apply_time` be updated every time the fill content is updated?
-                  return state.update({
-                    "state": body["state"],
-                    "apply_time": new Date()
-                  });
-                } else {
-                  return state.update({
-                    "state": body["state"],
-                  });
-                }
+                return state.update({
+                  "state": body["state"],
+                  "apply_time": new Date()
+                });
               }
             });
           })
