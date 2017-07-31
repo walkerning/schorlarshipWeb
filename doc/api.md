@@ -216,8 +216,8 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
          		{
          			// Number[required]: 评分辅导员/老师id
          			"scorer_id": 1,
-         			// Number[required, 0-100]: 该辅导员/老师给此申请的评分
-         			"score": 90,
+         			// JSON String[required]: 该辅导员/老师给此申请的评分
+         			"score": '{"score1":[7,9],"score2":[8],"score3":14}',
          			// String[required]: 创建该打分的可读timestamp (ISO format)
          			"created_at": "2017-05-28T10:48:51.416731",
          			// String[required]: 最后更新该打分的可读timestamp (ISO format)
@@ -348,7 +348,7 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``GET /api/v1/groups/{id}/honors``: 得到某个``{id}``组里的所有用户的荣誉申请情况列表
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: {`user_id`: User-Honor-State}, dict中每个value为一个list, 代表`user_id`用户的各个荣誉情况, 如果组里某用户没有申请这些荣誉, 省略其key-value对
-    * 加入query来限制honor id:
+    * （必选）加入query来限制honor id:
         * ``?honor_ids=12,34,13``: 荣誉id用单个逗号分隔, 不要空格
 
 ### 用户-荣誉相关
@@ -375,6 +375,8 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``PUT /api/v1/users/{id}/honors/{honor_id}/scores/{scorer_id}``: 修改自己对某个荣誉申请的评分
     * **权限**: 用户管理 AND 荣誉管理 AND ``me == scorer_id``
     * **返回**: User-Honor-State
+* ``DELETE /api/v1/users/{id}/honors/{honor_id}/scores/{scorer_id}``: 删除自己对某个荣誉申请的评分
+    * **权限**: 用户管理 AND 荣誉管理 AND ``me == scorer_id``
 * ``DELETE /api/v1/users/{id}/honors/{honor_id}``:
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
