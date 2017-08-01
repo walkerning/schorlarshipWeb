@@ -202,10 +202,6 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
         // Number[required]: 荣誉id
         "honor_id": 2,
         "id": "987654321", 
-        // String[required]: 荣誉名字
-        "name": "学业优秀奖", 
-        // String[required]: 该荣誉的年份
-        "year": "2017", 
         // String[required]: 申请时间
 	      "apply_time":  "2017-09-28T10:54:24.738793",
         // String[required]: 当前用户对该荣誉的申请状况, success/fail/applied/temp 分别代表
@@ -240,12 +236,8 @@ http --auth-type=jwt --auth=<token> POST http://localhost:3000/api/v1/forms name
     "apply_id": 10,
     // Number[required]: 奖学金id
     "scholar_id": 2,
-    // String[required]: 奖学金名字
-    "name": "国家奖学金", 
-    // String[required]: 该奖学金的年份
-    "year": "2017",
-    // String[required]: 奖学金感谢信状态, commit/temp分别代表 已提交/暂存
-    "state": "commit",
+    // String[required]: 奖学金感谢信状态, success代表已获得
+    "state": "success",
     // Number: 用户的感谢信表填写情况ID // 用这个ID可以拿到具体这个用户这个申请表填写的内容. 现在不可以
     //         如果该字段不存在, 则该用户还没有填写感谢信
     "fill_id": 111,
@@ -377,9 +369,6 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
     * **返回**: User-Honor-State
 * ``DELETE /api/v1/users/{id}/honors/{honor_id}/scores/{scorer_id}``: 删除自己对某个荣誉申请的评分
     * **权限**: 用户管理 AND 荣誉管理 AND ``me == scorer_id``
-* ``DELETE /api/v1/users/{id}/honors/{honor_id}``:
-    * **权限**: 用户管理 AND 荣誉管理
-    * **返回**: User-Honor-State
 
 ### 奖学金相关
 * ``GET /api/v1/scholars``: 获得奖学金列表
@@ -402,9 +391,8 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``GET /api/v1/groups/{id}/scholars``: 得到某个``{id}``组里的所有用户的奖学金分配情况列表
     * **权限**: 用户管理 AND 奖学金管理
     * **返回**: {`user_id`: User-Scholar-State}, dict中每个value为一个list, 代表`user_id`用户的奖学金情况, 如果组里某用户没有获得奖学金, 省略其key-value对
-    * 加入query来限制scholar:
+    * （必选）加入query来限制scholar:
         * ``?scholar_ids=12,34,13``: 奖学金id用单个逗号分隔, 不要空格
-	* ``?year=2017``: 奖学金的年份
 
 ### 用户-奖学金相关
 * ``GET /api/v1/users/{id}/scholars``: 得到某个``{id}``用户获得奖学金的列表
@@ -413,10 +401,13 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``POST /api/v1/users/{id}/scholars``: 给某个用户分配一个新的奖学金
     * **权限**: 用户管理 AND 奖学金管理
     * **返回**: User-Scholar-State
+* ``PUT /api/v1/users/{id}/scholars/{scholar_id}``: 修改用户在一个money类奖学金的获奖金额
+    * **权限**: 用户管理 AND 奖学金管理
+    * **返回**: User-Scholar-State
 * ``POST /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 提交感谢信表格
     * **权限**: ``me == id``
     * **返回**: User-Scholar-State
-* ``PUT /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 修改感谢信表格或者提交状态; 如果是``me == id``, 只能在暂存状态下修改成功, 否则返回错误。
+* ``PUT /api/v1/users/{id}/scholars/{scholar_id}/thanksletter``: 修改感谢信表格。
     * **权限**: ``me == id`` OR 奖学金管理
     * **返回**: User-Scholar-State
 * ``DELETE /api/v1/users/{id}/scholars/{scholar_id}``: 删除一个用户得到的某个奖学金
