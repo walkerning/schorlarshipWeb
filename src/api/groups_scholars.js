@@ -7,33 +7,35 @@ var errors = require("../errors")
 
 module.exports={
   list: function list(req, res, next) {
-    if (!req.query.hasOwnProperty("honor_ids")) {
+    if (!req.query.hasOwnProperty("scholar_ids")) {
       return Promise.reject(new errors.BadRequestError({
-        message: "`honor_ids` field is required."
+        message: "`scholar_ids` field is required."
       }));
     }
     return models.Group
       .getById(req.params.groupId, {fetchOptions: {withRelated: ["users"]}})
       .then(function(group) {
         users = group.getUsers();
-        honor_ids = _.map(_.split(req.query["honor_ids"], ","), _.toNumber);
+        scholar_ids = _.map(_.split(req.query["scholar_ids"], ","), _.toNumber);
         var tasks = [];
         for (var i in users) {
-          for (var j in honor_ids) {
-            tasks.push(models.UserHonorState.getUserHonorState(users[i]["id"], honor_ids[j]));
+          for (var j in scholar_ids) {
+            tasks.push(models.UserScholarState.getUserScholarState(users[i]["id"], scholar_ids[j]));
           }
         }
         return Promise.all(tasks).then(results => {
           results = _.map(results, (h) => { 
           	if (h != null) {
           		h = h.toJSON();
-          		h["fill"] = h["fill"]["content"];
+              if (h["fill"] != null) {
+          		  h["fill"] = h["fill"]["content"];
+              }
           	}
           	return h;
           });
           var rates = {};
           for (var i in users) {
-          	t = results.slice(i * honor_ids.length, (i + 1) * honor_ids.length);
+          	t = results.slice(i * scholar_ids.length, (i + 1) * scholar_ids.length);
           	if (!_.every(t, _.isNull)) {
           		rates[users[i]["id"]] = t;
           	}

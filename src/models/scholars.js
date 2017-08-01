@@ -6,16 +6,16 @@ var errors = require("../errors");
 var Scholar = bookshelfInst.Model.extend({
   tableName: "scholars",
 
-  users: function() {
-    return this.belongsToMany("User");
+  groups: function () {
+    return this.belongsToMany("Group").withPivot(["quota"])
+  },
+
+  applyUsers: function() {
+    return this.hasMany("UserScholarState");
   },
 
   form: function() {
     return this.belongsTo("Form", "form_id");
-  },
-
-  groups: function () {
-    return this.belongsToMany("Group").withPivot(["quota"])
   },
 
   renamePivotAttributes: function renamePivotAttributes(){
@@ -42,6 +42,22 @@ var Scholar = bookshelfInst.Model.extend({
       "updated_by",
       "groups"
     ];
+  },
+
+  getGroupQuota: function getGroupQuota() {
+    var json = this.toJSON();
+    group_quota = json["groups"];
+
+    var renamePivotAttributes = this.renamePivotAttributes();
+    var pickPivotAttributes = this.pickPivotAttributes();
+    group_quota = _.map(group_quota, function(model){
+      _.forEach(renamePivotAttributes, function(value, key){
+        model[value] = model[key];
+      });
+      model = _.pick(model, pickPivotAttributes);
+      return model;
+    });
+    return group_quota;
   },
 
   toClientJSON: function (options) {
@@ -118,14 +134,14 @@ var Scholar = bookshelfInst.Model.extend({
     ])
   },
   
-  create:function (body, user) {
+  create: function (body, contextUser) {
     if (body.hasOwnProperty("alloc") && body["alloc"] == "quota")
     {
       if (!body.hasOwnProperty(["money"]))
       {
         return Promise.reject(new errors.ValidationError({
           message:"`money` field is required for quota allocation method"
-        }))
+        }));
       }
     }
 
@@ -136,16 +152,16 @@ var Scholar = bookshelfInst.Model.extend({
       }))
     }
 
-    return bookshelfInst.Model.create.call(this, body, user)
+    return bookshelfInst.Model.create.call(this, body, contextUser)
       .then(function (scholar){
         return scholar.groups()
-          .attach(_.map(body["group_quota"],function (quota) {
-            return _.pick(quota,["group_id","quota"])
+          .attach(_.map(body["group_quota"], function (quota) {
+            return _.pick(quota, ["group_id","quota"])
           }))
           .then(function () {
-            return Scholar.forge({"id":scholar.get("id")}).fetch()
-          })
-      })
+            return Scholar.forge({"id": scholar.get("id")}).fetch()
+          });
+      });
   }
 });
 

@@ -16,6 +16,11 @@ var initData = {
       name: "1900",
       description: "1900级本科生",
       type: "undergraduate"
+    },
+    {
+      name: "1900",
+      description: "1900级研究生",
+      type: "graduate"
     }
   ],
   User: [
@@ -238,22 +243,51 @@ var initData = {
       fields: '[{"type":1,"max_len":-1,"min_len":0,"required":true,"description":"获得一项学业类优秀奖（学业优秀奖、学习进步奖）和一项非学业类优秀奖（科技创新优秀奖、公益活动优秀奖、社会工作优秀奖、文艺优秀奖、体育优秀奖、社会实践优秀奖），或者三项及以上优秀奖，可参评综合优秀奖学金","content":null},{"type":6,"max_len":-1,"min_len":0,"required":false,"description":"自我陈述","content":null}]',
       template: null
     },
+    {
+      name: "国家奖学金感谢信",
+      type: "thanks",
+      fields: '[{"type":1,"max_len":-1,"min_len":0,"required":true,"description":"请根据邮件要求填写国家奖学金征文","content":null}]',
+      template: null
+    },
+    {
+      name: "系设奖学金感谢信",
+      type: "thanks",
+      fields: '[{"type":1,"max_len":-1,"min_len":0,"required":true,"description":"该奖学金不用填写感谢信","content":null}]',
+      template: null
+    }
   ],
   Scholar: [
     {
-      name: "校设奖学金",
-      year: "2016",
-      form_id: 5,
+      name: "国家奖学金",
+      year: "1900",
+      form_id: 10,
       alloc: "quota",
-      money: 1000,
+      money: 8000,
       group_quota: [
         {
-          group_id: 1,
+          group_id: 2,
           quota: 5
         },
         {
-          group_id: 2,
+          group_id: 3,
           quota: 10
+        }
+      ]
+    },    
+    {
+      name: "系设奖学金",
+      year: "1900",
+      form_id: 11,
+      alloc: "money",
+      money: null,
+      group_quota: [
+        {
+          group_id: 2,
+          quota: 50000
+        },
+        {
+          group_id: 3,
+          quota: 10000
         }
       ]
     }

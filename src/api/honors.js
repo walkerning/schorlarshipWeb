@@ -7,14 +7,14 @@ var logging = require("../logging")
 module.exports={
   list:function list(req, res, next) {
     var queries = req.query;
-    return models.Honors.getByQuery(queries)
+    return models.Honors.getByQuery(queries, {fetchOptions: {withRelated: ["groups"]}})
       .then(function(collection) {
         var obj = collection.toClientJSON();
         // Query "?group_id=" return all honors that have quota in this group
         if ("group_id" in queries) {
           obj = _.filter(obj, (value) => {
             var group_ids = _.map(value["group_quota"], (s) => s["group_id"]);
-            return ~_.includes(group_ids, queries["group_id"]);
+            return _.includes(group_ids, _.toNumber(queries["group_id"]));
           });
         }
         // Query "?available=1" return all honors that the current time is between its start_time and end_time

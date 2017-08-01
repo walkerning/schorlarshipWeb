@@ -278,12 +278,15 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
   /** 
    * @returns {Promise<Collection>}
    */
-  getByQuery: function getByQuery(query) {
+  getByQuery: function getByQuery(query, options) {
+    if (options !== undefined) {
+      var fetchOpt = options.fetchOptions;
+    }
     return this.forge()
       .query({
         where: _.pick(query, this.queriableAttributes())
       })
-      .fetch();
+      .fetch(fetchOpt);
   },
   // Operation methods used by API.
   /** 

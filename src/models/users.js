@@ -51,9 +51,9 @@ var User = bookshelfInst.Model.extend({
   applyHonors: function() {
     return this.hasMany("UserHonorState", "user_id");
   },
-
-  scholars: function() {
-    return this.belongsToMany("Scholar");
+  
+  applyScholars: function() {
+    return this.hasMany("UserScholarState", "user_id");
   },
 
   permissions: function() {
@@ -138,10 +138,26 @@ var User = bookshelfInst.Model.extend({
     return this.related("applyHonors").toJSON();
   },
 
+  // get applied scholars
+  getScholarStates: function getScholarStates() {
+    return this.related("applyScholars").toJSON();
+  },
+
   getHonorStatesCol: function getHonorStatesCol(queries) {
     return this.related("applyHonors")
       .query({
         where: _.pick(queries, models.UserHonorStates.queriableAttributes())
+      })
+      .fetch()
+      .then(function(c) {
+        return c.toJSON();
+      });
+  },
+
+  getScholarStatesCol: function getScholarStatesCol(queries) {
+    return this.related("applyScholars")
+      .query({
+        where: _.pick(queries, models.UserScholarStates.queriableAttributes())
       })
       .fetch()
       .then(function(c) {
@@ -159,10 +175,27 @@ var User = bookshelfInst.Model.extend({
       });
   },
 
+  getScholarState: function getScholarState(scholar_id) {
+    return this.getScholarStateModel(scholar_id)
+      .then(function (state) {
+        if (state !== null) {
+          return state.toJSON();
+        }
+        return null;
+      });
+  },
+
   getHonorStateModel: function getHonorStateModel(honor_id) {
     return models.UserHonorState
       .forge()
       .where({user_id: this.get("id"), honor_id: honor_id})
+      .fetch();
+  },
+
+  getScholarStateModel: function getScholarStateModel(scholar_id) {
+    return models.UserScholarState
+      .forge()
+      .where({user_id: this.get("id"), scholar_id: scholar_id})
       .fetch();
   },
 

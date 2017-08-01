@@ -15,8 +15,6 @@ function expandFill(hstate, user) {
 
 module.exports = {
   listHonors: function listHonors(req, res, next) {
-    // TODO: maybe enable query about the honor's attributes.
-    //       whether to inline the honor attributes into the UserHonorState's client json?
     return models.User.getById(req.params.userId, {
       fetchOptions: {withRelated: ["applyHonors", "fills"]}
     })
@@ -36,7 +34,7 @@ module.exports = {
     }
     // Attention: ids in the request body is of string type
     //            Maybe get the honor first. and use honor.get("id") instead is better
-    req.body.honor_id = _.toNumber(req.body.honor_id)
+    req.body.honor_id = _.toNumber(req.body.honor_id);
     if (!req.body.hasOwnProperty("fill") || !req.body["fill"]) {
       return Promise.reject(new errors.BadRequestError({
         message: "`fill` field is required."
@@ -55,6 +53,11 @@ module.exports = {
         // Get the honor
         return models.Honor.getById(req.body.honor_id)
           .then(function (hon) {
+            if (!hon) {
+              return Promise.reject(new errors.BadRequestError({
+                message: "Honor with `honor_id`==" + req.body.honor_id + " does not exist."
+              }));
+            }
             // groups that have quota
             gids = _.map(hon.getGroupQuota(), (s) => s["group_id"])
             if (!_.includes(gids, user.get("group_id"))) {

@@ -10,8 +10,9 @@ var fills = require("./fills");
 var honors = require("./honors");
 var users_honors = require("./users_honors");
 var scholars = require("./scholars");
-var users_scholars = require("./users_honors");
+var users_scholars = require("./users_scholars");
 var groups_honors = require("./groups_honors");
+var groups_scholars = require("./groups_scholars");
 
 var apiRouter = express.Router();
 
@@ -69,8 +70,10 @@ apiRouter.delete("/users/:userId/honors/:honorId", permit(["user", "honor"]), ca
 apiRouter.get("/users/:userId/scholars", permit(["me"], ["user"]), catchError(users_scholars.listScholars));
 // Give a scholar to user
 apiRouter.post("/users/:userId/scholars", permit(["user", "scholar"]), catchError(users_scholars.giveScholar));
+// Change money for a scholar owner
+apiRouter.put("/users/:userId/scholars/:scholarId", permit(["user", "scholar"]), catchError(users_scholars.updateScholar));
 // Upload the thanks-letter form
-apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"]), catchError(users_scholars.uploadThanksLetter));
+apiRouter.post("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"]), catchError(users_scholars.uploadThanksLetter));
 // Change the thanks-letter form
 apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], ["scholar"]), catchError(users_scholars.changeThanksLetter));
 // Delete a scholar for this user
@@ -98,6 +101,10 @@ apiRouter.put("/groups/:groupId", permit(["user"]), catchError(groups.updateInfo
 
 // List the honors that the members in a group have
 apiRouter.get("/groups/:groupId/honors", permit(["user", "honor"]), catchError(groups_honors.list));
+
+// List the scholars that the members in a group have
+apiRouter.get("/groups/:groupId/scholars", permit(["user", "scholar"]), catchError(groups_scholars.list));
+
 
 
 //// Routing endpoints `/forms`

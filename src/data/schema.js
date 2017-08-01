@@ -362,18 +362,20 @@ module.exports = {
   },
 
   groups_scholars: {
-    id: {
-      type: "increments",
-      nullable: false,
-      primary: true
-    },
+    //id: {
+    //  type: "increments",
+    //  nullable: false,
+    //  primary: true
+    //},
     group_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true,
     },
     scholar_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      composite_primary: true,
     },
     quota: {
       type: "integer",
@@ -394,7 +396,7 @@ module.exports = {
       type: "integer",
       nullable: false
     },
-    honor_id: {
+    scholar_id: {
       type: "integer",
       nullable: false
     },
@@ -402,16 +404,34 @@ module.exports = {
       type: "string",
       nullable: false,
       validations: {
-        isIn: [["none", "temp", "commit"]]
+        isIn: [["success", "fail"]]
       }
     },
     fill_id: {
       type: "integer",
-      nullable: false
+      nullable: true
     },
     money: {
       type: "integer",
+      nullable: true
+    },
+
+    created_at: {
+      type: "dateTime",
       nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
     }
   },
 

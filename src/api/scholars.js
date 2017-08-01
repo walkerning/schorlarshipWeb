@@ -5,14 +5,14 @@ var models = require("../models")
 var logging = require("../logging")
 
 module.exports={
-  list:function (req, res ,next) {
+  list: function (req, res ,next) {
     return models.Scholars.getByQuery(req.query)
       .then(function(scholars){
           res.status(200).json(scholars.toClientJSON())
       })
   },
     
-  info:function (req, res, next) {
+  info: function (req, res, next) {
     return models.Scholar
       .getById(req.params.scholarId, {fetchOptions: {withRelated: ["groups"]}})
       .then(function(scholar) {
@@ -20,14 +20,14 @@ module.exports={
       })
   },
     
-  create:function (req, res, next) {
+  create: function (req, res, next) {
     return models.Scholar.create(req.body,req.user)
       .then(function (scholar) {
         res.status(201).json(scholar.toClientJSON())
       })
   },
     
-  updateInfo:function (req, res, next) {
+  updateInfo: function (req, res, next) {
     return models.Scholar.getById(req.params.scholarId)
       .then(function(scholar){
         return scholar.update(req.body, req.user)
@@ -37,13 +37,16 @@ module.exports={
       })
   },
     
-  delete:function (req, res, next) {
-    return models.Scholar.getById(req.params.scholarId)
+  delete: function (req, res, next) {
+    return models.Scholar.getById(req.params.scholarId, { noreject: true })
       .then(function (scholar) {
-        return scholar.delete()
-          .then(function () {
-            res.status(200).send("Successful Deleted")
-          })
+        var start = Promise.resolve(null);
+        if (scholar) {
+          start = scholar.destroy();
+        }
+        return start.then(function () {
+          res.status(200).json({}).end();
+        })
       })
   }
 };
