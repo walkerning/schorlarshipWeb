@@ -107,7 +107,7 @@ apiRouter.get("/groups/:groupId/scholars", permit(["user", "scholar"]), catchErr
 
 //// Routing endpoints `/forms`
 // List forms
-apiRouter.get("/forms", permit(["form"]), catchError(forms.list));
+apiRouter.get("/forms", catchError(forms.list));
 // Create forms
 apiRouter.post("/forms", permit(["form"]), catchError(forms.create));
 // Get form info
