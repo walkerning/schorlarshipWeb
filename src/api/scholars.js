@@ -4,12 +4,42 @@ var util = require("util")
 var models = require("../models")
 var logging = require("../logging")
 
+function listAll(req, res, next) {
+  return models.Scholars.getByQuery(req.query)
+    .then(function(scholars){
+      res.status(200).json(scholars.toClientJSON());
+    })
+}
+
+function listPage(req, res, next) {
+  var queries = req.query;
+  if (!(queries.hasOwnProperty("page") && queries.hasOwnProperty("pageSize"))) {
+    return Promise.reject(new errors.BadRequestError({
+      message: "`page` and `pageSize` field is required."
+    }));    
+  }
+  page = _.toInteger(queries["page"]);
+  pageSize = _.toInteger(queries["pageSize"]);
+  return models.Scholars.getByQuery(queries)
+    .then(function(scholars){
+      var obj = scholars.toClientJSON();
+      var pagination = {
+        page: page,
+        pageSize: pageSize,
+        rowCount: obj.length,
+        pageCount: Math.ceil(obj.length / pageSize)
+      }
+      res.status(200).json({ data: obj.slice((page - 1) * pageSize, page * pageSize), pagination: pagination});
+    })    
+}
+
 module.exports={
-  list: function (req, res ,next) {
-    return models.Scholars.getByQuery(req.query)
-      .then(function(scholars){
-          res.status(200).json(scholars.toClientJSON())
-      })
+  list: function (req, res, next) {
+    if (req.query.hasOwnProperty("page")) {
+      return listPage(req, res, next);
+    } else {
+      return listAll(req, res, next);
+    }
   },
     
   info: function (req, res, next) {

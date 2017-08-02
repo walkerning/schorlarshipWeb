@@ -4,26 +4,69 @@ var util = require("util");
 var models = require("../models");
 var errors = require("../errors");
 
+function listAll(req, res, next) {
+  var queries = req.query;
+  return models.Users.getByQuery(queries)
+    .then(function(collection) {
+      var obj = collection.toClientJSON();
+      if ("group" in queries) {
+        obj = _.filter(obj, (value) => {
+          return value["group"] == queries["group"];
+        });
+      }
+      // Query `?admin=1` return all the users with permissions other than "login"
+      if ("admin" in queries && _.toInteger(queries["admin"])) {
+        obj = _.filter(obj, (value) => {
+          // FIXME: add `is admin permission` field into the permission table?
+          return _.difference(value["permissions"], ["user", "apply"]).length > 0
+        });
+      }
+      res.status(200).json(obj);
+    });    
+}
+
+// TODO: use a more efficient way
+function listPage(req, res, next) {
+  var queries = req.query;
+  if (!(queries.hasOwnProperty("page") && queries.hasOwnProperty("pageSize"))) {
+    return Promise.reject(new errors.BadRequestError({
+      message: "`page` and `pageSize` field is required."
+    }));    
+  }
+  page = _.toInteger(queries["page"]);
+  pageSize = _.toInteger(queries["pageSize"]);
+  return models.Users.getByQuery(queries)
+    .then(function(collection) {
+      var obj = collection.toClientJSON();
+      if ("group" in queries) {
+        obj = _.filter(obj, (value) => {
+          return value["group"] == queries["group"];
+        });
+      }
+      // Query `?admin=1` return all the users with permissions other than "login"
+      if ("admin" in queries && _.toInteger(queries["admin"])) {
+        obj = _.filter(obj, (value) => {
+          // FIXME: add `is admin permission` field into the permission table?
+          return _.difference(value["permissions"], ["login", "apply"]).length > 0
+        });
+      }
+      var pagination = {
+        page: page,
+        pageSize: pageSize,
+        rowCount: obj.length,
+        pageCount: Math.ceil(obj.length / pageSize)
+      }
+      res.status(200).json({ data: obj.slice((page - 1) * pageSize, page * pageSize), pagination: pagination});
+    });     
+}
+
 module.exports = {
   list: function list(req, res, next) {
-    var queries = req.query;
-    return models.Users.getByQuery(queries)
-      .then(function(collection) {
-        var obj = collection.toClientJSON();
-        if ("group" in queries) {
-          obj = _.filter(obj, (value) => {
-            return value["group"] == queries["group"];
-          });
-        }
-        // Query `?admin=1` return all the users with permissions other than "login"
-        if ("admin" in queries && _.toInteger(queries["admin"])) {
-          obj = _.filter(obj, (value) => {
-            // FIXME: add `is admin permission` field into the permission table?
-            return _.difference(value["permissions"], ["user", "apply"]).length > 0
-          });
-        }
-        res.status(200).json(obj);
-      });
+    if (req.query.hasOwnProperty("page")) {
+      return listPage(req, res, next);
+    } else {
+      return listAll(req, res, next);
+    }
   },
 
   create: function create(req, res, next) {
@@ -80,7 +123,7 @@ module.exports = {
         }
         return user.update(req.body, req.user)
           .then(function() {
-            return user.fetch()
+            return models.User.getById(req.params.userId)
               .then(function(user) {
                 res.status(200).json(user.toClientJSON());
               });

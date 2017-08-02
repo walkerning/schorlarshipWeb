@@ -285,8 +285,5 @@ module.exports = {
               });
           });
       });
-  },
-
-  deleteHonor: function deleteHonor(req, res, next) {
-  },
+  }
 };

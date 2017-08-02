@@ -3,13 +3,44 @@ var Promise = require("bluebird");
 var models = require("../models");
 var errors = require("../errors");
 
+function listAll(req, res, next) {
+  var queries = req.query;
+  return models.Forms.getByQuery(queries)
+    .then(function(collection) {
+      res.status(200).json(collection.toClientJSON());
+    });
+}
+
+// TODO: use a more efficient way
+function listPage(req, res, next) {
+  var queries = req.query;
+  if (!(queries.hasOwnProperty("page") && queries.hasOwnProperty("pageSize"))) {
+    return Promise.reject(new errors.BadRequestError({
+      message: "`page` and `pageSize` field is required."
+    }));    
+  }
+  page = _.toInteger(queries["page"]);
+  pageSize = _.toInteger(queries["pageSize"]);  
+  return models.Forms.getByQuery(queries)
+    .then(function(collection) {
+      var obj = collection.toClientJSON();
+      var pagination = {
+        page: page,
+        pageSize: pageSize,
+        rowCount: obj.length,
+        pageCount: Math.ceil(obj.length / pageSize)
+      }      
+      res.status(200).json({ data: obj.slice((page - 1) * pageSize, page * pageSize), pagination: pagination});
+    });  
+}
+
 module.exports = {
   list: function list(req, res, next) {
-    var queries = req.query;
-    return models.Forms.getByQuery(queries)
-      .then(function(collection) {
-        res.status(200).json(collection.toClientJSON());
-      });
+    if (req.query.hasOwnProperty("page")) {
+      return listPage(req, res, next);
+    } else {
+      return listAll(req, res, next);
+    }
   },
 
   create: function create(req, res, next) {

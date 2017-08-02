@@ -6,11 +6,13 @@ var db = require("../data").db;
 var schema = require("../data").schema;
 var validation = require("../data").validation;
 var errors = require("../errors");
+var logging = require("../logging")
 
 var bookshelfInst;
 
 bookshelfInst = bookshelf(db);
 bookshelfInst.plugin("registry");
+bookshelfInst.plugin("pagination");
 
 // Helpers
 function _getJSONAttrList(json, attrName) {
@@ -219,7 +221,6 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
         }
       });
   },
-
   /** 
    * @returns {Promise<Model>}
    */
@@ -287,6 +288,21 @@ bookshelfInst.Collection = bookshelfInst.Collection.extend({
         where: _.pick(query, this.queriableAttributes())
       })
       .fetch(fetchOpt);
+  },
+  // Operation methods used by API.
+  /** 
+   * @returns {Promise<Collection>}
+   */
+  getByQueryInPage: function getByQueryInPage(query, pageOptions, options) {
+    var fetchOpt = {};
+    if (options !== undefined) {
+      fetchOpt = options.fetchOptions;
+    }
+    return this.forge()
+      .query({
+        where: _.pick(query, this.queriableAttributes())
+      })
+      .fetchPage(_.extend(fetchOpt, pageOptions));
   },
   // Operation methods used by API.
   /** 
