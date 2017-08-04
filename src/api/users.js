@@ -149,6 +149,7 @@ module.exports = {
   },
 
   newPassword: function newPassword(req, res, next) {
+    /*
     return models.User.getById(req.params.userId)
       .then(function(user) {
         // TODO: the reset password should be random and sent to the user's email
@@ -160,6 +161,19 @@ module.exports = {
           .then(function() {
             return user.sendEmail("Password reset: Your new password at EEScholarshipWeb", util.format("Your new password is: %s\n", newPass));
           })
+          .then(function() {
+            res.status(201).json({}).end();
+          });
+      });
+  }
+  */
+    return models.User.getById(req.params.userId)
+      .then(function(user) {
+        var newPass = user.get("student_id");
+        //var newPass = passwordGenerator.generate();
+        return user.update({
+          password: newPass
+        }, req.user)
           .then(function() {
             res.status(201).json({}).end();
           });
