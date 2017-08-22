@@ -5,7 +5,7 @@ module.exports = function readPermissions(req, res, next) {
   if (req.auth === undefined) {
     next(new errors.UnauthorizedError());
   } else {
-    models.User.forge({
+    return models.User.forge({
       id: req.auth.id
     })
       .fetch({

@@ -106,9 +106,37 @@ module.exports = {
       });
   },
 
+  cancelHonor: function cancelHonor(req, res, next) {
+    return models.User.getById(req.params.userId,
+                        {
+                          fetchOptions: {withRelated: ["fills", "applyHonors"]}
+                        })
+      .then(function(user) {
+        // Handle fill change
+        return user.getHonorStateModel(req.params.honorId)
+          .then(function(state) {
+            start = Promise.resolve(null);
+            if (!state) {
+              return Promise.reject(new errors.NotFoundError({
+                message: "This user do not apply for this honor."
+              }));
+            }
+            hstate = state.toJSON();
+            if (_.includes(["applied", "temp"], hstate["states"])) {
+              return Promise.reject(new errors.BadRequestError({
+                message: "You can only cancel honor application in temp or applied."
+              }));
+            }
+            return state.destroy().then(function() {
+              res.status(204).json({}).end();
+            });
+          })
+      });
+  },
+
   updateHonor: function updateHonor(req, res, next) {
     // Update the honor applying status, or the table content
-    body = _.pick(req.body, ["state", "fill"]);
+    var body = _.pick(req.body, ["state", "fill"]);
     if (_.keys(body).length == 0) {
       res.status(304).json();
     }
@@ -131,15 +159,14 @@ module.exports = {
               fill_id = hstate["fill_id"];
               start = user.related("fills").get(fill_id).update({
                 "content": JSON.stringify(body["fill"])
-              });
+              }, req.user);
             }
             return start.then(function() {
               // Handle state change
               if (body["state"]) {
                 return state.update({
-                  "state": body["state"],
-                  "apply_time": new Date()
-                });
+                  "state": body["state"]
+                }, req.user);
               }
             });
           })
@@ -157,7 +184,7 @@ module.exports = {
 
   updateHonorFill: function updateHonorFill(req, res, next) {
     // Update the honor applying status, or the table content
-    body = _.pick(req.body, ["state", "fill"]);
+    var body = _.pick(req.body, ["state", "fill"]);
     if (_.keys(body).length != 2) {
       res.status(304).json();
     }

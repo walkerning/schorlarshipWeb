@@ -53,6 +53,8 @@ apiRouter.delete("/users/:userId", permit(["user"]), catchError(users.delete));
 apiRouter.get("/users/:userId/honors", permit(["me"], ["user"]), catchError(users_honors.listHonors));
 // Apply for honor
 apiRouter.post("/users/:userId/honors", permit(["me", "apply"]), catchError(users_honors.applyHonor));
+// Delete a honor application
+apiRouter.delete("/users/:userId/honors/:honorId", permit(["me", "apply"]), catchError(users_honors.cancelHonor));
 // Change honor apply status for this user
 apiRouter.put("/users/:userId/honors/:honorId/admin", permit(["user", "honor"]), catchError(users_honors.updateHonor));
 // Change honor apply fill content when the state is "temp"
