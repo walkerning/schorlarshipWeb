@@ -361,6 +361,8 @@ Link: <https://{HOST_NAME}/api/v1/users?group=2016&page=3&per_page=20>; rel="nex
 * ``PUT /api/v1/users/{id}/honors/{honor_id}``: 提交已暂存的申请表, 或者在荣誉状态为暂存的时候修改申请表
     * **权限**: 用户管理 AND 荣誉管理 OR ``me == id``
     * **返回**: User-Honor-State
+* ``DELETE /api/v1/users/{id}/honors/{honor_id}``: 删除申请
+    * **权限**: ``me == id``
 * ``POST /api/v1/users/{id}/honors/{honor_id}/scores/``: 提交对某个荣誉申请的评分
     * **权限**: 用户管理 AND 荣誉管理
     * **返回**: User-Honor-State
