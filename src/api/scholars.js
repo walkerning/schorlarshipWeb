@@ -6,7 +6,7 @@ var logging = require("../logging")
 
 function listAll(req, res, next) {
   return models.Scholars.getByQuery(req.query)
-    .then(function(scholars){
+    .then(function(scholars) {
       res.status(200).json(scholars.toClientJSON());
     })
 }
@@ -16,12 +16,12 @@ function listPage(req, res, next) {
   if (!(queries.hasOwnProperty("page") && queries.hasOwnProperty("pageSize"))) {
     return Promise.reject(new errors.BadRequestError({
       message: "`page` and `pageSize` field is required."
-    }));    
+    }));
   }
   page = _.toInteger(queries["page"]);
   pageSize = _.toInteger(queries["pageSize"]);
   return models.Scholars.getByQuery(queries)
-    .then(function(scholars){
+    .then(function(scholars) {
       var obj = scholars.toClientJSON();
       var pagination = {
         page: page,
@@ -29,52 +29,61 @@ function listPage(req, res, next) {
         rowCount: obj.length,
         pageCount: Math.ceil(obj.length / pageSize)
       }
-      res.status(200).json({ data: obj.slice((page - 1) * pageSize, page * pageSize), pagination: pagination});
-    })    
+      res.status(200).json({
+        data: obj.slice((page - 1) * pageSize, page * pageSize),
+        pagination: pagination
+      });
+    })
 }
 
-module.exports={
-  list: function (req, res, next) {
+module.exports = {
+  list: function(req, res, next) {
     if (req.query.hasOwnProperty("page")) {
       return listPage(req, res, next);
     } else {
       return listAll(req, res, next);
     }
   },
-    
-  info: function (req, res, next) {
+
+  info: function(req, res, next) {
     return models.Scholar
-      .getById(req.params.scholarId, {fetchOptions: {withRelated: ["groups"]}})
+      .getById(req.params.scholarId, {
+        fetchOptions: {
+          withRelated: ["groups"]
+        }
+      })
       .then(function(scholar) {
         res.status(200).json(scholar.toClientJSON());
       })
   },
-    
-  create: function (req, res, next) {
-    return models.Scholar.create(req.body,req.user)
-      .then(function (scholar) {
+
+  create: function(req, res, next) {
+    return models.Scholar.create(req.body, req.user)
+      .then(function(scholar) {
         res.status(201).json(scholar.toClientJSON())
       })
   },
-    
-  updateInfo: function (req, res, next) {
+
+  updateInfo: function(req, res, next) {
     return models.Scholar.getById(req.params.scholarId)
-      .then(function(scholar){
+      .then(function(scholar) {
         return scholar.update(req.body, req.user)
-          .then(function (scholar) {
+          .then(function(scholar) {
             res.status(200).json(scholar)
           })
       })
   },
-    
-  delete: function (req, res, next) {
-    return models.Scholar.getById(req.params.scholarId, { noreject: true })
-      .then(function (scholar) {
+
+  delete: function(req, res, next) {
+    return models.Scholar.getById(req.params.scholarId, {
+      noreject: true
+    })
+      .then(function(scholar) {
         var start = Promise.resolve(null);
         if (scholar) {
           start = scholar.destroy();
         }
-        return start.then(function () {
+        return start.then(function() {
           res.status(200).json({}).end();
         })
       })

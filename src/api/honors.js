@@ -6,7 +6,11 @@ var logging = require("../logging")
 
 function listAll(req, res, next) {
   var queries = req.query;
-  return models.Honors.getByQuery(queries, {fetchOptions: {withRelated: ["groups"]}})
+  return models.Honors.getByQuery(queries, {
+    fetchOptions: {
+      withRelated: ["groups"]
+    }
+  })
     .then(function(collection) {
       var obj = collection.toClientJSON();
       // Query "?group_id=" return all honors that have quota in this group
@@ -34,11 +38,15 @@ function listPage(req, res, next) {
   if (!(queries.hasOwnProperty("page") && queries.hasOwnProperty("pageSize"))) {
     return Promise.reject(new errors.BadRequestError({
       message: "`page` and `pageSize` field is required."
-    }));    
+    }));
   }
   page = _.toInteger(queries["page"]);
   pageSize = _.toInteger(queries["pageSize"]);
-  return models.Honors.getByQuery(queries, {fetchOptions: {withRelated: ["groups"]}})
+  return models.Honors.getByQuery(queries, {
+    fetchOptions: {
+      withRelated: ["groups"]
+    }
+  })
     .then(function(collection) {
       var obj = collection.toClientJSON();
       // Query "?group_id=" return all honors that have quota in this group
@@ -63,12 +71,15 @@ function listPage(req, res, next) {
         rowCount: obj.length,
         pageCount: Math.ceil(obj.length / pageSize)
       }
-      res.status(200).json({ data: obj.slice((page - 1) * pageSize, page * pageSize), pagination: pagination}); 
-    });  
+      res.status(200).json({
+        data: obj.slice((page - 1) * pageSize, page * pageSize),
+        pagination: pagination
+      });
+    });
 }
 
-module.exports={
-  list:function list(req, res, next) {
+module.exports = {
+  list: function list(req, res, next) {
     if (req.query.hasOwnProperty("page")) {
       return listPage(req, res, next);
     } else {
@@ -78,9 +89,13 @@ module.exports={
 
   info: function info(req, res, next) {
     return models.Honor
-      .getById(req.params.honorId, {fetchOptions: {withRelated: ["groups"]}})
+      .getById(req.params.honorId, {
+        fetchOptions: {
+          withRelated: ["groups"]
+        }
+      })
       .then(function(honor) {
-          res.status(200).json(honor.toClientJSON());
+        res.status(200).json(honor.toClientJSON());
       })
 
   },
@@ -97,7 +112,9 @@ module.exports={
       .then(function(hon) {
         return hon.update(req.body, req.user)
           .then(function() {
-            return models.Honor.forge({"id": hon.get("id")}).fetch()
+            return models.Honor.forge({
+              "id": hon.get("id")
+            }).fetch()
               .then(function(hon) {
                 res.status(200).json(hon.toClientJSON());
               });

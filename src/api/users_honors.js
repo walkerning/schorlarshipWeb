@@ -17,12 +17,16 @@ function expandFill(hstate, user) {
 module.exports = {
   listHonors: function listHonors(req, res, next) {
     return models.User.getById(req.params.userId, {
-      fetchOptions: {withRelated: ["applyHonors", "fills"]}
+      fetchOptions: {
+        withRelated: ["applyHonors", "fills"]
+      }
     })
-      .then(function (user) {
+      .then(function(user) {
         return user.getHonorStatesCol(req.query)
-          .then(function (hstates) {
-            res.status(200).json(_.map(hstates, (hstate) => {return expandFill(hstate, user);}))
+          .then(function(hstates) {
+            res.status(200).json(_.map(hstates, (hstate) => {
+              return expandFill(hstate, user);
+            }))
           });
       });
   },
@@ -42,9 +46,11 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId, {
-      fetchOptions: {withRelated: ["applyHonors"]}
+      fetchOptions: {
+        withRelated: ["applyHonors"]
+      }
     })
-      .then(function (user) {
+      .then(function(user) {
         exist_hids = _.map(user.getHonorStates(), (h) => h["honor_id"]);
         if (_.includes(exist_hids, req.body.honor_id)) {
           return Promise.reject(new errors.BadRequestError({
@@ -53,7 +59,7 @@ module.exports = {
         }
         // Get the honor
         return models.Honor.getById(req.body.honor_id)
-          .then(function (hon) {
+          .then(function(hon) {
             if (!hon) {
               return Promise.reject(new errors.BadRequestError({
                 message: "Honor with `honor_id`==" + req.body.honor_id + " does not exist."
@@ -97,7 +103,7 @@ module.exports = {
             return user.fetch({
               withRelated: ["applyHonors", "fills"]
             })
-              .then(function (user) {
+              .then(function(user) {
                 return user.getHonorState(req.body.honor_id)
                   .then(function(hstate) {
                     res.status(201).json(expandFill(hstate, user));
@@ -109,9 +115,11 @@ module.exports = {
 
   cancelHonor: function cancelHonor(req, res, next) {
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["fills", "applyHonors"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["fills", "applyHonors"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
@@ -142,9 +150,11 @@ module.exports = {
       res.status(304).json();
     }
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["fills", "applyHonors"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["fills", "applyHonors"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
@@ -155,13 +165,17 @@ module.exports = {
               }));
             }
             hstate = state.toJSON();
-            return bookshelfInst.transaction(function (trans) {
+            return bookshelfInst.transaction(function(trans) {
               return models.Honor.getById(req.params.honorId).then(function(hon) {
                 var start = Promise.resolve(null);
                 if (body["state"] && body["state"] == "success") {
                   // Judge the allocation count not exceed the group quota.
                   start = hon.applyUsers()
-                    .query({where: {"state": "success"}})
+                    .query({
+                      where: {
+                        "state": "success"
+                      }
+                    })
                     .count()
                     .then(function(count) {
                       var group_quota = hon.getQuotaOfGroup(user.get("group_id"));
@@ -194,7 +208,9 @@ module.exports = {
             });
           })
           .then(function() {
-            return user.fetch({withRelated: ["fills", "applyHonors"]})
+            return user.fetch({
+              withRelated: ["fills", "applyHonors"]
+            })
               .then(function(user) {
                 return user.getHonorState(req.params.honorId)
                   .then(function(hstate) {
@@ -217,9 +233,11 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["fills", "applyHonors"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["fills", "applyHonors"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
@@ -258,7 +276,9 @@ module.exports = {
             });
           })
           .then(function() {
-            return user.fetch({withRelated: ["fills", "applyHonors"]})
+            return user.fetch({
+              withRelated: ["fills", "applyHonors"]
+            })
               .then(function(user) {
                 return user.getHonorState(req.params.honorId)
                   .then(function(hstate) {
@@ -276,13 +296,13 @@ module.exports = {
       }));
     }
     return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
-      .then(function (st) {
+      .then(function(st) {
         if (!st) {
           // FIXME: BadRequestError or NotFoundError???
           return Promise.reject(new errors.BadRequestError({
             message: util.format("This user %s has not applied for this honor %s.", req.params.userId, req.params.honorId)
           }));
-        }        
+        }
         return st.addScore(req.user, JSON.stringify(req.body.score))
           .then(function() {
             st.fetch()
@@ -301,7 +321,7 @@ module.exports = {
       }));
     }
     return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
-      .then(function (st) {
+      .then(function(st) {
         if (!st) {
           // FIXME: BadRequestError or NotFoundError???
           return Promise.reject(new errors.BadRequestError({
@@ -320,7 +340,7 @@ module.exports = {
 
   deleteHonorScore: function deleteHonorScore(req, res, next) {
     return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
-      .then(function (st) {
+      .then(function(st) {
         if (!st) {
           // FIXME: BadRequestError or NotFoundError???
           return Promise.reject(new errors.BadRequestError({

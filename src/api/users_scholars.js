@@ -17,12 +17,16 @@ function expandFill(hstate, user) {
 module.exports = {
   listScholars: function listScholars(req, res, next) {
     return models.User.getById(req.params.userId, {
-      fetchOptions: {withRelated: ["applyScholars", "fills"]}
+      fetchOptions: {
+        withRelated: ["applyScholars", "fills"]
+      }
     })
-      .then(function (user) {
+      .then(function(user) {
         return user.getScholarStatesCol(req.query)
-          .then(function (hstates) {
-            res.status(200).json(_.map(hstates, (hstate) => {return expandFill(hstate, user);}))
+          .then(function(hstates) {
+            res.status(200).json(_.map(hstates, (hstate) => {
+              return expandFill(hstate, user);
+            }))
           });
       });
   },
@@ -35,9 +39,11 @@ module.exports = {
     }
     req.body.scholar_id = _.toNumber(req.body.scholar_id);
     return models.User.getById(req.params.userId, {
-      fetchOptions: {withRelated: ["applyScholars"]}
+      fetchOptions: {
+        withRelated: ["applyScholars"]
+      }
     })
-      .then(function (user) {
+      .then(function(user) {
         exist_hids = _.map(user.getScholarStates(), (h) => h["scholar_id"]);
         if (_.includes(exist_hids, req.body.scholar_id)) {
           return Promise.reject(new errors.BadRequestError({
@@ -45,9 +51,9 @@ module.exports = {
           }));
         }
         // Get the scholar
-        return bookshelfInst.transaction(function (trans) {
+        return bookshelfInst.transaction(function(trans) {
           return models.Scholar.getById(req.body.scholar_id)
-            .then(function (scholar) {
+            .then(function(scholar) {
               // groups that have quota
               gids = _.map(scholar.getGroupQuota(), (s) => s["group_id"])
               if (!_.includes(gids, user.get("group_id"))) {
@@ -79,7 +85,7 @@ module.exports = {
                 start = scholar.allocatedCount();
               }
               // Create new scholar state
-              return start.then(function (allocated) {
+              return start.then(function(allocated) {
                 if (allocated + added > group_quota) {
                   // Exceeded, return error.
                   return Promise.reject(new errors.ValidationError({
@@ -100,7 +106,7 @@ module.exports = {
             return user.fetch({
               withRelated: ["applyScholars", "fills"]
             })
-              .then(function (user) {
+              .then(function(user) {
                 return user.getScholarState(req.body.scholar_id)
                   .then(function(hstate) {
                     res.status(201).json(expandFill(hstate, user));
@@ -117,9 +123,11 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["applyScholars"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["applyScholars"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -130,38 +138,42 @@ module.exports = {
                 message: "This user do not have this scholarship."
               }));
             }
-            return models.Scholar.getById(req.params.scholarId)
-              .then(function(scholar) {
-                if (!scholar) {
-                  return Promise.reject(new errors.BadRequestError({
-                    message: "Scholar with `scholar_id`==" + req.params.scholarId + " does not exist."
-                  }));                  
-                }
-                if (scholar.get("alloc") != "money") {
-                  return Promise.reject(new errors.ValidationError({
-                    message: "This API is only for `money` type scholarship."
-                  }));              
-                }
-                return scholar.allocatedMoney()
-                  .then(function (allocated) {
-                    // Judge if the new allocated money will exceed the group quota.
-                    var new_money = _.toNumber(req.body.money);
-                    var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
-                    var new_allocated = allocated - state.get("money") + new_money;
-                    if (new_allocated > group_quota) {
-                      // Will exceed, return error.
-                      return Promise.reject(new errors.ValidationError({
-                        message: util.format("Allocated `%d` will exceeds quota `%d`.", new_allocated, group_quota)
-                      }));
-                    }
-                    return state.update({
-                      money: new_money
+            return bookshelfInst.transaction(function(trans) {
+              return models.Scholar.getById(req.params.scholarId)
+                .then(function(scholar) {
+                  if (!scholar) {
+                    return Promise.reject(new errors.BadRequestError({
+                      message: "Scholar with `scholar_id`==" + req.params.scholarId + " does not exist."
+                    }));
+                  }
+                  if (scholar.get("alloc") != "money") {
+                    return Promise.reject(new errors.ValidationError({
+                      message: "This API is only for `money` type scholarship."
+                    }));
+                  }
+                  return scholar.allocatedMoney()
+                    .then(function(allocated) {
+                      // Judge if the new allocated money will exceed the group quota.
+                      var new_money = _.toNumber(req.body.money);
+                      var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
+                      var new_allocated = allocated - state.get("money") + new_money;
+                      if (new_allocated > group_quota) {
+                        // Will exceed, return error.
+                        return Promise.reject(new errors.ValidationError({
+                          message: util.format("Allocated `%d` will exceeds quota `%d`.", new_allocated, group_quota)
+                        }));
+                      }
+                      return state.update({
+                        money: new_money
+                      });
                     });
-                  });
-              });
+                });
+            });
           })
           .then(function() {
-            return user.fetch({withRelated: ["fills", "applyScholars"]})
+            return user.fetch({
+              withRelated: ["fills", "applyScholars"]
+            })
               .then(function(user) {
                 return user.getScholarState(req.params.scholarId)
                   .then(function(hstate) {
@@ -179,9 +191,11 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["fills", "applyScholars"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["fills", "applyScholars"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -193,31 +207,33 @@ module.exports = {
               }));
             }
             if (state.get("fill_id") != null) {
-  	          return Promise.reject(new errors.BadRequestError({
-  	            message: "The user already has submitted the thanks letter."
-  	          }));               	
+              return Promise.reject(new errors.BadRequestError({
+                message: "The user already has submitted the thanks letter."
+              }));
             }
             return models.Scholar.getById(req.params.scholarId)
               .then(function(scholar) {
-              	if (!scholar) {
-		              return Promise.reject(new errors.BadRequestError({
-		                message: "Scholar with `scholar_id`==" + req.params.scholarId + " does not exist."
-		              }));              		
-              	}
-              	return models.Fill.create({
-  	              "form_id": scholar.get("form_id"),
-  	              "user_id": req.params.userId,
-  	              "content": JSON.stringify(req.body["fill"])              		
-              	}, req.user)
-              	  .then(function(fill) {
-              	  	return state.update({
-              	  		"fill_id": fill.get("id")
-              	  	});
-              	  });
+                if (!scholar) {
+                  return Promise.reject(new errors.BadRequestError({
+                    message: "Scholar with `scholar_id`==" + req.params.scholarId + " does not exist."
+                  }));
+                }
+                return models.Fill.create({
+                  "form_id": scholar.get("form_id"),
+                  "user_id": req.params.userId,
+                  "content": JSON.stringify(req.body["fill"])
+                }, req.user)
+                  .then(function(fill) {
+                    return state.update({
+                      "fill_id": fill.get("id")
+                    });
+                  });
               });
           })
           .then(function() {
-            return user.fetch({withRelated: ["fills", "applyScholars"]})
+            return user.fetch({
+              withRelated: ["fills", "applyScholars"]
+            })
               .then(function(user) {
                 return user.getScholarState(req.params.scholarId)
                   .then(function(hstate) {
@@ -235,9 +251,11 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["fills", "applyScholars"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["fills", "applyScholars"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -248,13 +266,15 @@ module.exports = {
               }));
             }
             hstate = state.toJSON();
-  	        fill_id = hstate["fill_id"];
-  	        return user.related("fills").get(fill_id).update({
-  	          "content": JSON.stringify(req.body["fill"])
-  	        });
+            fill_id = hstate["fill_id"];
+            return user.related("fills").get(fill_id).update({
+              "content": JSON.stringify(req.body["fill"])
+            });
           })
           .then(function() {
-            return user.fetch({withRelated: ["fills", "applyScholars"]})
+            return user.fetch({
+              withRelated: ["fills", "applyScholars"]
+            })
               .then(function(user) {
                 return user.getScholarState(req.params.scholarId)
                   .then(function(hstate) {
@@ -267,9 +287,11 @@ module.exports = {
 
   deleteScholar: function deleteScholar(req, res, next) {
     return models.User.getById(req.params.userId,
-                               {
-                                 fetchOptions: {withRelated: ["fills", "applyScholars"]}
-                               })
+      {
+        fetchOptions: {
+          withRelated: ["fills", "applyScholars"]
+        }
+      })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -280,7 +302,7 @@ module.exports = {
               }));
             }
             return state.destroy().then(function() {
-            	res.status(204).json({}).end();
+              res.status(204).json({}).end();
             });
           })
       });

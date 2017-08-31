@@ -32,7 +32,7 @@ var Honor = bookshelfInst.Model.extend({
   },
 
 
-  omitAttributes: function omitAttributes(){
+  omitAttributes: function omitAttributes() {
     return ["created_at",
       "created_by",
       "updated_at",
@@ -41,7 +41,7 @@ var Honor = bookshelfInst.Model.extend({
     ];
   },
 
-  renamePivotAttributes: function renamePivotAttributes(){
+  renamePivotAttributes: function renamePivotAttributes() {
     return {
       _pivot_quota: "quota",
       type: "type",
@@ -50,31 +50,37 @@ var Honor = bookshelfInst.Model.extend({
     };
   },
 
-  pickPivotAttributes: function pickPivotAttributes(){
+  pickPivotAttributes: function pickPivotAttributes() {
     return ["group",
-            "quota",
-            "type",
-            "group_id"
-           ];
+      "quota",
+      "type",
+      "group_id"
+    ];
   },
 
   update: function update(body, contextUser) {
     var start = Promise.resolve(null);
     // `group_quota` field must be an array.
     if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
-      gids_spec = _.reduce(body["group_quota"], function (obj, s) {
+      gids_spec = _.reduce(body["group_quota"], function(obj, s) {
         obj[s["group_id"]] = s;
         return obj;
       }, {});
       gids = _.keys(gids_spec)
-      now_gids = _.map(this.relations["groups"].toJSON(), (s) => {return s["id"]})
+      now_gids = _.map(this.relations["groups"].toJSON(), (s) => {
+        return s["id"]
+      })
       // The gids that should be removed
       gids_remove = _.difference(now_gids, gids);
       self = this;
-      start = self.groups().detach(gids_remove).then(function () {
+      start = self.groups().detach(gids_remove).then(function() {
         return self.fetch().then(function() {
           return Promise.mapSeries(gids, function(gid) {
-            return self.relations["groups"].query({where: {group_id: gid}})
+            return self.relations["groups"].query({
+              where: {
+                group_id: gid
+              }
+            })
               .fetch()
               .then(function(c) {
                 if (c.length) {
@@ -91,7 +97,7 @@ var Honor = bookshelfInst.Model.extend({
     }
     // Update attributes other than the `group_quota`.
     self = this;
-    return start.then(function () {
+    return start.then(function() {
       return bookshelfInst.Model.prototype.update.call(self, body, contextUser);
     });
   },
@@ -102,8 +108,8 @@ var Honor = bookshelfInst.Model.extend({
 
     var renamePivotAttributes = this.renamePivotAttributes();
     var pickPivotAttributes = this.pickPivotAttributes();
-    group_quota = _.map(group_quota, function(model){
-      _.forEach(renamePivotAttributes, function(value, key){
+    group_quota = _.map(group_quota, function(model) {
+      _.forEach(renamePivotAttributes, function(value, key) {
         model[value] = model[key];
       });
       model = _.pick(model, pickPivotAttributes);
@@ -129,8 +135,8 @@ var Honor = bookshelfInst.Model.extend({
 
     var renamePivotAttributes = this.renamePivotAttributes();
     var pickPivotAttributes = this.pickPivotAttributes();
-    json["group_quota"] = _.map(json["group_quota"], function(model){
-      _.forEach(renamePivotAttributes, function(value, key){
+    json["group_quota"] = _.map(json["group_quota"], function(model) {
+      _.forEach(renamePivotAttributes, function(value, key) {
         model[value] = model[key];
       });
       model = _.pick(model, pickPivotAttributes);
@@ -157,14 +163,15 @@ var Honor = bookshelfInst.Model.extend({
       }));
     }
     return bookshelfInst.Model.create.call(this, body, contextUser)
-      .then(function (m) {
+      .then(function(m) {
         return m.groups()
-          .attach(_.map(body["group_quota"],
-                        function (g) {
-                          return _.pick(g, ["group_id", "quota"]);
-                        }))
-          .then(function () {
-            return Honor.forge({"id": m.get("id")}).fetch();
+          .attach(_.map(body["group_quota"], function(g) {
+            return _.pick(g, ["group_id", "quota"]);
+          }))
+          .then(function() {
+            return Honor.forge({
+              "id": m.get("id")
+            }).fetch();
           });
       });
   }
@@ -173,7 +180,7 @@ var Honor = bookshelfInst.Model.extend({
 var Honors = bookshelfInst.Collection.extend({
   model: Honor
 }, {
-  queriableAttributes: function queriableAttributes(){
+  queriableAttributes: function queriableAttributes() {
     return ["id",
       "name",
       "year",

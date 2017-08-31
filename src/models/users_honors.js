@@ -23,7 +23,7 @@ var UserHonorState = bookshelfInst.Model.extend({
   scores: function scores() {
     return this.hasMany("Score", "honor_user_id");
   },
-  
+
   fill: function fill() {
     return this.belongsTo("Fill");
   },
@@ -39,10 +39,12 @@ var UserHonorState = bookshelfInst.Model.extend({
   addScore: function addScore(context_user, score) {
     scorer_id = context_user.get("id");
     // Check whether this scorer already submit a score
-    if (_.includes(_.map(this.related("scores").toJSON(), (s) => {return s["scorer_id"];}), scorer_id)) {
+    if (_.includes(_.map(this.related("scores").toJSON(), (s) => {
+        return s["scorer_id"];
+      }), scorer_id)) {
       return Promise.reject(new errors.ValidationError({
         message: util.format("This scorer with id(%d) has already submitted a score, to modify the score, use the PUT API instead.",
-                            scorer_id)
+          scorer_id)
       }));
     }
     return Score.create({
@@ -63,10 +65,12 @@ var UserHonorState = bookshelfInst.Model.extend({
         if (!sc) {
           return Promise.reject(new errors.ValidationError({
             message: util.format("This scorer with id(%d) has not submitted a score, to submit a new score, use the POST API instead.",
-                                 scorer_id)
+              scorer_id)
           }));
         }
-        return sc.update({score: score});
+        return sc.update({
+          score: score
+        });
       });
   },
 
@@ -81,7 +85,7 @@ var UserHonorState = bookshelfInst.Model.extend({
         if (!sc) {
           return Promise.reject(new errors.ValidationError({
             message: util.format("This scorer with id(%d) has not submitted a score.",
-                                 scorer_id)
+              scorer_id)
           }));
         }
         return sc.destroy();
@@ -90,8 +94,13 @@ var UserHonorState = bookshelfInst.Model.extend({
 }, {
   getUserHonorState: function getState(user_id, honor_id) {
     return this.forge()
-      .where({user_id: user_id, honor_id: honor_id})
-      .fetch({withRelated: ["fill"]});
+      .where({
+        user_id: user_id,
+        honor_id: honor_id
+      })
+      .fetch({
+        withRelated: ["fill"]
+      });
   },
 
   fetchInlineRelations: function fetchInlineRelations() {

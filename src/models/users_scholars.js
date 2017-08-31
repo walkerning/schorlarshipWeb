@@ -5,7 +5,7 @@ var errors = require("../errors");
 
 var UserScholarState = bookshelfInst.Model.extend({
   tableName: "scholars_users",
-  
+
   fill: function fill() {
     return this.belongsTo("Fill");
   },
@@ -20,8 +20,13 @@ var UserScholarState = bookshelfInst.Model.extend({
 }, {
   getUserScholarState: function getState(user_id, scholar_id) {
     return this.forge()
-      .where({user_id: user_id, scholar_id: scholar_id})
-      .fetch({withRelated: ["fill"]});
+      .where({
+        user_id: user_id,
+        scholar_id: scholar_id
+      })
+      .fetch({
+        withRelated: ["fill"]
+      });
   }
 });
 
