@@ -34,7 +34,7 @@ Resources
     // Number: 年级排名
     "year_rank": 3, 
     // [String]: 该用户有的权限列表: login有效, apply可申请荣誉/奖学金, user用户管理, form表单管理,
-    //           honor荣誉管理, scholarship奖学金管理, export学校对接
+    //           honor荣誉管理, scholar奖学金管理, user_honor用户-荣誉关系管理, user_scholar用户-奖学金关系管理, export学校对接
     "permissions": ["login"]
 }
 ```

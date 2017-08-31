@@ -53,6 +53,14 @@ var initData = {
       description: "Form management permission."
     },
     {
+      name: "user_honor",
+      description: "User-Honor states management permission."
+    },
+    {
+      name: "user_scholar",
+      description: "User-Scholar states management permission."
+    },
+    {
       name: "honor",
       description: "Honor management permission."
     },

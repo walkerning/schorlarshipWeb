@@ -16,6 +16,8 @@ DEVELOP
 * ``grunt database``: 初始化数据库, 建立表格, 插入实验数据
 * ``grunt dev``: 运行development server
 
+* please!!! 在commit之前运行`jsfmt`... 实在不能忍格式不对...
+
 API
 -----------
 

@@ -50,34 +50,34 @@ apiRouter.put("/users/:userId/newPassword", permit(["user"]), catchError(users.n
 apiRouter.delete("/users/:userId", permit(["user"]), catchError(users.delete));
 
 // List the honors this user has applied or got
-apiRouter.get("/users/:userId/honors", permit(["me"], ["user"]), catchError(users_honors.listHonors));
+apiRouter.get("/users/:userId/honors", permit(["me"], ["user_honor"]), catchError(users_honors.listHonors));
 // Apply for honor
 apiRouter.post("/users/:userId/honors", permit(["me", "apply"]), catchError(users_honors.applyHonor));
 // Delete a honor application
 apiRouter.delete("/users/:userId/honors/:honorId", permit(["me", "apply"]), catchError(users_honors.cancelHonor));
 // Change honor apply status for this user
-apiRouter.put("/users/:userId/honors/:honorId/admin", permit(["user", "honor"]), catchError(users_honors.updateHonor));
+apiRouter.put("/users/:userId/honors/:honorId/admin", permit(["user", "user_honor"]), catchError(users_honors.updateHonor));
 // Change honor apply fill content when the state is "temp"
-apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "honor"], ["me", "apply"]), catchError(users_honors.updateHonorFill));
+apiRouter.put("/users/:userId/honors/:honorId", permit(["user", "user_honor"], ["me", "apply"]), catchError(users_honors.updateHonorFill));
 // Add score for a user honor state
-apiRouter.post("/users/:userId/honors/:honorId/scores", permit(["user", "honor"]), catchError(users_honors.addHonorScore));
+apiRouter.post("/users/:userId/honors/:honorId/scores", permit(["user", "user_honor"]), catchError(users_honors.addHonorScore));
 // Update score for a user honor state
-apiRouter.put("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "honor", "me_scorer"]), catchError(users_honors.updateHonorScore));
+apiRouter.put("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "user_honor", "me_scorer"]), catchError(users_honors.updateHonorScore));
 // Delete score for a user honor state
-apiRouter.delete("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "honor", "me_scorer"]), catchError(users_honors.deleteHonorScore));
+apiRouter.delete("/users/:userId/honors/:honorId/scores/:scorerId", permit(["user", "user_honor", "me_scorer"]), catchError(users_honors.deleteHonorScore));
 
 // List the scholars this user has got
 apiRouter.get("/users/:userId/scholars", permit(["me"], ["user"]), catchError(users_scholars.listScholars));
 // Give a scholar to user
-apiRouter.post("/users/:userId/scholars", permit(["user", "scholar"]), catchError(users_scholars.giveScholar));
+apiRouter.post("/users/:userId/scholars", permit(["user", "user_scholar"]), catchError(users_scholars.giveScholar));
 // Change money for a scholar owner
-apiRouter.put("/users/:userId/scholars/:scholarId", permit(["user", "scholar"]), catchError(users_scholars.updateScholar));
+apiRouter.put("/users/:userId/scholars/:scholarId", permit(["user", "user_scholar"]), catchError(users_scholars.updateScholar));
 // Upload the thanks-letter form
 apiRouter.post("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"]), catchError(users_scholars.uploadThanksLetter));
 // Change the thanks-letter form
-apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], ["scholar"]), catchError(users_scholars.changeThanksLetter));
+apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], ["user_scholar"]), catchError(users_scholars.changeThanksLetter));
 // Delete a scholar for this user
-apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "scholar"]), catchError(users_scholars.deleteScholar));
+apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user", "user_scholar"]), catchError(users_scholars.deleteScholar));
 
 
 //// Routing endpoins `/permissions`
@@ -100,10 +100,10 @@ apiRouter.post("/groups", permit(["user"]), catchError(groups.create));
 apiRouter.put("/groups/:groupId", permit(["user"]), catchError(groups.updateInfo));
 
 // List the honors that the members in a group have
-apiRouter.get("/groups/:groupId/honors", permit(["user", "honor"]), catchError(groups_honors.list));
+apiRouter.get("/groups/:groupId/honors", permit(["user", "user_honor"]), catchError(groups_honors.list));
 
 // List the scholars that the members in a group have
-apiRouter.get("/groups/:groupId/scholars", permit(["user", "scholar"]), catchError(groups_scholars.list));
+apiRouter.get("/groups/:groupId/scholars", permit(["user", "user_scholar"]), catchError(groups_scholars.list));
 
 
 
