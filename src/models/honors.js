@@ -60,6 +60,7 @@ var Honor = bookshelfInst.Model.extend({
 
   update: function update(body, contextUser) {
     var start = Promise.resolve(null);
+    // `group_quota` field must be an array.
     if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
       gids_spec = _.reduce(body["group_quota"], function (obj, s) {
         obj[s["group_id"]] = s;
@@ -109,6 +110,15 @@ var Honor = bookshelfInst.Model.extend({
       return model;
     });
     return group_quota;
+  },
+
+  getQuotaOfGroup: function getGroupQuota(gid) {
+    var group_quota = this.getGroupQuota();
+    quota = _.find(group_quota, _.matchesProperty("group_id", gid));
+    if (quota === undefined) {
+      return 0;
+    }
+    return quota["quota"];
   },
 
   toClientJSON: function toClientJSON(options) {

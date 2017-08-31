@@ -3,6 +3,7 @@ var Promise = require("bluebird");
 var util = require("util");
 var models = require("../models");
 var errors = require("../errors");
+var bookshelfInst = require("../models/base");
 
 function expandFill(hstate, user) {
   var fill = user.related("fills").get(hstate["fill_id"]);
@@ -108,9 +109,9 @@ module.exports = {
 
   cancelHonor: function cancelHonor(req, res, next) {
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: ["fills", "applyHonors"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["fills", "applyHonors"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
@@ -141,33 +142,55 @@ module.exports = {
       res.status(304).json();
     }
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: ["fills", "applyHonors"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["fills", "applyHonors"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
           .then(function(state) {
-            start = Promise.resolve(null);
             if (!state) {
               return Promise.reject(new errors.NotFoundError({
                 message: "This user do not apply for this honor."
               }));
             }
             hstate = state.toJSON();
-            if (body.hasOwnProperty("fill")) {
-              fill_id = hstate["fill_id"];
-              start = user.related("fills").get(fill_id).update({
-                "content": JSON.stringify(body["fill"])
-              }, req.user);
-            }
-            return start.then(function() {
-              // Handle state change
-              if (body["state"]) {
-                return state.update({
-                  "state": body["state"]
-                }, req.user);
-              }
+            return bookshelfInst.transaction(function (trans) {
+              return models.Honor.getById(req.params.honorId).then(function(hon) {
+                var start = Promise.resolve(null);
+                if (body["state"] && body["state"] == "success") {
+                  // Judge the allocation count not exceed the group quota.
+                  start = hon.applyUsers()
+                    .query({where: {"state": "success"}})
+                    .count()
+                    .then(function(count) {
+                      var group_quota = hon.getQuotaOfGroup(user.get("group_id"));
+                      if (count >= group_quota) {
+                        // Exceeded, return error.
+                        return Promise.reject(new errors.ValidationError({
+                          message: util.format("Allocated count `%d` already exceeds quota `%d`.", count, group_quota)
+                        }));
+                      }
+                    });
+                }
+                if (body.hasOwnProperty("fill")) {
+                  fill_id = hstate["fill_id"];
+                  // Update the fill of the apply form
+                  start = start.then(function() {
+                    user.related("fills").get(fill_id).update({
+                      "content": JSON.stringify(body["fill"])
+                    }, req.user);
+                  });
+                }
+                return start.then(function() {
+                  // Handle state change
+                  if (body["state"]) {
+                    return state.update({
+                      "state": body["state"]
+                    }, req.user);
+                  }
+                });
+              });
             });
           })
           .then(function() {
@@ -194,9 +217,9 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: ["fills", "applyHonors"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["fills", "applyHonors"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)

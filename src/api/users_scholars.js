@@ -1,7 +1,9 @@
 var _ = require("lodash");
 var Promise = require("bluebird");
+var util = require("util");
 var models = require("../models");
 var errors = require("../errors");
+var bookshelfInst = require("../models/base");
 
 function expandFill(hstate, user) {
   var fill = user.related("fills").get(hstate["fill_id"]);
@@ -43,35 +45,57 @@ module.exports = {
           }));
         }
         // Get the scholar
-        return models.Scholar.getById(req.body.scholar_id)
-          .then(function (scholar) {
-            // groups that have quota
-            gids = _.map(scholar.getGroupQuota(), (s) => s["group_id"])
-            if (!_.includes(gids, user.get("group_id"))) {
-              // FIXME: validation error type?
-              return Promise.reject(new errors.ValidationError({
-                message: "You can not add this scholar. No quota is assigned to his group."
-              }));
-            }
-            if (scholar.get("alloc") == "money" && !req.body.hasOwnProperty("money")) {
-              return Promise.reject(new errors.ValidationError({
-                message: "You should specify `money` in this kind of scholarship."
-              }));              
-            }
-            if (req.body.hasOwnProperty("money")) {
-              req.body.money = _.toNumber(req.body.money);
-            } else {
-              req.body.money = null;
-            }
-            // Create new scholar state
-            return models.UserScholarState.create({
-              user_id: req.params.userId,
-              scholar_id: req.body.scholar_id,
-              fill_id: null,
-              money: req.body.money,
-              state: "success"
-            }, req.user);
-          })
+        return bookshelfInst.transaction(function (trans) {
+          return models.Scholar.getById(req.body.scholar_id)
+            .then(function (scholar) {
+              // groups that have quota
+              gids = _.map(scholar.getGroupQuota(), (s) => s["group_id"])
+              if (!_.includes(gids, user.get("group_id"))) {
+                // FIXME: validation error type?
+                return Promise.reject(new errors.ValidationError({
+                  message: "You can not add this scholar. No quota is assigned to his group."
+                }));
+              }
+              if (scholar.get("alloc") == "money" && !req.body.hasOwnProperty("money")) {
+                return Promise.reject(new errors.ValidationError({
+                  message: "You should specify `money` in this kind of scholarship."
+                }));
+              }
+              if (req.body.hasOwnProperty("money")) {
+                req.body.money = _.toNumber(req.body.money);
+              } else {
+                req.body.money = null;
+              }
+              // Judge if the allocated money or the allocated quota exceeds the group quota.
+              var start = Promise.resolve(null);
+              var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
+              var added = 1;
+              if (scholar.get("alloc") == "money") {
+                // money alloc
+                start = scholar.allocatedMoney();
+                added = req.body.money;
+              } else {
+                // quota alloc
+                start = scholar.allocatedCount();
+              }
+              // Create new scholar state
+              return start.then(function (allocated) {
+                if (allocated + added > group_quota) {
+                  // Exceeded, return error.
+                  return Promise.reject(new errors.ValidationError({
+                    message: util.format("Allocated `%d` will exceeds quota `%d`.", allocated + added, group_quota)
+                  }));
+                }
+                return models.UserScholarState.create({
+                  user_id: req.params.userId,
+                  scholar_id: req.body.scholar_id,
+                  fill_id: null,
+                  money: req.body.money,
+                  state: "success"
+                }, req.user);
+              });
+            });
+        })
           .then(function() {
             return user.fetch({
               withRelated: ["applyScholars", "fills"]
@@ -93,9 +117,9 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: [, "applyScholars"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["applyScholars"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -118,9 +142,22 @@ module.exports = {
                     message: "This API is only for `money` type scholarship."
                   }));              
                 }
-                return state.update({
-                  money: _.toNumber(req.body.money)
-                });
+                return scholar.allocatedMoney()
+                  .then(function (allocated) {
+                    // Judge if the new allocated money will exceed the group quota.
+                    var new_money = _.toNumber(req.body.money);
+                    var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
+                    var new_allocated = allocated - state.get("money") + new_money;
+                    if (new_allocated > group_quota) {
+                      // Will exceed, return error.
+                      return Promise.reject(new errors.ValidationError({
+                        message: util.format("Allocated `%d` will exceeds quota `%d`.", new_allocated, group_quota)
+                      }));
+                    }
+                    return state.update({
+                      money: new_money
+                    });
+                  });
               });
           })
           .then(function() {
@@ -142,9 +179,9 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: ["fills", "applyScholars"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["fills", "applyScholars"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -198,9 +235,9 @@ module.exports = {
       }));
     }
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: ["fills", "applyScholars"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["fills", "applyScholars"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
@@ -230,9 +267,9 @@ module.exports = {
 
   deleteScholar: function deleteScholar(req, res, next) {
     return models.User.getById(req.params.userId,
-                        {
-                          fetchOptions: {withRelated: ["fills", "applyScholars"]}
-                        })
+                               {
+                                 fetchOptions: {withRelated: ["fills", "applyScholars"]}
+                               })
       .then(function(user) {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)

@@ -18,6 +18,22 @@ var Scholar = bookshelfInst.Model.extend({
     return this.belongsTo("Form", "form_id");
   },
 
+  // Allocated count
+  allocatedCount: function() {
+    return this.applyUsers()
+      .query({where: {"state": "success"}})
+      .count();
+  },
+
+  // Allocated money
+  allocatedMoney: function() {
+    return this.applyUsers()
+      .fetch()
+      .then(function (col) {
+        return _.sum(_.map(_.filter(col.toJSON(), _.matchesProperty("state", "success")), (s) => s["money"]));
+      });
+  },
+
   renamePivotAttributes: function renamePivotAttributes(){
     return {
       _pivot_quota: "quota",
@@ -58,6 +74,15 @@ var Scholar = bookshelfInst.Model.extend({
       return model;
     });
     return group_quota;
+  },
+
+  getQuotaOfGroup: function getGroupQuota(gid) {
+    var group_quota = this.getGroupQuota();
+    quota = _.find(group_quota, _.matchesProperty("group_id", gid));
+    if (quota === undefined) {
+      return 0;
+    }
+    return quota["quota"];
   },
 
   toClientJSON: function (options) {
