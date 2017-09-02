@@ -48,7 +48,7 @@ function validateSchema(tableName, model, autoAttrs) {
       if (validator.isEmpty(strVal)) {
         log = util.format("%s.%s cannot be blank.", tableName, columnKey);
         validationErrors.push(new errors.ValidationError({
-          log: log,
+          message: log,
           context: tableName + "." + columnKey
         }));
       }
@@ -59,7 +59,7 @@ function validateSchema(tableName, model, autoAttrs) {
       if (!(validator.isBoolean(strVal) || validator.isEmpty(strVal))) {
         log = util.format("%s.%s must be boolean.", tableName, columnKey);
         validationErrors.push(new errors.ValidationError({
-          log: log,
+          message: log,
           context: tableName + "." + columnKey
         }));
       }
@@ -70,7 +70,7 @@ function validateSchema(tableName, model, autoAttrs) {
         if (!validator.isLength(strVal, 0, schema[tableName][columnKey].maxlength)) {
           log = util.format("%s.%s exceed max length.", tableName, columnKey);
           validationErrors.push(new errors.ValidationError({
-            log: log,
+            message: log,
             context: tableName + "." + columnKey
           }));
         }
@@ -87,7 +87,7 @@ function validateSchema(tableName, model, autoAttrs) {
         if (schema[tableName][columnKey].type === "integer" && !validator.isInt(strVal)) {
           log = util.format("%s.%s is not integer.", tableName, columnKey);
           validationErrors.push(new errors.ValidationError({
-            log: log,
+            message: log,
             context: tableName + "." + columnKey
           }));
         }
@@ -95,10 +95,11 @@ function validateSchema(tableName, model, autoAttrs) {
     }
   });
   if (validationErrors.length !== 0) {
-    return Promise.reject(new errors.ValidationError({
-      errors: validationErrors
-    }));
-
+    // Reject using the first validation error.
+    return Promise.reject(validationErrors[0]);
+    // return Promise.reject(new errors.ValidationError({
+    //   errors: validationErrors
+    // }));
   }
   return Promise.resolve();
 }
@@ -124,10 +125,12 @@ function validate(value, key, tableName) {
 
     // equivalent of validator.isSomething(option1, option2)
     if (validator[validationName].apply(validator, validationOptions) !== goodResult) {
+      var log = util.format("%s.%s(%s) %s %j validation failed.", tableName, key, value,
+                            validationName, _.slice(validationOptions, 1));
       validationErrors.push(new errors.ValidationError({
+        message: log,
         context: tableName + "." + key,
-        log: util.format("%s.%s(%s) %s %j validation failed.", tableName, key, value,
-          validationName, _.slice(validationOptions, 1))
+        log: log
       }));
     }
     validationOptions.shift();
