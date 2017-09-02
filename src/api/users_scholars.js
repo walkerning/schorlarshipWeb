@@ -74,15 +74,16 @@ module.exports = {
               }
               // Judge if the allocated money or the allocated quota exceeds the group quota.
               var start = Promise.resolve(null);
-              var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
+              var gid = user.get("group_id");
+              var group_quota = scholar.getQuotaOfGroup(gid);
               var added = 1;
               if (scholar.get("alloc") == "money") {
                 // money alloc
-                start = scholar.allocatedMoney();
+                start = scholar.allocatedMoneyOfGroup(gid);
                 added = req.body.money;
               } else {
                 // quota alloc
-                start = scholar.allocatedCount();
+                start = scholar.allocatedCountOfGroup(gid);
               }
               // Create new scholar state
               return start.then(function(allocated) {
@@ -155,7 +156,7 @@ module.exports = {
                     .then(function(allocated) {
                       // Judge if the new allocated money will exceed the group quota.
                       var new_money = _.toNumber(req.body.money);
-                      var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
+                      var group_quota = scholar.getQuotaOfGroup(gid);
                       var new_allocated = allocated - state.get("money") + new_money;
                       if (new_allocated > group_quota) {
                         // Will exceed, return error.

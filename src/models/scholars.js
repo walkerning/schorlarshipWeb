@@ -18,6 +18,16 @@ var Scholar = bookshelfInst.Model.extend({
     return this.belongsTo("Form", "form_id");
   },
 
+  // Allocated count of a group
+  allocatedCountOfGroup: function(gid) {
+    return this.belongsToMany("User").withPivot(["state"])
+      .query({"where": {"group_id": gid}})
+      .fetch()
+      .then(function (col) {
+        return _.filter(col.toJSON(), _.matchesProperty("_pivot_state", "success")).length
+      });
+  },
+
   // Allocated count
   allocatedCount: function() {
     return this.applyUsers()
@@ -27,6 +37,16 @@ var Scholar = bookshelfInst.Model.extend({
         }
       })
       .count();
+  },
+
+  // Allocated money of a group
+  allocatedMoneyOfGroup: function(gid) {
+    return this.belongsToMany("User").withPivot(["state"])
+      .query({"where": {"group_id": gid}})
+      .fetch()
+      .then(function(col) {
+        return _.sum(_.map(_.filter(col.toJSON(), _.matchesProperty("_pivot_state", "success")), (s) => s["money"]));
+      });
   },
 
   // Allocated money

@@ -170,14 +170,15 @@ module.exports = {
                 var start = Promise.resolve(null);
                 if (body["state"] && body["state"] == "success") {
                   // Judge the allocation count not exceed the group quota.
-                  start = hon.applyUsers()
+                  start = hon.applyUsersPivots()
                     .query({
                       where: {
-                        "state": "success"
+                        "group_id": user.get("group_id"),
                       }
                     })
-                    .count()
-                    .then(function(count) {
+                    .fetch()
+                    .then(function (col) {
+                      var count = _.filter(col.toJSON(), _.matchesProperty("_pivot_state", "success")).length;
                       var group_quota = hon.getQuotaOfGroup(user.get("group_id"));
                       if (count >= group_quota) {
                         // Exceeded, return error.
