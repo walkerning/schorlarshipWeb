@@ -5,7 +5,7 @@ var models = require("../models")
 var logging = require("../logging")
 var errors = require("../errors")
 
-module.exports={
+module.exports = {
   list: function list(req, res, next) {
     if (!req.query.hasOwnProperty("scholar_ids")) {
       return Promise.reject(new errors.BadRequestError({
@@ -13,7 +13,11 @@ module.exports={
       }));
     }
     return models.Group
-      .getById(req.params.groupId, {fetchOptions: {withRelated: ["users"]}})
+      .getById(req.params.groupId, {
+        fetchOptions: {
+          withRelated: ["users"]
+        }
+      })
       .then(function(group) {
         users = group.getUsers();
         scholar_ids = _.map(_.split(req.query["scholar_ids"], ","), _.toNumber);
@@ -24,21 +28,22 @@ module.exports={
           }
         }
         return Promise.all(tasks).then(results => {
-          results = _.map(results, (h) => { 
-          	if (h != null) {
-          		h = h.toJSON();
+          results = _.map(results, (h) => {
+            if (h != null) {
+              h = h.toJSON();
               if (h["fill"] != null) {
-          		  h["fill"] = h["fill"]["content"];
+                h["fill"] = h["fill"]["content"];
               }
-          	}
-          	return h;
+            }
+            return h;
           });
           var rates = {};
           for (var i in users) {
-          	t = results.slice(i * scholar_ids.length, (i + 1) * scholar_ids.length);
-          	if (!_.every(t, _.isNull)) {
-          		rates[users[i]["id"]] = t;
-          	}
+            i = _.toNumber(i);
+            var t = results.slice(i * scholar_ids.length, (i + 1) * scholar_ids.length);
+            if (!_.every(t, _.isNull)) {
+              rates[users[i]["id"]] = t;
+            }
           }
           res.status(200).json(rates);
         })
