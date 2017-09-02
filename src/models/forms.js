@@ -3,6 +3,10 @@ var bookshelfInst = require("./base");
 var Form = bookshelfInst.Model.extend({
   tableName: "forms",
 
+  fills: function() {
+    return this.hasMany("Fill", "form_id");
+  },
+
   scholars: function() {
     return this.hasMany("Scholar", "form_id");
   },
@@ -19,7 +23,7 @@ var Form = bookshelfInst.Model.extend({
 });
 
 var Forms = bookshelfInst.Collection.extend({
-  model: Form
+  model: Form,
 }, {
   queriableAttributes: function queriableAttributes() {
     return ["id", "name", "type"];
