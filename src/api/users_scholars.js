@@ -148,11 +148,12 @@ module.exports = {
                       message: "This API is only for `money` type scholarship."
                     }));
                   }
-                  return scholar.allocatedMoney()
+                  gid = user.get("group_id");
+                  return scholar.allocatedMoneyOfGroup(gid)
                     .then((allocated) => {
                       // Judge if the new allocated money will exceed the group quota.
                       var new_money = _.toNumber(req.body.money);
-                      var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
+                      var group_quota = scholar.getQuotaOfGroup(gid);
                       var new_allocated = allocated - state.get("money") + new_money;
                       if (new_allocated > group_quota) {
                         // Will exceed, return error.
