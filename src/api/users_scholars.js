@@ -78,13 +78,9 @@ module.exports = {
               var group_quota = scholar.getQuotaOfGroup(gid);
               var added = 1;
               if (scholar.get("alloc") == "money") {
-                // money alloc
-                start = scholar.allocatedMoneyOfGroup(gid);
                 added = req.body.money;
-              } else {
-                // quota alloc
-                start = scholar.allocatedCountOfGroup(gid);
               }
+              start = scholar.allocatedOfGroup(gid);
               // Create new scholar state
               return start.then(function(allocated) {
                 if (allocated + added > group_quota) {

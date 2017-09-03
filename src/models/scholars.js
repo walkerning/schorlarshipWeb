@@ -46,7 +46,7 @@ var Scholar = bookshelfInst.Model.extend({
 
   // Allocated money of a group
   allocatedMoneyOfGroup: function(gid) {
-    return this.belongsToMany("User").withPivot(["state"])
+    return this.belongsToMany("User").withPivot(["state", "money"])
       .query({
         "where": {
           "group_id": gid
@@ -54,7 +54,8 @@ var Scholar = bookshelfInst.Model.extend({
       })
       .fetch()
       .then(function(col) {
-        return _.sum(_.map(_.filter(col.toJSON(), _.matchesProperty("_pivot_state", "success")), (s) => s["money"]));
+        return _.sum(_.map(_.filter(col.toJSON(), _.matchesProperty("_pivot_state", "success")),
+                           (s) => s["_pivot_money"]));
       });
   },
 
@@ -63,7 +64,8 @@ var Scholar = bookshelfInst.Model.extend({
     return this.applyUsers()
       .fetch()
       .then(function(col) {
-        return _.sum(_.map(_.filter(col.toJSON(), _.matchesProperty("state", "success")), (s) => s["money"]));
+        return _.sum(_.map(_.filter(col.toJSON(), _.matchesProperty("state", "success")),
+                           (s) => s["money"]));
       });
   },
 
