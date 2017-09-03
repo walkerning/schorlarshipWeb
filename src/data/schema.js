@@ -274,7 +274,7 @@ module.exports = {
       nullable: false,
       defaultTo: "temp",
       validations: {
-        isIn: [["temp", "applied", "success", "fail"]]
+        isIn: [["temp", "applied", "success", "fail", "leaveout"]]
       }
     },
     apply_time: {

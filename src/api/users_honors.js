@@ -168,7 +168,7 @@ module.exports = {
             return bookshelfInst.transaction(function(trans) {
               return models.Honor.getById(req.params.honorId).then(function(hon) {
                 var start = Promise.resolve(null);
-                if (body["state"] && body["state"] == "success") {
+                if (body["state"] && body["state"] == "success" && hstate["state"] !== "success") {
                   // Judge the allocation count not exceed the group quota.
                   start = hon.allocatedCountOfGroup(user.get("group_id"))
                     .then(function (count) {
