@@ -1,5 +1,6 @@
 var _ = require("lodash")
 var Promise = require("bluebird");
+var util = require("util");
 var bookshelfInst = require("./base");
 var errors = require("../errors");
 
@@ -25,6 +26,19 @@ var Honor = bookshelfInst.Model.extend({
 
   applyUsers: function() {
     return this.hasMany("UserHonorState");
+  },
+
+  allocatedCountOfGroup: function(gid) {
+    return this.applyUsersPivots()
+      .query({
+        where: {
+          "group_id": gid,
+        }
+      })
+      .fetch()
+      .then(function(col) {
+        return _.filter(col.toJSON(), _.matchesProperty("_pivot_state", "success")).length;
+      });
   },
 
   applyUsersPivots: function() {
@@ -63,46 +77,82 @@ var Honor = bookshelfInst.Model.extend({
   },
 
   update: function update(body, contextUser) {
-    var start = Promise.resolve(null);
-    // `group_quota` field must be an array.
-    if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
-      gids_spec = _.reduce(body["group_quota"], function(obj, s) {
-        obj[s["group_id"]] = s;
-        return obj;
-      }, {});
-      gids = _.keys(gids_spec)
-      now_gids = _.map(this.relations["groups"].toJSON(), (s) => {
-        return s["id"]
-      })
-      // The gids that should be removed
-      gids_remove = _.difference(now_gids, gids);
-      self = this;
-      start = self.groups().detach(gids_remove).then(function() {
-        return self.fetch().then(function() {
-          return Promise.mapSeries(gids, function(gid) {
-            return self.relations["groups"].query({
-              where: {
-                group_id: gid
-              }
-            })
-              .fetch()
-              .then(function(c) {
-                if (c.length) {
-                  // Already exists. call `updatePivot`
-                  return c.updatePivot(_.pick(gids_spec[gid], ["quota", "group_id"]));
-                } else {
-                  // Not exists. call `attach`
-                  return self.groups().attach(_.pick(gids_spec[gid], ["quota", "group_id"]));
-                }
-              });
-          });
+    return bookshelfInst.transaction((trans) => {
+      var start = Promise.resolve(null);
+      // `group_quota` field must be an array.
+      if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
+        gids_spec = _.reduce(body["group_quota"], function(obj, s) {
+          obj[s["group_id"]] = s;
+          return obj;
+        }, {});
+        gids = _.map(_.keys(gids_spec), (s) => {
+          return parseInt(s);
         });
-      })
-    }
-    // Update attributes other than the `group_quota`.
-    self = this;
-    return start.then(function() {
-      return bookshelfInst.Model.prototype.update.call(self, body, contextUser);
+        now_gids = _.map(this.relations["groups"].toJSON(), (s) => {
+          return s["id"]
+        });
+        // The gids that should be removed
+        gids_remove = _.difference(now_gids, gids);
+        console.log("gids_remove: ", gids_remove, now_gids, gids);
+        start = Promise.map(gids_remove, (remove_gid) => {
+          // If Already allocated to a group, the quota of this group cannot be deleted.
+          return this.allocatedCountOfGroup(remove_gid)
+            .then((cnt) => {
+              if (cnt > 0) {
+                return Promise.reject(new errors.ValidationError({
+                  message: util.format("Already allocated %d to group %d. Cannot delete its group quota.", cnt, remove_gid)
+                }));
+              }
+            });
+        })
+          .then(() => {
+            return this.groups().detach(gids_remove);
+          })
+          .then(() => {
+            return Promise.map(gids, (gid) => {
+              return this.allocatedCountOfGroup(gid)
+                .then((cnt) => {
+                  if (cnt > gids_spec[gid]["quota"]) {
+                    return Promise.reject(new errors.ValidationError({
+                      message: util.format("Already allocated %d to group %d. Cannot set its group quota to %d.", cnt, gid, gids_spec[gid]["quota"])
+                    }));
+                  }
+                });
+            });
+          })
+          .then(() => {
+            return this.fetch().then(() => {
+              return Promise.mapSeries(gids, (gid) => {
+                return self.relations["groups"].query({
+                  where: {
+                    group_id: gid
+                  }
+                })
+                  .fetch()
+                  .then((c) => {
+                    if (c.length) {
+                      // Already exists. call `updatePivot`
+                      return c.updatePivot(_.pick(gids_spec[gid], ["quota"]), {
+                        query: {
+                          where: {
+                            "group_id": gid
+                          }
+                        }
+                      });
+                    } else {
+                      // Not exists. call `attach`
+                      return this.groups().attach(_.pick(gids_spec[gid], ["quota", "group_id"]));
+                    }
+                  });
+              });
+            });
+          });
+      }
+      // Update attributes other than the `group_quota`.
+      self = this;
+      return start.then(function() {
+        return bookshelfInst.Model.prototype.update.call(self, body, contextUser);
+      });
     });
   },
 

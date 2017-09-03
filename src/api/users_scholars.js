@@ -139,9 +139,9 @@ module.exports = {
                 message: "This user do not have this scholarship."
               }));
             }
-            return bookshelfInst.transaction(function(trans) {
+            return bookshelfInst.transaction((trans) => {
               return models.Scholar.getById(req.params.scholarId)
-                .then(function(scholar) {
+                .then((scholar) => {
                   if (!scholar) {
                     return Promise.reject(new errors.BadRequestError({
                       message: "Scholar with `scholar_id`==" + req.params.scholarId + " does not exist."
@@ -153,10 +153,10 @@ module.exports = {
                     }));
                   }
                   return scholar.allocatedMoney()
-                    .then(function(allocated) {
+                    .then((allocated) => {
                       // Judge if the new allocated money will exceed the group quota.
                       var new_money = _.toNumber(req.body.money);
-                      var group_quota = scholar.getQuotaOfGroup(gid);
+                      var group_quota = scholar.getQuotaOfGroup(user.get("group_id"));
                       var new_allocated = allocated - state.get("money") + new_money;
                       if (new_allocated > group_quota) {
                         // Will exceed, return error.
