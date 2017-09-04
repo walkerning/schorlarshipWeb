@@ -5,10 +5,10 @@ var commands = require("./commands");
 var schema = require("./schema");
 var _ = require("lodash");
 
-var tableNames = _.keys(schema);
+var tableNames = schema["tableNames"];
 
 function dropTables() {
-  return Promise.mapSeries(tableNames, function dropTable(tableName) {
+  return Promise.mapSeries(_.reverse(_.clone(tableNames)), function dropTable(tableName) {
     return commands.dropTable(tableName);
   });
 }
@@ -26,7 +26,7 @@ if (argv.reinit) {
     .then(function() {
       logging.info("All tables droped");
     })
-    .catch(function() {
+    .catch(function(error) {
       logging.error("Failure when dropping tables: ", error);
       process.exit(1);
     });

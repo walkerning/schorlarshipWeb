@@ -102,7 +102,15 @@ module.exports = {
       .then(function(form) {
         var start = Promise.resolve(null);
         if (form) {
-          start = form.destroy();
+          start = form.fills().count().then(function(cnt) {
+            if (cnt > 0) {
+              // Return error
+              return Promise.reject(new errors.ValidationError({
+                message: util.format("Form `%d` already used by %d fills, cannot delete this form.", req.params.formId, cnt)
+              }));
+            }
+          })
+            .then(() => { return form.destroy(); });
         }
         return start.then(function() {
           res.status(204).json({}).end();

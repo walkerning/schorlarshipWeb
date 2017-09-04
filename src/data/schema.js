@@ -1,4 +1,52 @@
 module.exports = {
+  tableNames: ["groups", "users", "honors", "groups_honors", "honors_users",
+               "honor_user_scores", "scholars", "groups_scholars", "scholars_users",
+               "forms", "fills", "permissions", "permissions_users"],
+  groups: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
+    name: {
+      type: "string",
+      maxlength: 20,
+      nullable: false,
+      composite_unique: 1
+    },
+    type: {
+      type: "string",
+      maxlength: 36,
+      nullable: false,
+      validations: {
+        isIn: [["undergraduate", "graduate", "faculty"]]
+      },
+      composite_unique: 1
+    },
+    description: {
+      type: "string",
+      maxlength: 54,
+      nullable: true
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
+    }
+  },
+
   users: {
     id: {
       type: "increments",
@@ -7,7 +55,9 @@ module.exports = {
     },
     group_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      unsigned: true,
+      references: "groups.id"
     },
     name: {
       type: "string",
@@ -94,51 +144,6 @@ module.exports = {
     },
   },
 
-  groups: {
-    id: {
-      type: "increments",
-      nullable: false,
-      primary: true
-    },
-    name: {
-      type: "string",
-      maxlength: 20,
-      nullable: false,
-      composite_unique: 1
-    },
-    type: {
-      type: "string",
-      maxlength: 36,
-      nullable: false,
-      validations: {
-        isIn: [["undergraduate", "graduate", "faculty"]]
-      },
-      composite_unique: 1
-    },
-    description: {
-      type: "string",
-      maxlength: 54,
-      nullable: true
-    },
-
-    created_at: {
-      type: "dateTime",
-      nullable: false
-    },
-    created_by: {
-      type: "integer",
-      nullable: false
-    },
-    updated_at: {
-      type: "dateTime",
-      nullable: true
-    },
-    updated_by: {
-      type: "integer",
-      nullable: true
-    }
-  },
-
   honors: {
     id: {
       type: "increments",
@@ -197,12 +202,18 @@ module.exports = {
     group_id: {
       type: "integer",
       nullable: false,
+      unsigned: true,
       composite_primary: true,
+      references: "groups.id",
+      onDelete: "CASCADE"
     },
     honor_id: {
       type: "integer",
       nullable: false,
-      composite_primary: true
+      unsigned: true,
+      composite_primary: true,
+      references: "honors.id",
+      onDelete: "CASCADE"
     },
     quota: {
       type: "integer",
@@ -211,46 +222,6 @@ module.exports = {
         isMinimum: 0
       }
     }
-  },
-
-  honor_user_scores: {
-    id: {
-      type: "increments",
-      nullable: false,
-      primary: true
-    },
-    score: {
-      type: "text",
-      nullable: true
-    },
-    honor_user_id: {
-      type: "integer",
-      nullable: false,
-      composite_unique: 1
-    },
-    scorer_id: {
-      type: "integer",
-      nullable: false,
-      composite_unique: 1
-    },
-
-    created_at: {
-      type: "dateTime",
-      nullable: false
-    },
-    created_by: {
-      type: "integer",
-      nullable: false
-    },
-
-    updated_at: {
-      type: "dateTime",
-      nullable: true
-    },
-    updated_by: {
-      type: "integer",
-      nullable: true
-    },
   },
 
   honors_users: {
@@ -262,12 +233,18 @@ module.exports = {
     user_id: {
       type: "integer",
       nullable: false,
-      composite_unique: 1
+      unsigned: true,
+      composite_unique: 1,
+      references: "users.id",
+      onDelete: "CASCADE"
     },
     honor_id: {
       type: "integer",
       nullable: false,
-      composite_unique: 1
+      unsigned: true,
+      composite_unique: 1,
+      references: "honors.id",
+      onDelete: "CASCADE"
     },
     state: {
       type: "string",
@@ -303,6 +280,52 @@ module.exports = {
       type: "integer",
       nullable: true
     }
+  },
+
+  honor_user_scores: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
+    score: {
+      type: "text",
+      nullable: true
+    },
+    honor_user_id: {
+      type: "integer",
+      nullable: false,
+      unsigned: true,
+      composite_unique: 1,
+      references: "honors_users.id",
+      onDelete: "CASCADE"
+    },
+    scorer_id: {
+      type: "integer",
+      nullable: false,
+      unsigned: true,
+      composite_unique: 1,
+      references: "users.id",
+      onDelete: "CASCADE"
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
+    },
   },
 
   scholars: {
@@ -370,12 +393,18 @@ module.exports = {
     group_id: {
       type: "integer",
       nullable: false,
+      unsigned: true,
       composite_primary: true,
+      references: "groups.id",
+      onDelete: "CASCADE"
     },
     scholar_id: {
       type: "integer",
       nullable: false,
+      unsigned: true,
       composite_primary: true,
+      references: "scholars.id",
+      onDelete: "CASCADE"
     },
     quota: {
       type: "integer",
@@ -394,11 +423,17 @@ module.exports = {
     },
     user_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      unsigned: true,
+      references: "users.id",
+      onDelete: "CASCADE"
     },
     scholar_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      unsigned: true,
+      references: "scholars.id",
+      onDelete: "CASCADE"
     },
     state: {
       type: "string",

@@ -52,6 +52,9 @@ function createTable(tableName) {
       if (schema[tableName][key].hasOwnProperty("references")) {
         column.references(schema[tableName][key].references);
       }
+      if (schema[tableName][key].hasOwnProperty("onDelete")) {
+        column.onDelete(schema[tableName][key].onDelete);
+      }
       if (schema[tableName][key].hasOwnProperty("defaultTo")) {
         column.defaultTo(schema[tableName][key].defaultTo);
       }
