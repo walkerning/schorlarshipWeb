@@ -2,6 +2,8 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var morgan = require("morgan");
 var cors = require("cors");
+var compression = require("compression");
+var helmet = require("helmet");
 
 var logging = require("./logging");
 var models = require("./models");
@@ -22,6 +24,12 @@ app.use(cors())
 app.use(morgan("dev", {
   "stream": logging.stream
 }));
+
+// PLUGIN: securing application from some attacks
+app.use(helmet());
+
+// PLUGIN: gzip compression, compacting the json responses
+app.use(compression());
 
 // PLUGIN: JSON body parser: parse JSON payload into `req.body` attribute
 app.use(bodyParser.json());
