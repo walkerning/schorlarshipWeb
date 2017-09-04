@@ -4,6 +4,7 @@ var morgan = require("morgan");
 var cors = require("cors");
 var compression = require("compression");
 var helmet = require("helmet");
+var RateLimit = require('express-rate-limit');
 
 var logging = require("./logging");
 var models = require("./models");
@@ -38,6 +39,14 @@ app.use(bodyParser.json());
 app.use(jwtMiddleware.unless({
   path: ["/auth"]
 }));
+
+// PLUGIN: rate limiter for each IP
+var limiter = new RateLimit({
+  windowMs: 60*1000, // 1 minutes
+  max: 200, // limit each IP to 200 requests per windowMs
+  delayMs: 0 // disable delaying - full speed until the max limit is reached
+});
+app.use(limiter);
 
 // ROUTES: auth: verify the password, a jwt-signed token on success
 app.post("/auth", authHandler);
