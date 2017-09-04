@@ -182,7 +182,7 @@ var Scholar = bookshelfInst.Model.extend({
         remove_gids = _.difference(now_gids, gids);
         start = start.then(() => {
           return Promise.map(remove_gids, (remove_gid) => {
-            this.allocatedOfGroup(remove_gid)
+            return this.allocatedOfGroup(remove_gid)
               .then((cnt) => {
                 // If Already allocated to a group, the quota of this group cannot be deleted.
                 if (cnt > 0) {
