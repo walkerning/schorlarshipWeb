@@ -219,6 +219,7 @@ module.exports = {
                 return models.Fill.create({
                   "form_id": scholar.get("form_id"),
                   "user_id": req.params.userId,
+                  "user_scholar_id": state.get("id"),
                   "content": JSON.stringify(req.body["fill"])
                 }, req.user)
                   .then(function(fill) {

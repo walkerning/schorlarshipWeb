@@ -524,13 +524,33 @@ module.exports = {
       nullable: false,
       primary: true
     },
+    user_honor_id: {
+      type: "integer",
+      nullable: true,
+      unsigned: true,
+      references: "honors_users.id",
+      onDelete: "CASCADE"
+    },
+    user_scholar_id: {
+      type: "integer",
+      nullable: true,
+      unsigned: true,
+      references: "scholars_users.id",
+      onDelete: "CASCADE"
+    },
     form_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      unsigned: true,
+      references: "forms.id",
+      onDelete: "CASCADE"
     },
     user_id: {
       type: "integer",
-      nullable: false
+      nullable: false,
+      unsigned: true,
+      references: "users.id",
+      onDelete: "CASCADE"
     },
     content: {
       type: "text",

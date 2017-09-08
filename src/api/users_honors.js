@@ -96,7 +96,10 @@ module.exports = {
                   fill_id: fill.get("id"),
                   apply_time: apply_time,
                   state: "temp" // default state: "temp"
-                }, req.user);
+                }, req.user)
+                  .then(function(hon) {
+                    return fill.update({"user_honor_id": hon.get("id")}, req.user);
+                  });
               });
           })
           .then(function() {
