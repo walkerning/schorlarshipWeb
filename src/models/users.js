@@ -199,6 +199,17 @@ var User = bookshelfInst.Model.extend({
       .fetch();
   },
 
+  removeScholarsOfYear: function removeScholarsOfYear(year) {
+    var scholars_col = this.belongsToMany("Scholar");
+    return this.belongsToMany("Scholar")
+      .query({where: {year: year}})
+      .fetch()
+      .then(function (schos) {
+        console.log(schos.toJSON());
+        return scholars_col.detach(_.map(schos.toJSON(), (scho) => { return scho["id"]; }));
+      });
+  },
+
   toClientJSON: function toClientJSON(options) {
     options = _.mergeWith({
       omitPivot: true,

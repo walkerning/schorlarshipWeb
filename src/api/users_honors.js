@@ -212,10 +212,19 @@ module.exports = {
                 }
                 return start.then(function() {
                   // Handle state change
+                  var start_ = Promise.resolve(null);
                   if (body["state"]) {
-                    return state.update({
-                      "state": body["state"]
-                    }, req.user);
+                    if ((body["state"] == "success" && hstate["state"] !== "success") ||
+                        (hstate["state"] == "success" && body["state"] !== "success")) {
+                      // If state change is an add/delete of success, clear all the scholarships
+                      // of the current year that have been allocated to this user
+                      start_ = user.removeScholarsOfYear((new Date()).getFullYear());
+                    }
+                    return start_.then(() => {
+                      state.update({
+                        "state": body["state"]
+                      }, req.user);
+                    });
                   }
                 });
               });

@@ -308,7 +308,7 @@ module.exports = {
       });
   },
 
-  deleteScholar: function deleteScholar(req, res, next) {
+  deleteScholar: permitUpdateCurrentYear(function deleteScholar(req, res, next) {
     return models.User.getById(req.params.userId,
       {
         fetchOptions: {
@@ -329,5 +329,5 @@ module.exports = {
             });
           })
       });
-  }
+  })
 };
