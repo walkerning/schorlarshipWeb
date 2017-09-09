@@ -14,6 +14,22 @@ function expandFill(hstate, user) {
   return hstate;
 }
 
+function permitUpdateCurrentYear(fn) {
+  return function(req, res, next) {
+    return models.Honor.getById(req.params.honorId).then(function(hon) {
+      var hon_year = _.toNumber(hon.get("year"));
+      var now_year = (new Date()).getFullYear();
+      if (hon_year !== now_year) {
+        return Promise.reject(new errors.ValidationError({
+          message: util.format("Honor `%d` is of year %s, its allocation cannot be updated now (year %s).",
+                               req.params.honorId, hon_year, now_year)
+        }));
+      }
+      return fn(req, res, next);
+    });
+  };
+}
+
 module.exports = {
   listHonors: function listHonors(req, res, next) {
     return models.User.getById(req.params.userId, {
@@ -77,7 +93,8 @@ module.exports = {
             start_time = new Date(hon.get("start_time"));
             end_time = new Date(hon.get("end_time"));
             apply_time = new Date();
-            if (!(start_time <= apply_time && apply_time <= end_time)) {
+            if (!(start_time <= apply_time && apply_time <= end_time &&
+                  apply_time.getFullYear() == _.toNumber(hon.get("year")))) {
               return Promise.reject(new errors.BadRequestError({
                 message: "You can not apply for this honor. The honor is not open now."
               }));
@@ -116,7 +133,7 @@ module.exports = {
       });
   },
 
-  cancelHonor: function cancelHonor(req, res, next) {
+  cancelHonor: permitUpdateCurrentYear(function cancelHonor(req, res, next) {
     return models.User.getById(req.params.userId,
       {
         fetchOptions: {
@@ -144,9 +161,9 @@ module.exports = {
             });
           })
       });
-  },
+  }),
 
-  updateHonor: function updateHonor(req, res, next) {
+  updateHonor: permitUpdateCurrentYear(function updateHonor(req, res, next) {
     // Update the honor applying status, or the table content
     var body = _.pick(req.body, ["state", "fill"]);
     if (_.keys(body).length == 0) {
@@ -216,9 +233,9 @@ module.exports = {
               });
           });
       });
-  },
+  }),
 
-  updateHonorFill: function updateHonorFill(req, res, next) {
+  updateHonorFill: permitUpdateCurrentYear(function updateHonorFill(req, res, next) {
     // Update the honor applying status, or the table content
     var body = _.pick(req.body, ["state", "fill"]);
     if (_.keys(body).length != 2) {
@@ -284,9 +301,9 @@ module.exports = {
               });
           });
       });
-  },
+  }),
 
-  addHonorScore: function addHonorScore(req, res, next) {
+  addHonorScore: permitUpdateCurrentYear(function addHonorScore(req, res, next) {
     if (!req.body.hasOwnProperty("score")) {
       return Promise.reject(new errors.BadRequestError({
         message: "`score` field is required."
@@ -309,9 +326,9 @@ module.exports = {
               });
           });
       });
-  },
+  }),
 
-  updateHonorScore: function updateHonorScore(req, res, next) {
+  updateHonorScore: permitUpdateCurrentYear(function updateHonorScore(req, res, next) {
     if (!req.body.hasOwnProperty("score")) {
       return Promise.reject(new errors.BadRequestError({
         message: "`score` field is required."
@@ -333,9 +350,9 @@ module.exports = {
               });
           });
       });
-  },
+  }),
 
-  deleteHonorScore: function deleteHonorScore(req, res, next) {
+  deleteHonorScore: permitUpdateCurrentYear(function deleteHonorScore(req, res, next) {
     return models.UserHonorState.getUserHonorState(req.params.userId, req.params.honorId)
       .then(function(st) {
         if (!st) {
@@ -352,5 +369,5 @@ module.exports = {
               });
           });
       });
-  }
+  })
 };

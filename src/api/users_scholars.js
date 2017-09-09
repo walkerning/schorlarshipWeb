@@ -14,6 +14,22 @@ function expandFill(hstate, user) {
   return hstate;
 }
 
+function permitUpdateCurrentYear(fn) {
+  return function(req, res, next) {
+    return models.Scholar.getById(req.params.scholarId).then(function(scho) {
+      var scho_year = _.toNumber(scho.get("year"));
+      var now_year = (new Date()).getFullYear();
+      if (scho_year !== now_year) {
+        return Promise.reject(new errors.ValidationError({
+          message: util.format("Scholar `%d` is of year %d, its allocation cannot be updated now (year %d).",
+                               req.params.scholarId, scho_year, now_year)
+        }));
+      }
+      return fn(req, res, next);
+    });
+  };
+}
+
 module.exports = {
   listScholars: function listScholars(req, res, next) {
     return models.User.getById(req.params.userId, {
@@ -54,6 +70,14 @@ module.exports = {
         return bookshelfInst.transaction(function(trans) {
           return models.Scholar.getById(req.body.scholar_id)
             .then(function(scholar) {
+              var scho_year = _.toNumber(scholar.get("year"));
+              var now_year = (new Date()).getFullYear();
+              if (scho_year !== now_year) {
+                return Promise.reject(new errors.ValidationError({
+                  message: util.format("Scholarship `%d` is of year %s, its allocation cannot be updated now (year %s).",
+                                       req.body.scholar_id, scho_year, now_year)
+                }));
+              }
               // groups that have quota
               gids = _.map(scholar.getGroupQuota(), (s) => s["group_id"])
               if (!_.includes(gids, user.get("group_id"))) {
@@ -113,7 +137,7 @@ module.exports = {
       });
   },
 
-  updateScholar: function updateScholar(req, res, next) {
+  updateScholar: permitUpdateCurrentYear(function updateScholar(req, res, next) {
     if (!req.body.hasOwnProperty("money")) {
       return Promise.reject(new errors.BadRequestError({
         message: "`money` field is required."
@@ -180,7 +204,7 @@ module.exports = {
               });
           });
       });
-  },
+  }),
 
   uploadThanksLetter: function uploadThanksLetter(req, res, next) {
     if (!req.body.hasOwnProperty("fill") || !req.body["fill"]) {
