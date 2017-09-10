@@ -69,6 +69,11 @@ if (app.get("env") == "development") {
       // For 404
       err = new errors.NotFoundError();
     }
+    var message = err.message;
+    if (err.code == "ER_DUP_ENTRY") {
+      message = "Create resource fail, duplicated entry exists.";
+      err.status = 400;
+    }
     console.log("error: ", err);
     if (err.status >= 100 && err.status < 600) {
       res.status(err.status);
@@ -79,7 +84,7 @@ if (app.get("env") == "development") {
       "Cache-Control": "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0"
     });
     res.json({
-      message: err.message,
+      message: message,
       name: err.name,
       trace: err
     });
@@ -89,6 +94,12 @@ if (app.get("env") == "development") {
     if (!err) {
       // For 404
       err = new errors.NotFoundError();
+    }
+    var message = err.message;
+    if (err.code == "ER_DUP_ENTRY") {
+      err = new errors.ValidationError({
+        message: "Create resource fail, duplicated entry exists."
+      });
     }
     if (err.status >= 100 && err.status < 600) {
       res.status(err.status);
