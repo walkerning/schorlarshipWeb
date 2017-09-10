@@ -81,19 +81,19 @@ var Honor = bookshelfInst.Model.extend({
       var start = Promise.resolve(null);
       // `group_quota` field must be an array.
       if (body.hasOwnProperty("group_quota") && _.isArray(body["group_quota"])) {
-        gids_spec = _.reduce(body["group_quota"], function(obj, s) {
+        var gids_spec = _.reduce(body["group_quota"], function(obj, s) {
           obj[s["group_id"]] = s;
           return obj;
         }, {});
-        gids = _.map(_.keys(gids_spec), (s) => {
+        var gids = _.map(_.keys(gids_spec), (s) => {
           return parseInt(s);
         });
-        now_gids = _.map(this.relations["groups"].toJSON(), (s) => {
+        var now_gids = _.map(this.relations["groups"].toJSON(), (s) => {
           return s["id"]
         });
         // The gids that should be removed
-        gids_remove = _.difference(now_gids, gids);
-        console.log("gids_remove: ", gids_remove, now_gids, gids);
+        var gids_remove = _.difference(now_gids, gids);
+        // console.log("gids_remove: ", gids_remove, now_gids, gids);
         start = Promise.map(gids_remove, (remove_gid) => {
           // If Already allocated to a group, the quota of this group cannot be deleted.
           return this.allocatedCountOfGroup(remove_gid)
@@ -149,7 +149,7 @@ var Honor = bookshelfInst.Model.extend({
           });
       }
       // Update attributes other than the `group_quota`.
-      self = this;
+      var self = this;
       return start.then(function() {
         return bookshelfInst.Model.prototype.update.call(self, body, contextUser);
       });
@@ -158,7 +158,7 @@ var Honor = bookshelfInst.Model.extend({
 
   getGroupQuota: function getGroupQuota() {
     var json = this.toJSON();
-    group_quota = json["groups"];
+    var group_quota = json["groups"];
 
     var renamePivotAttributes = this.renamePivotAttributes();
     var pickPivotAttributes = this.pickPivotAttributes();
@@ -174,7 +174,7 @@ var Honor = bookshelfInst.Model.extend({
 
   getQuotaOfGroup: function getGroupQuota(gid) {
     var group_quota = this.getGroupQuota();
-    quota = _.find(group_quota, _.matchesProperty("group_id", gid));
+    var quota = _.find(group_quota, _.matchesProperty("group_id", gid));
     if (quota === undefined) {
       return 0;
     }

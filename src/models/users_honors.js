@@ -37,7 +37,7 @@ var UserHonorState = bookshelfInst.Model.extend({
   },
 
   addScore: function addScore(context_user, score) {
-    scorer_id = context_user.get("id");
+    var scorer_id = context_user.get("id");
     // Check whether this scorer already submit a score
     if (_.includes(_.map(this.related("scores").toJSON(), (s) => {
         return s["scorer_id"];
@@ -55,7 +55,7 @@ var UserHonorState = bookshelfInst.Model.extend({
   },
 
   updateScore: function updateScore(context_user, score) {
-    scorer_id = context_user.get("id");
+    var scorer_id = context_user.get("id");
     return Score.forge({
       scorer_id: scorer_id,
       honor_user_id: this.get("id")
@@ -75,7 +75,7 @@ var UserHonorState = bookshelfInst.Model.extend({
   },
 
   deleteScore: function deleteScore(context_user) {
-    scorer_id = context_user.get("id");
+    var scorer_id = context_user.get("id");
     return Score.forge({
       scorer_id: scorer_id,
       honor_user_id: this.get("id")

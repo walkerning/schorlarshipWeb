@@ -19,8 +19,8 @@ module.exports = {
         }
       })
       .then(function(group) {
-        users = group.getUsers();
-        honor_ids = _.map(_.split(req.query["honor_ids"], ","), _.toNumber);
+        var users = group.getUsers();
+        var honor_ids = _.map(_.split(req.query["honor_ids"], ","), _.toNumber);
         var tasks = [];
         for (var i in users) {
           for (var j in honor_ids) {

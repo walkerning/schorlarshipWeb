@@ -20,8 +20,8 @@ function listPage(req, res, next) {
       message: "`page` and `pageSize` field is required."
     }));
   }
-  page = _.toInteger(queries["page"]);
-  pageSize = _.toInteger(queries["pageSize"]);
+  var page = _.toInteger(queries["page"]);
+  var pageSize = _.toInteger(queries["pageSize"]);
   return models.Reasons.getByQuery(queries, {})
     .then(function(collection) {
       var obj = collection.toClientJSON();
@@ -31,6 +31,7 @@ function listPage(req, res, next) {
         rowCount: obj.length,
         pageCount: Math.ceil(obj.length / pageSize)
       }
+      console.log("reasons: ", page, pageSize, obj);
       res.status(200).json({
         data: obj.slice((page - 1) * pageSize, page * pageSize),
         pagination: pagination

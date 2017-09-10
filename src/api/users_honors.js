@@ -76,7 +76,7 @@ module.exports = {
                 message: util.format("You cannot apply for honors before submitting apply reasons(申请理由) for this year `%d`", now_year)
               }));
             }
-            exist_hids = _.map(user.getHonorStates(), (h) => h["honor_id"]);
+            var exist_hids = _.map(user.getHonorStates(), (h) => h["honor_id"]);
             if (_.includes(exist_hids, req.body.honor_id)) {
               return Promise.reject(new errors.BadRequestError({
                 message: "Honor with `honor_id`==" + req.body.honor_id + " already applied."
@@ -91,7 +91,7 @@ module.exports = {
                   }));
                 }
                 // groups that have quota
-                gids = _.map(hon.getGroupQuota(), (s) => s["group_id"])
+                var gids = _.map(hon.getGroupQuota(), (s) => s["group_id"])
                 if (!_.includes(gids, user.get("group_id"))) {
                   // FIXME: validation error type?
                   return Promise.reject(new errors.ValidationError({
@@ -99,9 +99,9 @@ module.exports = {
                   }));
                 }
                 // Get current time
-                start_time = new Date(hon.get("start_time"));
-                end_time = new Date(hon.get("end_time"));
-                apply_time = new Date();
+                var start_time = new Date(hon.get("start_time"));
+                var end_time = new Date(hon.get("end_time"));
+                var apply_time = new Date();
                 if (!(start_time <= apply_time && apply_time <= end_time &&
                       apply_time.getFullYear() == _.toNumber(hon.get("year")))) {
                   return Promise.reject(new errors.BadRequestError({
@@ -154,13 +154,13 @@ module.exports = {
         // Handle fill change
         return user.getHonorStateModel(req.params.honorId)
           .then(function(state) {
-            start = Promise.resolve(null);
+            var start = Promise.resolve(null);
             if (!state) {
               return Promise.reject(new errors.NotFoundError({
                 message: "This user do not apply for this honor."
               }));
             }
-            hstate = state.toJSON();
+            var hstate = state.toJSON();
             if (_.includes(["applied", "temp"], hstate["states"])) {
               return Promise.reject(new errors.BadRequestError({
                 message: "You can only cancel honor application in temp or applied."
@@ -194,7 +194,7 @@ module.exports = {
                 message: "This user do not apply for this honor."
               }));
             }
-            hstate = state.toJSON();
+            var hstate = state.toJSON();
             return bookshelfInst.transaction(function(trans) {
               return models.Honor.getById(req.params.honorId).then(function(hon) {
                 var start = Promise.resolve(null);
@@ -212,7 +212,7 @@ module.exports = {
                     });
                 }
                 if (body.hasOwnProperty("fill")) {
-                  fill_id = hstate["fill_id"];
+                  var fill_id = hstate["fill_id"];
                   // Update the fill of the apply form
                   start = start.then(function() {
                     user.related("fills").get(fill_id).update({
@@ -280,7 +280,7 @@ module.exports = {
                 message: "This user do not apply for this honor."
               }));
             }
-            hstate = state.toJSON();
+            var hstate = state.toJSON();
             if (hstate["state"] != "temp") {
               return Promise.reject(new errors.BadRequestError({
                 message: "You cannot modify the apply form after it is applied."
@@ -288,15 +288,15 @@ module.exports = {
             }
             return models.Honor.getById(req.params.honorId).then(function(hon) {
               // Get current time
-              start_time = new Date(hon.get("start_time"));
-              end_time = new Date(hon.get("end_time"));
-              apply_time = new Date();
+              var start_time = new Date(hon.get("start_time"));
+              var end_time = new Date(hon.get("end_time"));
+              var apply_time = new Date();
               if (!(start_time <= apply_time && apply_time <= end_time)) {
                 return Promise.reject(new errors.BadRequestError({
                   message: "You can not update related states of this honor. The honor is not open now."
                 }));
               }
-              fill_id = hstate["fill_id"];
+              var fill_id = hstate["fill_id"];
               return user.related("fills").get(fill_id).update({
                 "content": JSON.stringify(body["fill"])
               }).then(function() {

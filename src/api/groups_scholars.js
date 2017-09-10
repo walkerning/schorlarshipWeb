@@ -19,8 +19,8 @@ module.exports = {
         }
       })
       .then(function(group) {
-        users = group.getUsers();
-        scholar_ids = _.map(_.split(req.query["scholar_ids"], ","), _.toNumber);
+        var users = group.getUsers();
+        var scholar_ids = _.map(_.split(req.query["scholar_ids"], ","), _.toNumber);
         var tasks = [];
         for (var i in users) {
           for (var j in scholar_ids) {

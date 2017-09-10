@@ -60,7 +60,7 @@ module.exports = {
       }
     })
       .then(function(user) {
-        exist_hids = _.map(user.getScholarStates(), (h) => h["scholar_id"]);
+        var exist_hids = _.map(user.getScholarStates(), (h) => h["scholar_id"]);
         if (_.includes(exist_hids, req.body.scholar_id)) {
           return Promise.reject(new errors.BadRequestError({
             message: "Scholar with `scholar_id`==" + req.body.scholar_id + " already applied."
@@ -79,7 +79,7 @@ module.exports = {
                 }));
               }
               // groups that have quota
-              gids = _.map(scholar.getGroupQuota(), (s) => s["group_id"])
+              var gids = _.map(scholar.getGroupQuota(), (s) => s["group_id"])
               if (!_.includes(gids, user.get("group_id"))) {
                 // FIXME: validation error type?
                 return Promise.reject(new errors.ValidationError({
@@ -153,7 +153,7 @@ module.exports = {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
           .then(function(state) {
-            start = Promise.resolve(null);
+            var start = Promise.resolve(null);
             if (!state) {
               return Promise.reject(new errors.NotFoundError({
                 message: "This user do not have this scholarship."
@@ -172,7 +172,7 @@ module.exports = {
                       message: "This API is only for `money` type scholarship."
                     }));
                   }
-                  gid = user.get("group_id");
+                  var gid = user.get("group_id");
                   return scholar.allocatedMoneyOfGroup(gid)
                     .then((allocated) => {
                       // Judge if the new allocated money will exceed the group quota.
@@ -222,7 +222,7 @@ module.exports = {
         // Handle fill change
         return user.getScholarStateModel(req.params.scholarId)
           .then(function(state) {
-            start = Promise.resolve(null);
+            var start = Promise.resolve(null);
             if (!state) {
               return Promise.reject(new errors.NotFoundError({
                 message: "This user do not have this scholarship."
@@ -288,8 +288,8 @@ module.exports = {
                 message: "This user do not have this scholarship."
               }));
             }
-            hstate = state.toJSON();
-            fill_id = hstate["fill_id"];
+            var hstate = state.toJSON();
+            var fill_id = hstate["fill_id"];
             return user.related("fills").get(fill_id).update({
               "content": JSON.stringify(req.body["fill"])
             });

@@ -65,7 +65,7 @@ module.exports = {
       }
     })
       .then(function(user) {
-        exist_hids = _.map(user.getReasonStates(), (h) => h["year"]);
+        var exist_hids = _.map(user.getReasonStates(), (h) => h["year"]);
         if (_.includes(exist_hids, req.body.reason_id)) {
           return Promise.reject(new errors.BadRequestError({
             message: "Reason with `year`==" + req.body.reason_id + " already applied."
@@ -80,7 +80,7 @@ module.exports = {
               }));
             }
             // Get current time
-            apply_time = new Date();
+            var apply_time = new Date();
             var rea_year = _.toNumber(rea.get("year"));
             if (!(apply_time.getFullYear() == rea_year)) {
               return Promise.reject(new errors.BadRequestError({
@@ -138,9 +138,9 @@ module.exports = {
                 message: "This user do not submit this reason."
               }));
             }
-            hstate = state.toJSON();
+            var hstate = state.toJSON();
             return models.Reason.getById(req.params.reasonId).then(function(rea) {
-              fill_id = hstate["fill_id"];
+              var fill_id = hstate["fill_id"];
               var apply_time = new Date();
               return user.related("fills").get(fill_id).update({
                 "content": JSON.stringify(body["fill"])

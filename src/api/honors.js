@@ -40,8 +40,8 @@ function listPage(req, res, next) {
       message: "`page` and `pageSize` field is required."
     }));
   }
-  page = _.toInteger(queries["page"]);
-  pageSize = _.toInteger(queries["pageSize"]);
+  var page = _.toInteger(queries["page"]);
+  var pageSize = _.toInteger(queries["pageSize"]);
   return models.Honors.getByQuery(queries, {
     fetchOptions: {
       withRelated: ["groups"]
@@ -65,6 +65,7 @@ function listPage(req, res, next) {
           return start <= now && now <= end;
         });
       }
+      console.log("honors: ", page, pageSize, obj);
       var pagination = {
         page: page,
         pageSize: pageSize,

@@ -21,8 +21,8 @@ function listPage(req, res, next) {
       message: "`page` and `pageSize` field is required."
     }));
   }
-  page = _.toInteger(queries["page"]);
-  pageSize = _.toInteger(queries["pageSize"]);
+  var page = _.toInteger(queries["page"]);
+  var pageSize = _.toInteger(queries["pageSize"]);
   return models.Forms.getByQuery(queries)
     .then(function(collection) {
       var obj = collection.toClientJSON();

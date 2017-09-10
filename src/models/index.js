@@ -1,6 +1,6 @@
 var l = require("lodash");
 
-modelNames = [
+var modelNames = [
   "forms",
   "honors",
   "permissions",
