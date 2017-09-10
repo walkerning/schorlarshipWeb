@@ -153,6 +153,11 @@ module.exports = {
       nullable: false,
       primary: true
     },
+    name: {
+      type: "string",
+      nullable: false,
+      maxlength: 20
+    },
     form_id: {
       type: "integer",
       nullable: false

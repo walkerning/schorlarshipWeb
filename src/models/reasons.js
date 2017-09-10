@@ -10,7 +10,7 @@ var Reason = bookshelfInst.Model.extend({
   },
 
   permittedUpdateAttributes: function permittedUpdateAttributes(contextUser) {
-    return ["form_id"];
+    return ["form_id", "name"];
   }
 }, {
   getById: function getById(id, options) {
@@ -22,7 +22,7 @@ var Reasons = bookshelfInst.Collection.extend({
   model: Reason
 }, {
   queriableAttributes: function queriableAttributes() {
-    return ["year"];
+    return ["year", "name"];
   }
 });
 
