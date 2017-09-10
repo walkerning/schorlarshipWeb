@@ -181,13 +181,14 @@ bookshelfInst.Model = bookshelfInst.Model.extend({
   /**
    * @returns {Promise<Model>}
    */
-  getById: function getById(id, options) {
+  getById: function getById(id, options, idname) {
     if (options !== undefined) {
       var fetchOpt = options.fetchOptions;
     }
-    return this.forge({
-      id: id
-    })
+    var idname = idname || "id";
+    var query = {};
+    query[idname] = id;
+    return this.forge(query)
       .fetch(fetchOpt)
       .then(function(mod) {
         if (!mod && (options === undefined || options.noreject !== true)) {

@@ -47,7 +47,11 @@ var User = bookshelfInst.Model.extend({
   group: function() {
     return this.belongsTo("Group", "group_id");
   },
-  
+
+  applyReasons: function() {
+    return this.hasMany("UserReasonState", "user_id")
+  },
+
   applyHonors: function() {
     return this.hasMany("UserHonorState", "user_id");
   },
@@ -138,6 +142,10 @@ var User = bookshelfInst.Model.extend({
     return this.related("applyHonors").toJSON();
   },
 
+  getReasonStates: function getHonorStates() {
+    return this.related("applyReasons").toJSON();
+  },
+
   // get applied scholars
   getScholarStates: function getScholarStates() {
     return this.related("applyScholars").toJSON();
@@ -147,6 +155,17 @@ var User = bookshelfInst.Model.extend({
     return this.related("applyHonors")
       .query({
         where: _.pick(queries, models.UserHonorStates.queriableAttributes())
+      })
+      .fetch()
+      .then(function(c) {
+        return c.toJSON();
+      });
+  },
+
+  getReasonStatesCol: function getReasonStatesCol(queries) {
+    return this.related("applyReasons")
+      .query({
+        where: _.pick(queries, models.UserReasonStates.queriableAttributes())
       })
       .fetch()
       .then(function(c) {
@@ -175,6 +194,16 @@ var User = bookshelfInst.Model.extend({
       });
   },
 
+  getReasonState: function getReasonState(year) {
+    return this.getReasonStateModel(year)
+      .then(function (state) {
+        if (state !== null) {
+          return state.toJSON();
+        }
+        return null;
+      });
+  },
+
   getScholarState: function getScholarState(scholar_id) {
     return this.getScholarStateModel(scholar_id)
       .then(function (state) {
@@ -189,6 +218,13 @@ var User = bookshelfInst.Model.extend({
     return models.UserHonorState
       .forge()
       .where({user_id: this.get("id"), honor_id: honor_id})
+      .fetch();
+  },
+
+  getReasonStateModel: function getHonorStateModel(year) {
+    return models.UserReasonState
+      .forge()
+      .where({user_id: this.get("id"), year: year})
       .fetch();
   },
 

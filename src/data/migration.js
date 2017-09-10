@@ -7,22 +7,26 @@ var _ = require("lodash");
 
 var tableNames = schema["tableNames"];
 
-function dropTables() {
-  return Promise.mapSeries(_.reverse(_.clone(tableNames)), function dropTable(tableName) {
+function dropTables(names) {
+  return Promise.mapSeries(_.reverse(_.clone(names)), function dropTable(tableName) {
     return commands.dropTable(tableName);
   });
 }
 
-function createTables() {
-  return Promise.mapSeries(tableNames, function createTable(tableName) {
+function createTables(names) {
+  return Promise.mapSeries(names, function createTable(tableName) {
     logging.info("Creating table: " + tableName);
     return commands.createTable(tableName);
   });
 }
 
 var start = Promise.resolve(null);
+var names = tableNames;
+if (argv.names) {
+  names = argv.names.split(",");
+}
 if (argv.reinit) {
-  start = dropTables()
+  start = dropTables(names)
     .then(function() {
       logging.info("All tables droped");
     })
@@ -33,7 +37,7 @@ if (argv.reinit) {
 }
 
 start.then(function() {
-  return createTables().then(function() {
+  return createTables(names).then(function() {
     logging.info("All tables created!");
     process.exit(0);
   })

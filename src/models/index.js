@@ -7,7 +7,9 @@ modelNames = [
   "scholars",
   "users",
   "users_honors",
-  "users_scholars"
+  "users_scholars",
+  "reasons",
+  "users_reasons"
 ];
 
 exports = module.exports;

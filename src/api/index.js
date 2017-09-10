@@ -11,6 +11,8 @@ var honors = require("./honors");
 var users_honors = require("./users_honors");
 var scholars = require("./scholars");
 var users_scholars = require("./users_scholars");
+var reasons = require("./reasons");
+var users_reasons = require("./users_reasons");
 var groups_honors = require("./groups_honors");
 var groups_scholars = require("./groups_scholars");
 
@@ -80,6 +82,12 @@ apiRouter.put("/users/:userId/scholars/:scholarId/thanksletter", permit(["me"], 
 // Delete a scholar for this user
 apiRouter.delete("/users/:userId/scholars/:scholarId", permit(["user_scholar"]), catchError(users_scholars.deleteScholar));
 
+// users-reasons endpoints.
+apiRouter.get("/users/:userId/reasons", permit(["me"], ["user"], ["user_honor"]), catchError(users_reasons.listReasons));
+// Apply a reason
+apiRouter.post("/users/:userId/reasons", permit(["me", "apply"]), catchError(users_reasons.applyReason));
+// Change a reason fill
+apiRouter.put("/users/:userId/reasons/:reasonId", permit(["me", "apply"], ["user_honor"]), catchError(users_reasons.updateReasonFill));
 
 //// Routing endpoins `/permissions`
 // List permissions
@@ -157,5 +165,16 @@ apiRouter.put("/scholars/:scholarId", permit(["scholar"]), catchError(scholars.u
 // Delete scholar
 apiRouter.delete("/scholars/:scholarId", permit(["scholar"]), catchError(scholars.delete));
 
+//// Routing endpoints `/reasons`
+// List reasons
+apiRouter.get("/reasons", catchError(reasons.list));
+// Create reason
+apiRouter.post("/reasons", permit(["honor"]), catchError(reasons.create));
+// Get reason info
+apiRouter.get("/reasons/:reasonId", catchError(reasons.info));
+// Update reason info
+apiRouter.put("/reasons/:reasonId", permit(["honor"]), catchError(reasons.updateInfo));
+// Delete reason
+apiRouter.delete("/reasons/:reasonId", permit(["honor"]), catchError(reasons.delete));
 
 module.exports = apiRouter;

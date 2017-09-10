@@ -1,6 +1,7 @@
 module.exports = {
-  tableNames: ["groups", "users", "honors", "groups_honors", "honors_users",
-               "honor_user_scores", "scholars", "groups_scholars", "scholars_users",
+  tableNames: ["groups", "users", "reasons", "reasons_users",
+               "honors", "groups_honors", "honors_users", "honor_user_scores",
+               "scholars", "groups_scholars", "scholars_users",
                "forms", "fills", "permissions", "permissions_users"],
   groups: {
     id: {
@@ -144,6 +145,86 @@ module.exports = {
     },
   },
 
+  reasons: {
+    // FIXME: all `year` attributes should be changed into integer type...
+    year: {
+      type: "integer",
+      unsigned: true,
+      nullable: false,
+      primary: true
+    },
+    form_id: {
+      type: "integer",
+      nullable: false
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
+    }
+  },
+
+  reasons_users: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
+    user_id: {
+      type: "integer",
+      nullable: false,
+      unsigned: true,
+      composite_unique: 1,
+      references: "users.id",
+      onDelete: "CASCADE"
+    },
+    year: {
+      type: "integer",
+      nullable: false,
+      unsigned: true,
+      composite_unique: 1,
+      references: "reasons.year",
+      onDelete: "CASCADE"
+    },
+    fill_id: {
+      type: "integer",
+      nullable: false
+    },
+    apply_time: {
+      type: "datetime",
+      nullable: true,
+    },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
+    }
+  },
+
   honors: {
     id: {
       type: "increments",
@@ -170,6 +251,8 @@ module.exports = {
       type: "datetime",
       nullable: false
     },
+    // FIXME: when delete a form with no fill but with honor/scholarship references
+    //        maybe should add notice in the front-end.
     form_id: {
       type: "integer",
       nullable: false

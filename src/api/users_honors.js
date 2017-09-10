@@ -63,70 +63,80 @@ module.exports = {
     }
     return models.User.getById(req.params.userId, {
       fetchOptions: {
-        withRelated: ["applyHonors"]
+        withRelated: ["applyHonors", "applyReasons"]
       }
     })
       .then(function(user) {
-        exist_hids = _.map(user.getHonorStates(), (h) => h["honor_id"]);
-        if (_.includes(exist_hids, req.body.honor_id)) {
-          return Promise.reject(new errors.BadRequestError({
-            message: "Honor with `honor_id`==" + req.body.honor_id + " already applied."
-          }));
-        }
-        // Get the honor
-        return models.Honor.getById(req.body.honor_id)
-          .then(function(hon) {
-            if (!hon) {
-              return Promise.reject(new errors.BadRequestError({
-                message: "Honor with `honor_id`==" + req.body.honor_id + " does not exist."
-              }));
-            }
-            // groups that have quota
-            gids = _.map(hon.getGroupQuota(), (s) => s["group_id"])
-            if (!_.includes(gids, user.get("group_id"))) {
-              // FIXME: validation error type?
+        // Judge if this user have submitted apply reason this year.
+        var now_year = (new Date()).getFullYear();
+        return user.getReasonState(now_year)
+          .then(function (s) {
+            if (s == null) {
               return Promise.reject(new errors.ValidationError({
-                message: "You can not apply for this honor. No quota is assigned to your group."
+                message: util.format("You cannot apply for honors before submitting apply reasons(申请理由) for this year `%d`", now_year)
               }));
             }
-            // Get current time
-            start_time = new Date(hon.get("start_time"));
-            end_time = new Date(hon.get("end_time"));
-            apply_time = new Date();
-            if (!(start_time <= apply_time && apply_time <= end_time &&
-                  apply_time.getFullYear() == _.toNumber(hon.get("year")))) {
+            exist_hids = _.map(user.getHonorStates(), (h) => h["honor_id"]);
+            if (_.includes(exist_hids, req.body.honor_id)) {
               return Promise.reject(new errors.BadRequestError({
-                message: "You can not apply for this honor. The honor is not open now."
+                message: "Honor with `honor_id`==" + req.body.honor_id + " already applied."
               }));
             }
-            // Create the fill object
-            return models.Fill.create({
-              "form_id": hon.get("form_id"),
-              "user_id": req.params.userId,
-              "content": JSON.stringify(req.body["fill"])
-            }, req.user)
-              .then(function(fill) {
-                // Create new honor apply state
-                return models.UserHonorState.create({
-                  user_id: req.params.userId,
-                  honor_id: req.body.honor_id,
-                  fill_id: fill.get("id"),
-                  apply_time: apply_time,
-                  state: "temp" // default state: "temp"
+            // Get the honor
+            return models.Honor.getById(req.body.honor_id)
+              .then(function(hon) {
+                if (!hon) {
+                  return Promise.reject(new errors.BadRequestError({
+                    message: "Honor with `honor_id`==" + req.body.honor_id + " does not exist."
+                  }));
+                }
+                // groups that have quota
+                gids = _.map(hon.getGroupQuota(), (s) => s["group_id"])
+                if (!_.includes(gids, user.get("group_id"))) {
+                  // FIXME: validation error type?
+                  return Promise.reject(new errors.ValidationError({
+                    message: "You can not apply for this honor. No quota is assigned to your group."
+                  }));
+                }
+                // Get current time
+                start_time = new Date(hon.get("start_time"));
+                end_time = new Date(hon.get("end_time"));
+                apply_time = new Date();
+                if (!(start_time <= apply_time && apply_time <= end_time &&
+                      apply_time.getFullYear() == _.toNumber(hon.get("year")))) {
+                  return Promise.reject(new errors.BadRequestError({
+                    message: "You can not apply for this honor. The honor is not open now."
+                  }));
+                }
+                // Create the fill object
+                return models.Fill.create({
+                  "form_id": hon.get("form_id"),
+                  "user_id": req.params.userId,
+                  "content": JSON.stringify(req.body["fill"])
                 }, req.user)
-                  .then(function(hon) {
-                    return fill.update({"user_honor_id": hon.get("id")}, req.user);
+                  .then(function(fill) {
+                    // Create new honor apply state
+                    return models.UserHonorState.create({
+                      user_id: req.params.userId,
+                      honor_id: req.body.honor_id,
+                      fill_id: fill.get("id"),
+                      apply_time: apply_time,
+                      state: "temp" // default state: "temp"
+                    }, req.user)
+                      .then(function(hon) {
+                        return fill.update({"user_honor_id": hon.get("id")}, req.user);
+                      });
                   });
-              });
-          })
-          .then(function() {
-            return user.fetch({
-              withRelated: ["applyHonors", "fills"]
-            })
-              .then(function(user) {
-                return user.getHonorState(req.body.honor_id)
-                  .then(function(hstate) {
-                    res.status(201).json(expandFill(hstate, user));
+              })
+              .then(function() {
+                return user.fetch({
+                  withRelated: ["applyHonors", "fills"]
+                })
+                  .then(function(user) {
+                    return user.getHonorState(req.body.honor_id)
+                      .then(function(hstate) {
+                        res.status(201).json(expandFill(hstate, user));
+                      });
                   });
               });
           });
@@ -167,7 +177,7 @@ module.exports = {
     // Update the honor applying status, or the table content
     var body = _.pick(req.body, ["state", "fill"]);
     if (_.keys(body).length == 0) {
-      res.status(304).json();
+      return res.status(304).json();
     }
     return models.User.getById(req.params.userId,
       {
@@ -247,8 +257,8 @@ module.exports = {
   updateHonorFill: permitUpdateCurrentYear(function updateHonorFill(req, res, next) {
     // Update the honor applying status, or the table content
     var body = _.pick(req.body, ["state", "fill"]);
-    if (_.keys(body).length != 2) {
-      res.status(304).json();
+    if (_.keys(body).length == 0) {
+      return res.status(304).json();
     }
     if (!_.includes(["applied", "temp"], body["state"])) {
       return Promise.reject(new errors.BadRequestError({
@@ -283,7 +293,7 @@ module.exports = {
               apply_time = new Date();
               if (!(start_time <= apply_time && apply_time <= end_time)) {
                 return Promise.reject(new errors.BadRequestError({
-                  message: "You can not apply for this honor. The honor is not open now."
+                  message: "You can not update related states of this honor. The honor is not open now."
                 }));
               }
               fill_id = hstate["fill_id"];
