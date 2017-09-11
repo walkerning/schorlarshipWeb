@@ -74,7 +74,7 @@ if (app.get("env") == "development") {
       message = "Create resource fail, duplicated entry exists.";
       err.status = 400;
     }
-    console.log("error: ", err);
+    logging.error("error: ", err);
     if (err.status >= 100 && err.status < 600) {
       res.status(err.status);
     } else {

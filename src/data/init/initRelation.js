@@ -22,6 +22,6 @@ models.Permission.fetchAll()
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(err);
+    logging.error(err);
     process.exit(1);
   });

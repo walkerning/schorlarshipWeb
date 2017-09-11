@@ -241,7 +241,6 @@ var User = bookshelfInst.Model.extend({
       .query({where: {year: year}})
       .fetch()
       .then(function (schos) {
-        console.log(schos.toJSON());
         return scholars_col.detach(_.map(schos.toJSON(), (scho) => { return scho["id"]; }));
       });
   },

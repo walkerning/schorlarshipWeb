@@ -31,7 +31,6 @@ function listPage(req, res, next) {
         rowCount: obj.length,
         pageCount: Math.ceil(obj.length / pageSize)
       }
-      console.log("reasons: ", page, pageSize, obj);
       res.status(200).json({
         data: obj.slice((page - 1) * pageSize, page * pageSize),
         pagination: pagination

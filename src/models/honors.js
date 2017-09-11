@@ -93,7 +93,6 @@ var Honor = bookshelfInst.Model.extend({
         });
         // The gids that should be removed
         var gids_remove = _.difference(now_gids, gids);
-        // console.log("gids_remove: ", gids_remove, now_gids, gids);
         start = Promise.map(gids_remove, (remove_gid) => {
           // If Already allocated to a group, the quota of this group cannot be deleted.
           return this.allocatedCountOfGroup(remove_gid)

@@ -65,7 +65,6 @@ function listPage(req, res, next) {
           return start <= now && now <= end;
         });
       }
-      console.log("honors: ", page, pageSize, obj);
       var pagination = {
         page: page,
         pageSize: pageSize,

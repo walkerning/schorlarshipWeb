@@ -15,6 +15,7 @@ var reasons = require("./reasons");
 var users_reasons = require("./users_reasons");
 var groups_honors = require("./groups_honors");
 var groups_scholars = require("./groups_scholars");
+var groups_reasons = require("./groups_reasons");
 
 var apiRouter = express.Router();
 
@@ -114,7 +115,8 @@ apiRouter.get("/groups/:groupId/honors", permit(["user_honor"]), catchError(grou
 // List the scholars that the members in a group have
 apiRouter.get("/groups/:groupId/scholars", permit(["user_scholar"]), catchError(groups_scholars.list));
 
-
+// List the scholars that the members in a group have
+apiRouter.get("/groups/:groupId/reasons", permit(["user_honor"]), catchError(groups_reasons.list));
 
 //// Routing endpoints `/forms`
 // List forms
