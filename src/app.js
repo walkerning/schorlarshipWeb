@@ -32,6 +32,14 @@ app.use(helmet());
 // PLUGIN: gzip compression, compacting the json responses
 app.use(compression());
 
+// Serve static attachment files
+var attachment_basename = process.env.ATTACHMENT_BASENAME;
+if (!attachment_basename) {
+  logging.error("REQUIRE `ATTACHMENT_BASENAME` environment variable. EXIT!");
+  process.exit(1);
+}
+app.use("/static/attachments/", express.static(attachment_basename));
+
 // PLUGIN: JSON body parser: parse JSON payload into `req.body` attribute
 app.use(bodyParser.json());
 
@@ -75,6 +83,7 @@ if (app.get("env") == "development") {
       err.status = 400;
     }
     logging.error("error: ", err);
+    console.log(err);
     if (err.status >= 100 && err.status < 600) {
       res.status(err.status);
     } else {

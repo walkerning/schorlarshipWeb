@@ -16,6 +16,7 @@ var users_reasons = require("./users_reasons");
 var groups_honors = require("./groups_honors");
 var groups_scholars = require("./groups_scholars");
 var groups_reasons = require("./groups_reasons");
+var notices = require("./notices");
 
 var apiRouter = express.Router();
 
@@ -178,5 +179,21 @@ apiRouter.get("/reasons/:reasonId", catchError(reasons.info));
 apiRouter.put("/reasons/:reasonId", permit(["honor"]), catchError(reasons.updateInfo));
 // Delete reason
 apiRouter.delete("/reasons/:reasonId", permit(["honor"]), catchError(reasons.delete));
+
+//// Routing endpoints `/notices`
+// List notices
+apiRouter.get("/notices", catchError(notices.list));
+// Create notice
+apiRouter.post("/notices", permit(["notice"]), catchError(notices.create));
+// Get notice info
+apiRouter.get("/notices/:noticeId", catchError(notices.info));
+// Update notice info
+apiRouter.put("/notices/:noticeId", permit(["notice"]), catchError(notices.updateInfo));
+// Upload attachment for notice
+apiRouter.post("/notices/:noticeId/attachment", permit(["notice"]), catchError(notices.uploadAttachment));
+// Delete attachment for notice
+apiRouter.delete("/notices/:noticeId/attachment", permit(["notice"]), catchError(notices.deleteAttachment));
+// Delete notice
+apiRouter.delete("/notices/:noticeId", permit(["notice"]), catchError(notices.delete));
 
 module.exports = apiRouter;

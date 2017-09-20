@@ -1,8 +1,61 @@
 module.exports = {
-  tableNames: ["groups", "users", "reasons", "reasons_users",
+  tableNames: ["notices", "groups", "users", "reasons", "reasons_users",
                "honors", "groups_honors", "honors_users", "honor_user_scores",
                "scholars", "groups_scholars", "scholars_users",
                "forms", "fills", "permissions", "permissions_users"],
+
+  notices: {
+    id: {
+      type: "increments",
+      nullable: false,
+      primary: true
+    },
+    name: {
+      type: "string",
+      maxlength: 20,
+      nullable: false
+    },
+    description: {
+      type: "text",
+      nullable: true
+    },
+    attachment_name: {
+      type: "string",
+      maxlength: 30,
+      nullable: true
+    },
+    suffix: {
+      type: "string",
+      maxlength: 10,
+      nullable: true
+    },
+    attachment_hash: {
+      type: "string",
+      nullable: true
+    },
+    // time: {
+    //   type: "dateTime",
+    //   nullable: false
+    // },
+
+    created_at: {
+      type: "dateTime",
+      nullable: false
+    },
+    created_by: {
+      type: "integer",
+      nullable: false
+    },
+    updated_at: {
+      type: "dateTime",
+      nullable: true
+    },
+    updated_by: {
+      type: "integer",
+      nullable: true
+    }
+  },
+
   groups: {
     id: {
       type: "increments",

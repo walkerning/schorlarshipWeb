@@ -9,7 +9,8 @@ var modelNames = [
   "users_honors",
   "users_scholars",
   "reasons",
-  "users_reasons"
+  "users_reasons",
+  "notices"
 ];
 
 exports = module.exports;

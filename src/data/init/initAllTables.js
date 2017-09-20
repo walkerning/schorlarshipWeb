@@ -76,6 +76,10 @@ var initData = {
       name: "permission",
       description: "Permission management permission."
     },
+    {
+      name: "notice",
+      description: "Notice management permission."
+    },
   ],
   Honor: [
     {
