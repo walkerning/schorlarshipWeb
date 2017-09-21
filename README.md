@@ -28,3 +28,10 @@ Some issues
 
 * There is a little bug in grunt plugin grunt-express-server, see [issue](https://github.com/ericclemmons/grunt-express-server/issues/105), still don't know what cause the stop method being called. But seems it's [this statement](https://github.com/ericclemmons/grunt-express-server/blob/eced2b73817fc4bf9cf73fce65998c7200794730/tasks/lib/server.js#L135) cause the error: `Fatal error: Cannot read property 'hardStop' of null` 
 
+Deploy
+-----------
+
+* 与develop一样需要配置好database.
+* TODO: 从环境变量读数据库名, 数据库用户名, 密码等.
+* 运行之前必须设置`ATTACHMENT_BASENAME`环境变量, 为存放公告附件的目录.
+* TODO: NGINX配置.
