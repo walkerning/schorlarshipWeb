@@ -31,7 +31,14 @@ Some issues
 Deploy
 -----------
 
-* 与develop一样需要配置好database.
-* TODO: 从环境变量读数据库名, 数据库用户名, 密码等.
-* 运行之前必须设置`ATTACHMENT_BASENAME`环境变量, 为存放公告附件的目录.
-* TODO: NGINX配置.
+* 安装mysql-server, node, npm等
+* `npm install -g grunt`
+* `npm install`
+* 从环境变量读数据库名, 数据库用户名, 密码等, 需要设置:
+    * `JXJ_DATABASE`
+    * `JXJ_USERNAME`
+    * `JXJ_PASSWORD`
+* Database migration, import from sql or `grunt remigration initdb`. 但是现在的migration代码里的初始值并不是对的...
+* 运行之前必须设置`JXJ_ATTACHMENT_BASENAME`环境变量, 为存放公告附件的目录.
+* grunt prod
+* NGINX配置, 给`/auth`和`/api` location设置`proxy_pass`到app server, serve静态attachments的目录.

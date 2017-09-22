@@ -85,7 +85,7 @@ module.exports = {
 
   uploadAttachment: function uploadAttachment(req, res, next) {
     // Must exists!
-    var attachment_basename = process.env.ATTACHMENT_BASENAME;
+    var attachment_basename = process.env.JXJ_ATTACHMENT_BASENAME;
     if (!attachment_basename) {
       return Promise.reject(new errors.InternalServerError());
     }
@@ -147,7 +147,7 @@ module.exports = {
   },
 
   deleteAttachment: function deleteAttachment(req, res, next) {
-    var attachment_basename = process.env.ATTACHMENT_BASENAME;
+    var attachment_basename = process.env.JXJ_ATTACHMENT_BASENAME;
     if (!attachment_basename) {
       return Promise.reject(new errors.InternalServerError());
     }
@@ -183,7 +183,7 @@ module.exports = {
   },
 
   delete: function _delete(req, res, next) {
-    var attachment_basename = process.env.ATTACHMENT_BASENAME;
+    var attachment_basename = process.env.JXJ_ATTACHMENT_BASENAME;
     if (!attachment_basename) {
       return Promise.reject(new errors.InternalServerError());
     }

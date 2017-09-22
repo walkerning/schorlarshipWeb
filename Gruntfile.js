@@ -26,15 +26,18 @@ module.exports = function(grunt) {
       },
       prod: {
         options: {
-          node_env: "production"
+          script: "src/devServer.js",
+          node_env: "production",
+          background: true,
+          serverreload: true
         }
       },
     },
     // ### watch file changes and run tasks
     watch: {
       express: {
-        files: ['**/*.js'],
-        tasks: ['express:dev'],
+        files: ["**/*.js"],
+        tasks: ["express:prod"],
         options: {
           spawn: false // Without this option specified express won't be reloaded
         }
@@ -54,4 +57,5 @@ module.exports = function(grunt) {
   grunt.registerTask("remigration", ["execute:remigration"]);
   grunt.registerTask("initdb", ["execute:initDb"]);
   grunt.registerTask("dev", ["express:dev", "watch"]);
+  grunt.registerTask("prod", ["express:prod", "watch"]);
 };

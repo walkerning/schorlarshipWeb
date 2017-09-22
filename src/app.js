@@ -33,11 +33,13 @@ app.use(helmet());
 app.use(compression());
 
 // Serve static attachment files
-var attachment_basename = process.env.ATTACHMENT_BASENAME;
+var attachment_basename = process.env.JXJ_ATTACHMENT_BASENAME;
 if (!attachment_basename) {
-  logging.error("REQUIRE `ATTACHMENT_BASENAME` environment variable. EXIT!");
+  logging.error("REQUIRE `JXJ_ATTACHMENT_BASENAME` environment variable. EXIT!");
   process.exit(1);
 }
+
+// Actually served by nginx in production.
 app.use("/static/attachments/", express.static(attachment_basename));
 
 // PLUGIN: JSON body parser: parse JSON payload into `req.body` attribute
@@ -104,6 +106,7 @@ if (app.get("env") == "development") {
       // For 404
       err = new errors.NotFoundError();
     }
+    console.log(err);
     var message = err.message;
     if (err.code == "ER_DUP_ENTRY") {
       err = new errors.ValidationError({
