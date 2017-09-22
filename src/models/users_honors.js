@@ -102,7 +102,6 @@ var UserHonorState = bookshelfInst.Model.extend({
         withRelated: ["fill"]
       });
   },
-
   fetchInlineRelations: function fetchInlineRelations() {
     return ["scores"];
   }
@@ -116,6 +115,15 @@ var UserHonorStates = bookshelfInst.Collection.extend({
       "state",
       "honor_id"
     ];
+  },
+  getUserHonorStates: function getStates(user_ids, honor_ids) {
+    return this.forge()
+      .query(function(qb) {
+        qb.where("user_id", "in", user_ids).andWhere("honor_id", "in", honor_ids)
+      })
+      .fetch({
+        withRelated: ["fill"]
+      });
   }
 });
 

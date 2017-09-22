@@ -38,6 +38,15 @@ var UserScholarStates = bookshelfInst.Collection.extend({
       "state",
       "scholar_id"
     ];
+  },
+  getUserScholarStates: function getStates(user_ids, scholar_ids) {
+    return this.forge()
+      .query(function(qb) {
+        qb.where("user_id", "in", user_ids).andWhere("scholar_id", "in", scholar_ids)
+      })
+      .fetch({
+        withRelated: ["fill"]
+      });
   }
 });
 
