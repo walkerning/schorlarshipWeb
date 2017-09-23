@@ -90,6 +90,20 @@ var UserHonorState = bookshelfInst.Model.extend({
         }
         return sc.destroy();
       });
+  },
+
+  toClientJSON: function toClientJSON(options) {
+    options = _.mergeWith({
+      omitPivot: true,
+      flattenRelation: this.constructor.fetchInlineRelations(),
+    }, options, function(dstValue, srcValue) {
+      if (_.isArray(dstValue)) {
+        return _.union(dstValue, srcValue);
+      }
+    });
+
+    var json = _.omitBy(_.omit(this.toJSON(options), this.constructor.secretAttributes()), _.isNull);
+    return json;
   }
 }, {
   getUserHonorState: function getState(user_id, honor_id) {
