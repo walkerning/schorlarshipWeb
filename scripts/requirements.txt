@@ -1,2 +1,4 @@
+chardet==3.0.3
+requests==2.13.0
 openpyxl==2.4.8
 pyquery==1.2.17
