@@ -12,11 +12,12 @@ from collections import namedtuple
 
 import chardet
 import requests
-from openpyxl import load_workbook
+from openpyxl import load_workbook, Workbook
 from pyquery import PyQuery as pq
 
-year = None
-logger = None
+year = datetime.datetime.now().year
+logger = logging.getLogger("export_info")
+logging.basicConfig(format="[%(levelname)s] %(name)s: %(message)s")
 
 # URLs for login
 login_url = "https://info.tsinghua.edu.cn:443/Login" # info login
@@ -80,7 +81,7 @@ class Exporter(object):
         found = re.search(r"jxxxfw.cic.tsinghua.edu.cn/admin/zhcx.jsp\?rootid=944\&amp;ticket=([a-zA-Z0-9]+)", manage_res.text)
         assert found, "Login error, check the password."
         ticket = found.group(1)
-        logger.debug("Ticket: ", ticket)
+        # logger.debug("Ticket: %s", ticket)
         headers = {
             "Referer": manage_tab_url,
             "User-Agent": user_agent,
@@ -116,6 +117,24 @@ class Exporter(object):
                 os.mkdir(self.backup_dir)
                 os.mkdir(os.path.join(self.backup_dir, "grades"))
                 os.mkdir(os.path.join(self.backup_dir, "allocations"))
+
+    def get_student_list(self):
+        res = self.s.get(audit_url, params={"curPage": 1})
+        res_content = res.content
+        doc = pq(res_content)
+        final_page_match = re.search('<a href=["\']admin.jsp\?curPage=([^"\']+)["\']>*?<img src=["\']/bksjzd/pic/end1.gif["\']', res_content).group(1)
+        logger.info("一共 {} 页记录".format(final_page_match))
+        lst = []
+        for page in range(1, int(final_page_match) + 1):
+            res = self.s.get(audit_url, params={"curPage": str(page)})
+            doc = pq(res.content)
+            infos = doc("body > table:nth-child(3) tr")[2:]
+            new_lst = [tuple([td.text_content() for td in tr.cssselect("td")[1:4]]) for tr in infos]
+            lst.extend(new_lst)
+            logger.debug("第 {} 页记录解析完成, 目前一共有 {} 条信息".format(page, len(lst)))
+        logger.info("一共 {} 个同学已提交审核信息".format(len(lst)))
+        self.student_list = lst
+        return lst
 
     def export_grades_info(self, grades):
         assert self.s is not None, "登录没有成功"
@@ -193,8 +212,12 @@ class Exporter(object):
 
             # 配平荣誉和奖学金个数
             if len(alloc.honors) > len(alloc.scholars):
-                # 用校管院分奖学金: J1022000
-                alloc.scholars.extend([Scholarship(u"校管院分", "J1022000")] * (len(alloc.honors) - len(alloc.scholars)))
+                # 用校管院分奖学金: J1022000, J1032000, J1042000, J1052000
+                zero_money_jhs = ["J1022000", "J1032000", "J1042000", "J1052000"]
+                num_pp = len(alloc.honors) - len(alloc.scholars)
+                if num_pp > 4:
+                    logger.error(u"只声明了4个可用零金额奖号 {}; 学生 {}({}) 获得 {} 荣誉, {} 奖学金, 需要 {} 个零金额奖号.".format(zero_money_jhs, alloc.name, alloc.student_id, len(alloc.honors), len(alloc.scholars), num_pp))
+                alloc.scholars.extend([Scholarship(u"校管院分", jh) for jh in zero_money_jhs[:num_pp]])
             elif len(alloc.scholars) > len(alloc.honors):
                 alloc.honors.extend([alloc.honors[0]] * (len(alloc.scholars) - len(alloc.honors)))
 
@@ -237,6 +260,16 @@ def parse_grades(wb):
     grades = [GradeRecord(*[cell.value for cell in record]) for record in list(grades_ws.rows)[1:]]
     return grades
 
+def dump_grades(wb, grades):
+    ws = wb.create_sheet(title=u"上一年学习情况")
+    header = ["姓名", "班级", "学号", "素质排名", "学业成绩", "成绩排名", "总人数"]
+    for col, head in enumerate(header):
+        ws.cell(row=1, column=col+1).value = head
+    for i, grade in enumerate(grades):
+        row = i + 2
+        for col, attrname in enumerate(("name", "cls", "student_id", "quality_rank", "grade", "grade_rank", "total_count")):
+            ws.cell(row=row, column=col+1).value = getattr(grade, attrname)
+
 AllocationRecord = namedtuple("AllocationRecord", ("name", "cls", "student_id", "honors", "scholars"))
 Scholarship = namedtuple("Scholarship", ("type", "id"))
 legal_scho_types = {u"校管校分", u"校管院分", u"院管院分"}
@@ -262,6 +295,20 @@ def parse_allocations(wb):
         records.append(AllocationRecord(cell_vs[0], cell_vs[1], cell_vs[2], honor_lst, scholar_lst))
     return records
 
+def dump_allocations(wb, ori_wb, allocations_ids):
+    ori_ws = ori_wb.get_sheet_by_name(u"奖学金分配名单")
+    ws = wb.create_sheet(title=u"奖学金分配名单")
+    rows = list(ori_ws.rows)
+    header = [cell.value for cell in rows[0] if cell.value is not None][:16]
+    for col, head in enumerate(header):
+        ws.cell(row=1, column=col+1).value = head
+    row_id = 2
+    for ind in allocations_ids:
+        cell_vs = [cell.value for cell in rows[ind + 1]]
+        for col, v in enumerate(cell_vs):
+            ws.cell(row=row_id, column=col+1).value = v
+        row_id += 1
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("username", help="管理员学号.")
@@ -280,15 +327,13 @@ if __name__ == "__main__":
                         help="如果声明了目录, 备份更新前拿到的html结果到某个目录下. 一旦出问题可以让程序员来复原...")
     parser.add_argument("--not-remove-original", default=False, action="store_true",
                         help="如果指定这个选项, 将不会把原来已分配的奖学金删除, 只增加奖学金.")
-
+    parser.add_argument("--not-exists-excel", default="./录入不存在名单.xlsx", help="如果有不存在学校系统里的学生, 将信息存至这个excel.")
     args = parser.parse_args()
 
     if not args.grade and not args.allocation:
         print("请在命令行参数指定-a 或者 -g分别对应导入分配和导入成绩, 或者使用两者都导入, 使用--help查看帮助.")
         sys.exit(1)
 
-    logger = logging.getLogger("export_info")
-    logging.basicConfig(format="[%(levelname)s] %(name)s: %(message)s")
     level = logging.INFO
     if args.verbose:
         level = logging.DEBUG
@@ -297,10 +342,8 @@ if __name__ == "__main__":
         requests_logger = logging.getLogger("requests.packages.urllib3")
         requests_logger.setLevel(args.DEBUG)
 
-
-    if not args.year:
-        args.year = datetime.datetime.now().year
-    year = args.year
+    if args.year:
+        year = args.year
 
     if not args.backup:
         print("你没有指定将之前的记录做备份的目录, 如果程序出bug可能无法恢复之前的状态. 如果要指定, 需要提供`--backup [备份目录名]` 命令行参数")
@@ -319,23 +362,63 @@ if __name__ == "__main__":
     print("正在登录...")
     exporter = Exporter(username, password, args.backup)
 
+    print("正在获取info上已存在的学生信息... 可能需要较长时间...")
+    student_lst = exporter.get_student_list()
+    exist_students = [(l[0], l[1]) for l in student_lst]
+    not_exists_wb = None
     if args.grade:
         print("正在从excel中解析成绩信息...")
         grades = parse_grades(wb)
         print("解析完成, 共有 {} 条成绩信息.".format(len(grades)))
+        export_students = set([(str(r.student_id), r.name) for r in grades])
+        nonexist_students = export_students - set(exist_students)
+        if len(nonexist_students) > 0:
+            print(u"以下学生没有在info上存在表项, 导出成绩信息时将忽略:\n\t{}".format("\n\t".join([u"{} {}".format(sid, sname) for sid, sname in nonexist_students])))
+            export_grades = []
+            notexport_grades = []
+            for grade in grades:
+                if (str(grade.student_id), grade.name) not in nonexist_students:
+                    export_grades.append(grade)
+                else:
+                    notexport_grades.append(grade)
+            not_exists_wb = Workbook()
+            dump_grades(not_exists_wb, notexport_grades)
+            print("这些学生的成绩信息将被存至 {}".format(args.not_exists_excel))
+        else:
+            export_grades = grades
+        print("共有 {} 条成绩信息需导入.".format(len(export_grades)))
         ans = None
         while ans not in {"yes", "no"}:
             ans = raw_input("是否继续(yes/no)? ").lower()
         if ans == "yes":
             print("开始导入到学校系统...")
-            exporter.export_grades_info(grades)
+            exporter.export_grades_info(export_grades)
     if args.allocation:
         print("正在从excel中解析分配信息...")
         allocations = parse_allocations(wb)
         print("解析完成, 共有 {} 条分配信息.".format(len(allocations)))
+        export_students = set([(str(r.student_id), r.name) for r in allocations])
+        nonexist_students = export_students - set(exist_students)
+        if len(nonexist_students) > 0:
+            print(u"以下学生没有在info上存在表项, 暂时导出分配信息时将忽略:\n\t{}".format("\n\t".join([u"{} {}".format(sid, sname) for sid, sname in nonexist_students])))
+            export_allocations = []
+            notexport_allocations_ids = []
+            for i, alloc in enumerate(allocations):
+                if (str(alloc.student_id), alloc.name) not in nonexist_students:
+                    export_allocations.append(alloc)
+                else:
+                    notexport_allocations_ids.append(i)
+            not_exists_wb = not_exists_wb or Workbook()
+            dump_allocations(not_exists_wb, wb, notexport_allocations_ids)
+            print("这些学生的分配信息将被存至 {}".format(args.not_exists_excel))
+        else:
+            export_allocations = allocations
+        print("共有 {} 条分配信息需导入.".format(len(export_allocations)))
         ans = None
         while ans not in {"yes", "no"}:
             ans = raw_input("是否继续(yes/no)? ").lower()
         if ans == "yes":
             print("开始导入到学校系统...")
-            exporter.export_allocations_info(allocations, (not args.not_remove_original))
+            exporter.export_allocations_info(export_allocations, (not args.not_remove_original))
+    if not_exists_wb is not None:
+        not_exists_wb.save(filename=args.not_exists_excel)
