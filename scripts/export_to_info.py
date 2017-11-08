@@ -32,10 +32,7 @@ student_url = "http://zhjw.cic.tsinghua.edu.cn/bksjzd/xsgzz/jxj/check/check.jsp"
 xf_url = "http://zhjw.cic.tsinghua.edu.cn/bksjzd/xsgzz/jxj/fill/xf_add.jsp"
 yf_url = "http://zhjw.cic.tsinghua.edu.cn/bksjzd/xsgzz/jxj/fill/yf_add.jsp"
 yg_url = "http://zhjw.cic.tsinghua.edu.cn/bksjzd/xsgzz/jxj/fill/yg_add.jsp"
-honor_delete_url = "http://zhjw.cic.tsinghua.edu.cn/bksjzd/xsgzz/jxj/fill/yf_delete.jsp?xh={student_id}&dm={dm}"
-
-# MISC
-regexp = r'src="http://jxxxfw.cic.tsinghua.edu.cn/admin/zhcx.jsp?rootid=944&amp;ticket=([a-zA-Z0-9]+)"'
+honor_delete_url = "http://zhjw.cic.tsinghua.edu.cn/bksjzd/xsgzz/jxj/fill/{type}_delete.jsp?xh={student_id}&dm={dm}"
 
 user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
 info_url = "info.tsinghua.edu.cn"
@@ -192,14 +189,16 @@ class Exporter(object):
                 parts = [u"院系已批准的校分奖学金荣誉项目：",
                          u"院系已批准的院分奖学金荣誉项目：",
                          u"院系已批准的院管奖学金荣誉项目："]
+                type_parts = ["xf", "yf", "yg"]
                 for i, part in enumerate(parts):
                     start = text_vs.index(part) + 2
-                    while 1:
+                    while 1 and start < len(trs):
                         lst = trs[start].cssselect("td > font")
                         if not len(lst):
                             break
                         delete_url = honor_delete_url.format(student_id=alloc.student_id,
-                                                             dm=lst[1].text.strip())
+                                                             dm=lst[1].text.strip(),
+                                                             type=type_parts[i])
                         res = self.s.get(delete_url)
                         if res.status_code != 200:
                             logger.error("status code {}: 删除分配失败: 学号: {}; 分配: {};\n\t返回: {};"
