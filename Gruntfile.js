@@ -36,7 +36,14 @@ module.exports = function(grunt) {
     // ### watch file changes and run tasks
     watch: {
       express: {
-        files: ["**/*.js"],
+        files: [
+          "src/*.js",
+          "src/api/*.js",
+          "src/models/*.js",
+          "src/config/*.js",
+          "src/middlewares/*.js"
+          //'!node_modules/**/*.js'
+        ],
         tasks: ["express:prod"],
         options: {
           spawn: false // Without this option specified express won't be reloaded
